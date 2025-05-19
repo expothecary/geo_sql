@@ -8,11 +8,10 @@ defmodule GeoSQL.MM2 do
 
       defmodule Example do
         import Ecto.Query
-        require GeoSQL.ST
-        alias GeoSQL.ST
+        import GeoSQL.MM2
 
         def example_query(geom) do
-          from location in Location, limit: 5, select: ST.distance(location.geom, ^geom)
+          from location in Location, limit: 5, select: distance(location.geom, ^geom)
         end
       end
   """

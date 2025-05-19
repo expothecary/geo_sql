@@ -29,17 +29,17 @@ defmodule GeoSQL.Mixfile do
     [
       {:geo, "~> 3.6 or ~> 4.0"},
       {:postgrex, ">= 0.0.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:ecto, "~> 3.0"},
-      {:ecto_sql, "~> 3.0"}
+      {:ecto_sql, "~> 3.0"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 
   defp package do
     [
-      description: "PostGIS extension for Postgrex.",
+      description: "GIS functions for Ecto.",
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md"],
-      maintainers: ["Tyler Young", "Bryan Joseph"],
+      maintainers: ["Aaron Seigoh"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url}
     ]

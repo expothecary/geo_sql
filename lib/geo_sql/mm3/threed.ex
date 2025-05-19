@@ -23,7 +23,7 @@ defmodule GeoSQL.MM3.ThreeD do
     quote do: fragment("CG_3DIntersection(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
-  defmacro intersecs(geometryA, geometryB) do
+  defmacro intersects(geometryA, geometryB) do
     # There is also a CG_3DIntersects in PostGIS but it does not seem to be in a bare-bones build?
     quote do: fragment("ST_3DIntersects(?, ?)", unquote(geometryA), unquote(geometryB))
   end

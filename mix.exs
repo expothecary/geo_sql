@@ -27,7 +27,7 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      {:geo, "~> 3.6 or ~> 4.0"},
+      {:geo, "~> 4.0"},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},

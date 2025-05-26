@@ -6,8 +6,6 @@ defmodule GeoSQL.PostGIS.Operators do
   """
 
   defmacro bbox_intersects(geometryA, geometryB) do
-    quote do
-      fragment("? && ?", unquote(geometryA), unquote(geometryB))
-    end
+    quote do: fragment("? && ?", unquote(geometryA), unquote(geometryB))
   end
 end

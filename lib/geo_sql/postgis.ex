@@ -11,10 +11,9 @@ defmodule GeoSQL.PostGIS do
     allowed = [:name, :extent, :geom_name, :feature_id_name]
 
     {param_string, params} =
-      as_named_params(options, allowed)
-      |> IO.inspect()
+      as_positional_params(options, allowed)
 
-    template = "ST_AsMVT(row => ?, #{param_string})"
+    template = "ST_AsMVT(? #{param_string})"
 
     quote do
       fragment(
@@ -31,8 +30,8 @@ defmodule GeoSQL.PostGIS do
 
   defmacro as_mvt_geom(geometry, bounds, options) do
     allowed = [:extent, :buffer, :clip_geom]
-    {param_string, params} = as_named_params(options, allowed)
-    template = "ST_AsMVTGeom(?, ?, #{param_string})"
+    {param_string, params} = as_positional_params(options, allowed)
+    template = "ST_AsMVTGeom(?, ? #{param_string})"
 
     quote do
       fragment(
@@ -156,9 +155,24 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
   end
 
+  @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
+          {param_string :: String.t(), params :: list}
+  def as_positional_params(options, allowed_keys)
+      when is_list(options) and is_list(allowed_keys) do
+    values =
+      Enum.reduce_while(allowed_keys, [], fn key, acc ->
+        case Keyword.get(options, key) do
+          nil -> {:halt, acc}
+          value -> {:cont, [value | acc]}
+        end
+      end)
+
+    {String.duplicate(", ?", Enum.count(values)), Enum.reverse(values)}
+  end
+
   @spec as_named_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
           {param_string :: String.t(), params :: list}
-  defp as_named_params(options, allowed_keys) when is_list(options) and is_list(allowed_keys) do
+  def as_named_params(options, allowed_keys) when is_list(options) and is_list(allowed_keys) do
     Keyword.validate!(options, allowed_keys)
 
     {

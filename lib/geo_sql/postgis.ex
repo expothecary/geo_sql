@@ -4,7 +4,7 @@ defmodule GeoSQL.PostGIS do
   """
 
   defmacro as_mvt(rows) do
-    quote do: fragment("ST_AsMVTGeom(?)", unquote(rows))
+    quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end
 
   defmacro as_mvt(rows, options) do
@@ -13,7 +13,7 @@ defmodule GeoSQL.PostGIS do
     {param_string, params} =
       as_named_params(options, allowed)
 
-    template = "ST_AsMVTGeom(?, ?, #{param_string})"
+    template = "ST_AsMVT(?, ?, #{param_string})"
 
     quote do
       fragment(

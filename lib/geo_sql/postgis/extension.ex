@@ -1,4 +1,4 @@
-defmodule GeoSQL.PostGis.Extension do
+defmodule GeoSQL.PostGIS.Extension do
   @moduledoc """
   PostGIS extension for Postgrex. Supports Geometry and Geography data types.
 

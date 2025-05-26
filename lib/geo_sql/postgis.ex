@@ -12,8 +12,9 @@ defmodule GeoSQL.PostGIS do
 
     {param_string, params} =
       as_named_params(options, allowed)
+      |> IO.inspect()
 
-    template = "ST_AsMVT(?, ?, #{param_string})"
+    template = "ST_AsMVT(?, #{param_string})"
 
     quote do
       fragment(

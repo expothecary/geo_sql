@@ -36,40 +36,6 @@ defmodule GeoSQL.Ecto.Test do
     end
   end
 
-  setup _ do
-    {:ok, pid} = Postgrex.start_link(Geo.Test.Helper.opts())
-
-    {:ok, _} = Postgrex.query(pid, "CREATE EXTENSION IF NOT EXISTS postgis", [])
-
-    {:ok, _} =
-      Postgrex.query(pid, "DROP TABLE IF EXISTS locations, geographies, location_multi", [])
-
-    {:ok, _} =
-      Postgrex.query(
-        pid,
-        "CREATE TABLE locations (id serial primary key, name varchar, geom geometry(MultiPolygon))",
-        []
-      )
-
-    {:ok, _} =
-      Postgrex.query(
-        pid,
-        "CREATE TABLE geographies (id serial primary key, name varchar, geom geography(Point))",
-        []
-      )
-
-    {:ok, _} =
-      Postgrex.query(
-        pid,
-        "CREATE TABLE location_multi (id serial primary key, name varchar, geom geometry)",
-        []
-      )
-
-    {:ok, _} = Repo.start_link()
-
-    :ok
-  end
-
   test "query multipoint" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 

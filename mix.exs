@@ -14,7 +14,8 @@ defmodule GeoSQL.Mixfile do
       deps: deps(),
       package: package(),
       docs: docs(),
-      elixirc_paths: elixirc_paths(Mix.env())
+      elixirc_paths: elixirc_paths(Mix.env()),
+      aliases: aliases()
     ]
   end
 
@@ -52,6 +53,12 @@ defmodule GeoSQL.Mixfile do
       source_url: @source_url,
       source_ref: "v#{@version}",
       formatters: ["html"]
+    ]
+  end
+
+  defp aliases do
+    [
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test", "ecto.drop"]
     ]
   end
 end

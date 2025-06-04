@@ -123,17 +123,6 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
-  defmacro tile_envelope(zoom, x, y) do
-    quote do
-      fragment(
-        "ST_TileEnvelope(?, ?, ?)",
-        unquote(zoom),
-        unquote(x),
-        unquote(y)
-      )
-    end
-  end
-
   defmacro make_valid(geometry, params) do
     quote do: fragment("ST_MakeValid(?, ?)", unquote(geometry), unquote(params))
   end
@@ -144,19 +133,6 @@ defmodule GeoSQL.PostGIS do
 
   defmacro set_srid(geometry, srid) do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
-  end
-
-  defmacro tile_envelope(zoom, x, y, bounds, margin \\ 0.0) do
-    quote do
-      fragment(
-        "ST_TileEnvelope(?, ?, ?, ?, ?)",
-        unquote(zoom),
-        unquote(x),
-        unquote(y),
-        unquote(bounds),
-        unquote(margin)
-      )
-    end
   end
 
   defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do

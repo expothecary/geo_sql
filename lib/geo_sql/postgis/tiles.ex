@@ -2,12 +2,37 @@ defmodule GeoSQL.PostGIS.Tiles do
   import Ecto.Query
   use GeoSQL.PostGIS
   use GeoSQL.MM2
+  import PostGIS.Operators
 
   @moduledoc """
     Non-standard tile generation functions found in PostGIS.
 
     These are often more optimized and/or specialized than their ST_* equivalents.
   """
+
+  defmacro tile_envelope(zoom, x, y) do
+    quote do
+      fragment(
+        "ST_TileEnvelope(?, ?, ?)",
+        unquote(zoom),
+        unquote(x),
+        unquote(y)
+      )
+    end
+  end
+
+  defmacro tile_envelope(zoom, x, y, bounds, margin \\ 0.0) do
+    quote do
+      fragment(
+        "ST_TileEnvelope(?, ?, ?, ?, ?)",
+        unquote(zoom),
+        unquote(x),
+        unquote(y),
+        unquote(bounds),
+        unquote(margin)
+      )
+    end
+  end
 
   # geom_query(z, x, y, "nodes", :geom, :node_id, :tags)
   @spec generate(
@@ -37,20 +62,20 @@ defmodule GeoSQL.PostGIS.Tiles do
           y :: non_neg_integer(),
           layers :: [__MODULE__.Layer.t()]
         ) :: Ecto.Query.t()
-  def geom_query(z, x, y, layers) do
+  defp geom_query(z, x, y, layers) do
     Enum.reduce(layers, nil, fn %{columns: columns} = layer, union_query ->
       from(g in "nodes",
         where:
-          PostGIS.Operators.bbox_intersects(
+          bbox_intersects?(
             field(g, ^columns.geometry),
-            MM2.transform(PostGIS.tile_envelope(^z, ^x, ^y), 4326)
+            MM2.transform(tile_envelope(^z, ^x, ^y), 4326)
           ),
         select: %{
           name: ^layer.name,
           geom:
             PostGIS.as_mvt_geom(
               field(g, ^columns.geometry),
-              MM2.transform(PostGIS.tile_envelope(^z, ^x, ^y), 4326)
+              MM2.transform(tile_envelope(^z, ^x, ^y), 4326)
             ),
           id: field(g, ^columns.id),
           tags: field(g, ^columns.tags)

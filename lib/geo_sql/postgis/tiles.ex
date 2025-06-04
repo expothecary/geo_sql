@@ -1,0 +1,65 @@
+defmodule GeoSQL.PostGIS.Tiles do
+  import Ecto.Query
+  use GeoSQL.PostGIS
+  use GeoSQL.MM2
+
+  @moduledoc """
+    Non-standard tile generation functions found in PostGIS.
+
+    These are often more optimized and/or specialized than their ST_* equivalents.
+  """
+
+  # geom_query(z, x, y, "nodes", :geom, :node_id, :tags)
+  @spec generate(
+          repo :: Ecto.Repo.t(),
+          zoom :: non_neg_integer(),
+          x :: non_neg_integer(),
+          y :: non_neg_integer(),
+          layers :: [__MODULE__.Layer.t()],
+          db_prefix :: String.t() | nil
+        ) :: term
+  def generate(repo, zoom, x, y, layers, db_prefix \\ nil)
+
+  def generate(_repo, _zoom, _x, _y, [], _db_prefix), do: []
+
+  def generate(repo, zoom, x, y, layers, db_prefix) do
+    geometry = geom_query(zoom, x, y, layers)
+
+    from(g in subquery(geometry, prefix: db_prefix),
+      select: PostGIS.as_mvt(g, name: g.name)
+    )
+    |> repo.all()
+  end
+
+  @spec geom_query(
+          z :: non_neg_integer(),
+          x :: non_neg_integer(),
+          y :: non_neg_integer(),
+          layers :: [__MODULE__.Layer.t()]
+        ) :: Ecto.Query.t()
+  def geom_query(z, x, y, layers) do
+    Enum.reduce(layers, nil, fn %{columns: columns} = layer, union_query ->
+      from(g in "nodes",
+        where:
+          PostGIS.Operators.bbox_intersects(
+            field(g, ^columns.geometry),
+            MM2.transform(PostGIS.tile_envelope(^z, ^x, ^y), 4326)
+          ),
+        select: %{
+          name: ^layer.name,
+          geom:
+            PostGIS.as_mvt_geom(
+              field(g, ^columns.geometry),
+              MM2.transform(PostGIS.tile_envelope(^z, ^x, ^y), 4326)
+            ),
+          id: field(g, ^columns.id),
+          tags: field(g, ^columns.tags)
+        }
+      )
+      |> maybe_union(union_query)
+    end)
+  end
+
+  defp maybe_union(query, nil), do: query
+  defp maybe_union(query, union_query), do: union_all(query, ^union_query)
+end

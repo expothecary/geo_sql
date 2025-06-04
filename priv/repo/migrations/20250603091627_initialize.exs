@@ -12,7 +12,7 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
       add(:geom, :geometry)
     end
 
-    create table("geographiies") do
+    create table("geographies") do
       add(:name, :text)
       add(:geom, :geography)
       add(:line, :geography)

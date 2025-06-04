@@ -13,6 +13,10 @@ defmodule GeoSQL.PostGIS.Operators do
     quote do: fragment("? && ?", unquote(geometryA), unquote(geometryB))
   end
 
+  defmacro bbox_nd_intersects?(geometryA, geometryB) do
+    quote do: fragment("? &&& ?", unquote(geometryA), unquote(geometryB))
+  end
+
   defmacro contained_by?(geometryA, geometryB) do
     quote do: fragment("? @ ?", unquote(geometryA), unquote(geometryB))
   end
@@ -21,12 +25,24 @@ defmodule GeoSQL.PostGIS.Operators do
     quote do: fragment("? ~ ?", unquote(geometryA), unquote(geometryB))
   end
 
-  defmacro equal?(geometryA, geometryB) do
-    quote do: fragment("? = ?", unquote(geometryA), unquote(geometryB))
+  defmacro distance_2d(geometryA, geometryB) do
+    quote do: fragment("? <-> ?", unquote(geometryA), unquote(geometryB))
   end
 
-  defmacro nd_bbox_intersects?(geometryA, geometryB) do
-    quote do: fragment("? &&& ?", unquote(geometryA), unquote(geometryB))
+  defmacro distance_nd(geometryA, geometryB) do
+    quote do: fragment("? <<->> ?", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro distance_between_bboxes(geometryA, geometryB) do
+    quote do: fragment("? <#> ?", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro distance_at_closest_approach(geometryA, geometryB) do
+    quote do: fragment("? |-| ?", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro equal?(geometryA, geometryB) do
+    quote do: fragment("? = ?", unquote(geometryA), unquote(geometryB))
   end
 
   defmacro overlaps_or_to_the?(direction, geometryA, geometryB) do

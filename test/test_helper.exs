@@ -8,11 +8,11 @@ defmodule GeoSQL.Test.PostGIS.Helper do
 
   defmacro __using__(_) do
     quote do
-      alias GeoSQL.Test.PostGIS
+      alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
       setup_all {GeoSQL.Test.PostGIS.Helper, :ecto_setup}
 
       setup tags do
-        pid = Ecto.Adapters.SQL.Sandbox.start_owner!(PostGIS.Repo, shared: not tags[:async])
+        pid = Ecto.Adapters.SQL.Sandbox.start_owner!(PostGISRepo, shared: not tags[:async])
         on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
         :ok
       end

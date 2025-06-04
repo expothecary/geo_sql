@@ -1,11 +1,11 @@
 defmodule GeoSQL.Ecto.Test do
   use ExUnit.Case, async: true
-  use Ecto.Migration
   import Ecto.Query
-  import GeoSQL.MM2
-  import GeoSQL.MM3
-  import GeoSQL.PostGIS
-  alias GeoSQL.Test.PostGIS
+  use GeoSQL.MM2
+  use GeoSQL.MM3
+  use GeoSQL.PostGIS
+  use GeoSQL.Common
+  use GeoSQL.Test.PostGIS.Helper
 
   @multipoint_wkb "0106000020E6100000010000000103000000010000000F00000091A1EF7505D521C0F4AD6182E481424072B3CE92FED421C01D483CDAE281424085184FAEF7D421C0CB159111E1814240E1EBD7FBF8D421C0D421F7C8DF814240AD111315FFD421C0FE1F21C0DE81424082A0669908D521C050071118DE814240813C5E700FD521C0954EEF97DE814240DC889FA815D521C0B3382182E08142400148A81817D521C0E620D22BE2814240F1E95BDE19D521C08BD53852E3814240F81699E217D521C05B35D7DCE4814240B287C8D715D521C0336338FEE481424085882FB90FD521C0FEF65484E5814240A53E1E460AD521C09A0EA286E581424091A1EF7505D521C0F4AD6182E4814240"
 
@@ -39,9 +39,9 @@ defmodule GeoSQL.Ecto.Test do
   test "query multipoint" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
     query = from(location in Location, limit: 5, select: location)
-    results = PostGIS.Repo.all(query)
+    results = PostGISRepo.all(query)
 
     assert geom == hd(results).geom
   end
@@ -49,10 +49,10 @@ defmodule GeoSQL.Ecto.Test do
   test "query area" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, limit: 5, select: st_area(location.geom))
-    results = PostGIS.Repo.all(query)
+    query = from(location in Location, limit: 5, select: MM2.area(location.geom))
+    results = PostGISRepo.all(query)
 
     assert is_number(hd(results))
   end
@@ -60,10 +60,10 @@ defmodule GeoSQL.Ecto.Test do
   test "query transform" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, limit: 1, select: st_transform(location.geom, 3452))
-    results = PostGIS.Repo.one(query)
+    query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
+    results = PostGISRepo.one(query)
 
     assert results.srid == 3452
   end
@@ -71,10 +71,10 @@ defmodule GeoSQL.Ecto.Test do
   test "query distance" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, limit: 5, select: st_distance(location.geom, ^geom))
-    results = PostGIS.Repo.one(query)
+    query = from(location in Location, limit: 5, select: MM2.distance(location.geom, ^geom))
+    results = PostGISRepo.one(query)
 
     assert results == 0
   end
@@ -82,10 +82,12 @@ defmodule GeoSQL.Ecto.Test do
   test "query sphere distance" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, limit: 5, select: st_distancesphere(location.geom, ^geom))
-    results = PostGIS.Repo.one(query)
+    query =
+      from(location in Location, limit: 5, select: PostGIS.distance_sphere(location.geom, ^geom))
+
+    results = PostGISRepo.one(query)
 
     assert results == 0
   end
@@ -93,16 +95,16 @@ defmodule GeoSQL.Ecto.Test do
   test "st_extent" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
 
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, select: st_extent(location.geom))
-    assert [%Geo.Polygon{coordinates: [coordinates]}] = PostGIS.Repo.all(query)
+    query = from(location in Location, select: PostGIS.extent(location.geom))
+    assert [%Geo.Polygon{coordinates: [coordinates]}] = PostGISRepo.all(query)
     assert length(coordinates) == 5
   end
 
   test "example" do
     geom = Geo.WKB.decode!(@multipoint_wkb)
-    PostGIS.Repo.insert(%Location{name: "hello", geom: geom})
+    PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
     defmodule Example do
       import Ecto.Query
@@ -115,16 +117,16 @@ defmodule GeoSQL.Ecto.Test do
     end
 
     query = Example.example_query(geom)
-    results = PostGIS.Repo.one(query)
+    results = PostGISRepo.one(query)
     assert results == 0
   end
 
   test "geography" do
     geom = %Geo.Point{coordinates: {30, -90}, srid: 4326}
 
-    PostGIS.Repo.insert(%Geographies{name: "hello", geom: geom})
+    PostGISRepo.insert(%Geographies{name: "hello", geom: geom})
     query = from(location in Geographies, limit: 5, select: location)
-    results = PostGIS.Repo.all(query)
+    results = PostGISRepo.all(query)
 
     assert geom == hd(results).geom
   end
@@ -132,9 +134,9 @@ defmodule GeoSQL.Ecto.Test do
   test "cast point" do
     geom = %Geo.Point{coordinates: {30, -90}, srid: 4326}
 
-    PostGIS.Repo.insert(%Geographies{name: "hello", geom: geom})
+    PostGISRepo.insert(%Geographies{name: "hello", geom: geom})
     query = from(location in Geographies, limit: 5, select: location)
-    results = PostGIS.Repo.all(query)
+    results = PostGISRepo.all(query)
 
     result = hd(results)
 
@@ -150,9 +152,9 @@ defmodule GeoSQL.Ecto.Test do
   test "cast point from map" do
     geom = %Geo.Point{coordinates: {30, -90}, srid: 4326}
 
-    PostGIS.Repo.insert(%Geographies{name: "hello", geom: geom})
+    PostGISRepo.insert(%Geographies{name: "hello", geom: geom})
     query = from(location in Geographies, limit: 5, select: location)
-    results = PostGIS.Repo.all(query)
+    results = PostGISRepo.all(query)
 
     result = hd(results)
 
@@ -174,20 +176,20 @@ defmodule GeoSQL.Ecto.Test do
     geom2 = %Geo.Point{coordinates: {30, -91}, srid: 4326}
     geom3 = %Geo.Point{coordinates: {60, -91}, srid: 4326}
 
-    PostGIS.Repo.insert(%Geographies{name: "there", geom: geom2})
-    PostGIS.Repo.insert(%Geographies{name: "here", geom: geom1})
-    PostGIS.Repo.insert(%Geographies{name: "way over there", geom: geom3})
+    PostGISRepo.insert(%Geographies{name: "there", geom: geom2})
+    PostGISRepo.insert(%Geographies{name: "here", geom: geom1})
+    PostGISRepo.insert(%Geographies{name: "way over there", geom: geom3})
 
     query =
       from(
         location in Geographies,
         limit: 5,
         select: location,
-        order_by: st_distance(location.geom, ^geom1)
+        order_by: MM3.ThreeD.distance(location.geom, ^geom1)
       )
 
     assert ["here", "there", "way over there"] ==
-             PostGIS.Repo.all(query)
+             PostGISRepo.all(query)
              |> Enum.map(fn x -> x.name end)
   end
 
@@ -195,10 +197,10 @@ defmodule GeoSQL.Ecto.Test do
     geom1 = %Geo.Point{coordinates: {30, -90}, srid: 4326}
     geom2 = %Geo.LineString{coordinates: [{30, -90}, {30, -91}], srid: 4326}
 
-    PostGIS.Repo.insert(%LocationMulti{name: "hello point", geom: geom1})
-    PostGIS.Repo.insert(%LocationMulti{name: "hello line", geom: geom2})
+    PostGISRepo.insert(%LocationMulti{name: "hello point", geom: geom1})
+    PostGISRepo.insert(%LocationMulti{name: "hello line", geom: geom2})
     query = from(location in LocationMulti, select: location)
-    [m1, m2] = PostGIS.Repo.all(query)
+    [m1, m2] = PostGISRepo.all(query)
 
     assert m1.geom == geom1
     assert m2.geom == geom2
@@ -215,15 +217,15 @@ defmodule GeoSQL.Ecto.Test do
         srid: 4326
       }
 
-      PostGIS.Repo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+      PostGISRepo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
 
       query =
         from(
           location in LocationMulti,
-          select: st_node(location.geom)
+          select: Common.node(location.geom)
         )
 
-      result = PostGIS.Repo.one(query)
+      result = PostGISRepo.one(query)
 
       assert %Geo.MultiLineStringZ{} = result
 
@@ -248,15 +250,15 @@ defmodule GeoSQL.Ecto.Test do
         srid: 4326
       }
 
-      PostGIS.Repo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+      PostGISRepo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
 
       query =
         from(
           location in LocationMulti,
-          select: st_node(location.geom)
+          select: Common.node(location.geom)
         )
 
-      result = PostGIS.Repo.one(query)
+      result = PostGISRepo.one(query)
 
       assert %Geo.MultiLineStringZ{} = result
 

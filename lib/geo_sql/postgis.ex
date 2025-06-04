@@ -6,6 +6,7 @@ defmodule GeoSQL.PostGIS do
   defmacro __using__(_) do
     quote do
       require GeoSQL.PostGIS
+      require GeoSQL.PostGIS.Operators
       alias GeoSQL.PostGIS
     end
   end

@@ -43,7 +43,7 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
-  defmacro distancesphere(geometryA, geometryB) do
+  defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
 

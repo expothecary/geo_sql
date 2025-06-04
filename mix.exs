@@ -58,7 +58,7 @@ defmodule GeoSQL.Mixfile do
 
   defp aliases do
     [
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test", "ecto.drop"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test", "ecto.drop --quiet"]
     ]
   end
 end

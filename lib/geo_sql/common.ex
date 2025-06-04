@@ -9,6 +9,13 @@ defmodule GeoSQL.Common do
   must be built with the GEO package for some of these functions to be available.
   """
 
+  defmacro __using__(_) do
+    quote do
+      require GeoSQL.Common
+      alias GeoSQL.Common
+    end
+  end
+
   defmacro shift_longitude(geometry, repo) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))

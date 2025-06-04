@@ -4,6 +4,15 @@ defmodule GeoSQL.MM3 do
   which implements these functions, such as PostGIS 3.
   """
 
+  defmacro __using__(_) do
+    quote do
+      require GeoSQL.MM3
+      require GeoSQL.MM3.ThreeD
+      require GeoSQL.MM3.Topo
+      alias GeoSQL.MM3
+    end
+  end
+
   defmacro coord_dim(geometry) do
     quote do: fragment("ST_CoordDim(?)", unquote(geometry))
   end

@@ -16,6 +16,13 @@ defmodule GeoSQL.MM2 do
       end
   """
 
+  defmacro __using__(_) do
+    quote do
+      require GeoSQL.MM2
+      alias GeoSQL.MM2
+    end
+  end
+
   defmacro area(geometry) do
     quote do: fragment("ST_Area(?)", unquote(geometry))
   end

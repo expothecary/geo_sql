@@ -3,6 +3,13 @@ defmodule GeoSQL.PostGIS do
     Non-standard GIS functions found in PostGIS.
   """
 
+  defmacro __using__(_) do
+    quote do
+      require GeoSQL.PostGIS
+      alias GeoSQL.PostGIS
+    end
+  end
+
   defmacro as_mvt(rows) do
     quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end

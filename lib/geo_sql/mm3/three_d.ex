@@ -16,7 +16,12 @@ defmodule GeoSQL.MM3.ThreeD do
 
   defmacro distance(geometryA, geometryB) do
     # There is also a CG_3DDiference in PostGIS but it does not seem to be in a bare-bones build?
-    quote do: fragment("ST_3DDistance(?, ?)", unquote(geometryA), unquote(geometryB))
+    quote do:
+            fragment(
+              "ST_3DDistance(?::geometry, ?::geometry)",
+              unquote(geometryA),
+              unquote(geometryB)
+            )
   end
 
   defmacro intersection(geometryA, geometryB) do

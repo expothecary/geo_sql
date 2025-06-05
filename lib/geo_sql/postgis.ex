@@ -7,6 +7,7 @@ defmodule GeoSQL.PostGIS do
     quote do
       require GeoSQL.PostGIS
       require GeoSQL.PostGIS.Operators
+      require GeoSQL.PostGIS.Tiles
       alias GeoSQL.PostGIS
     end
   end

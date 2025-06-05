@@ -1,8 +1,9 @@
 defmodule GeoSQL.PostGIS.Tiles do
   import Ecto.Query
-  use GeoSQL.PostGIS
   use GeoSQL.MM2
-  import PostGIS.Operators
+  require GeoSQL.PostGIS
+  import GeoSQL.PostGIS.Operators
+  alias GeoSQL.PostGIS
 
   @moduledoc """
     Non-standard tile generation functions found in PostGIS.

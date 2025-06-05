@@ -11,10 +11,6 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
-  defmacro as_mvt(rows) do
-    quote do: fragment("ST_AsMVT(?)", unquote(rows))
-  end
-
   defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end

@@ -23,6 +23,12 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
       add(:geom, :geometry)
     end
 
+    create table("tile_pois") do
+      add(:name, :text)
+      add(:tags, :map, default: %{})
+      add(:geom, :geometry)
+    end
+
     execute(
       "CREATE TABLE specified_columns
         (

@@ -10,6 +10,42 @@ defmodule GeoSQL.PostGIS.Tiles do
     These are often more optimized and/or specialized than their ST_* equivalents.
   """
 
+  defmacro as_mvt(rows, options) do
+    allowed = [:name, :extent, :geom_name, :feature_id_name]
+
+    {param_string, params} =
+      PostGIS.Utils.as_positional_params(options, allowed)
+
+    template = "ST_AsMVT(? #{param_string})"
+
+    quote do
+      fragment(
+        unquote(template),
+        unquote(rows),
+        unquote_splicing(params)
+      )
+    end
+  end
+
+  defmacro as_mvt_geom(geometry, bounds) do
+    quote do: fragment("ST_AsMVTGeom(?, ?)", unquote(geometry), unquote(bounds))
+  end
+
+  defmacro as_mvt_geom(geometry, bounds, options) do
+    allowed = [:extent, :buffer, :clip_geom]
+    {param_string, params} = PostGIS.Utils.as_positional_params(options, allowed)
+    template = "ST_AsMVTGeom(?, ? #{param_string})"
+
+    quote do
+      fragment(
+        unquote(template),
+        unquote(geometry),
+        unquote(bounds),
+        unquote_splicing(params)
+      )
+    end
+  end
+
   defmacro tile_envelope(zoom, x, y) do
     quote do
       fragment(
@@ -19,6 +55,10 @@ defmodule GeoSQL.PostGIS.Tiles do
         unquote(y)
       )
     end
+  end
+
+  defmacro as_mvt(rows) do
+    quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end
 
   defmacro tile_envelope(zoom, x, y, bounds, margin \\ 0.0) do
@@ -51,7 +91,7 @@ defmodule GeoSQL.PostGIS.Tiles do
     geometry = geom_query(zoom, x, y, layers)
 
     from(g in subquery(geometry, prefix: db_prefix),
-      select: PostGIS.as_mvt(g, name: g.name)
+      select: as_mvt(g, name: g.name)
     )
     |> repo.all()
   end
@@ -73,7 +113,7 @@ defmodule GeoSQL.PostGIS.Tiles do
         select: %{
           name: ^layer.name,
           geom:
-            PostGIS.as_mvt_geom(
+            as_mvt_geom(
               field(g, ^columns.geometry),
               MM2.transform(tile_envelope(^z, ^x, ^y), 4326)
             ),

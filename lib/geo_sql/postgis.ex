@@ -15,42 +15,6 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end
 
-  defmacro as_mvt(rows, options) do
-    allowed = [:name, :extent, :geom_name, :feature_id_name]
-
-    {param_string, params} =
-      as_positional_params(options, allowed)
-
-    template = "ST_AsMVT(? #{param_string})"
-
-    quote do
-      fragment(
-        unquote(template),
-        unquote(rows),
-        unquote_splicing(params)
-      )
-    end
-  end
-
-  defmacro as_mvt_geom(geometry, bounds) do
-    quote do: fragment("ST_AsMVTGeom(?, ?)", unquote(geometry), unquote(bounds))
-  end
-
-  defmacro as_mvt_geom(geometry, bounds, options) do
-    allowed = [:extent, :buffer, :clip_geom]
-    {param_string, params} = as_positional_params(options, allowed)
-    template = "ST_AsMVTGeom(?, ? #{param_string})"
-
-    quote do
-      fragment(
-        unquote(template),
-        unquote(geometry),
-        unquote(bounds),
-        unquote_splicing(params)
-      )
-    end
-  end
-
   defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -137,31 +101,5 @@ defmodule GeoSQL.PostGIS do
 
   defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
-  end
-
-  @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
-          {param_string :: String.t(), params :: list}
-  def as_positional_params(options, allowed_keys)
-      when is_list(options) and is_list(allowed_keys) do
-    values =
-      Enum.reduce_while(allowed_keys, [], fn key, acc ->
-        case Keyword.get(options, key) do
-          nil -> {:halt, acc}
-          value -> {:cont, [value | acc]}
-        end
-      end)
-
-    {String.duplicate(", ?", Enum.count(values)), Enum.reverse(values)}
-  end
-
-  @spec as_named_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
-          {param_string :: String.t(), params :: list}
-  def as_named_params(options, allowed_keys) when is_list(options) and is_list(allowed_keys) do
-    Keyword.validate!(options, allowed_keys)
-
-    {
-      Enum.map(options, fn {key, _value} -> "#{key} => ?" end) |> Enum.join(", "),
-      Enum.map(options, fn {_key, value} -> value end)
-    }
   end
 end

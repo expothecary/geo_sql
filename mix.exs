@@ -32,7 +32,8 @@ defmodule GeoSQL.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:mix_test_watch, "~> 1.3", only: [:dev, :test], runtime: false}
     ]
   end
 

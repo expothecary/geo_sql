@@ -104,7 +104,8 @@ defmodule GeoSQL.PostGIS.VectorTiles do
         ) :: Ecto.Query.t()
   defp geom_query(z, x, y, layers) do
     Enum.reduce(layers, nil, fn %{columns: columns} = layer, union_query ->
-      from(g in "nodes",
+      from(g in layer.source,
+        prefix: ^layer.prefix,
         where:
           bbox_intersects?(
             field(g, ^columns.geometry),
@@ -121,6 +122,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
           tags: field(g, ^columns.tags)
         }
       )
+      |> layer.compose_query_fn.()
       |> maybe_union(union_query)
     end)
   end

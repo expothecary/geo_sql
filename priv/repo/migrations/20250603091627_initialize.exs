@@ -23,12 +23,6 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
       add(:geom, :geometry)
     end
 
-    create table("tile_pois") do
-      add(:name, :text)
-      add(:tags, :map, default: %{})
-      add(:geom, :geometry)
-    end
-
     execute(
       "CREATE TABLE specified_columns
         (
@@ -47,5 +41,17 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
       ",
       "DROP TABLE specified_columns"
     )
+
+    execute("CREATE SCHEMA map")
+
+    create table("vector_tile_pois") do
+      add(:tags, :map, default: %{}, null: false)
+      add(:geom, :"geometry(Point, 4326)")
+    end
+
+    create table("vector_tile_pois", prefix: "map") do
+      add(:tags, :map, default: %{}, null: false)
+      add(:geom, :"geometry(Point, 4326)")
+    end
   end
 end

@@ -6,9 +6,12 @@ defmodule GeoSQL.Test.PostGIS.Helper do
     :ok
   end
 
-  defmacro __using__(_) do
+  defmacro __using__(options \\ []) do
+    setup_funs = Keyword.get(options, :setup_funs, [])
+
     quote do
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
+      setup_all [{GeoSQL.Test.PostGIS.Helper, :ecto_setup}] ++ unquote(setup_funs)
       setup_all {GeoSQL.Test.PostGIS.Helper, :ecto_setup}
 
       setup tags do

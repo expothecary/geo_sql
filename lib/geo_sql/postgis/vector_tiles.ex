@@ -75,7 +75,6 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     end
   end
 
-  # geom_query(z, x, y, "nodes", :geom, :node_id, :tags)
   @spec generate(
           repo :: Ecto.Repo.t(),
           zoom :: non_neg_integer(),

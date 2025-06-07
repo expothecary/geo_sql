@@ -1,4 +1,4 @@
-defmodule GeoSQL.PostGIS.Tiles.Layer do
+defmodule GeoSQL.PostGIS.VectorTiles.Layer do
   @enforce_keys [:name, :source, :columns]
   defstruct [:name, :source, :columns]
 

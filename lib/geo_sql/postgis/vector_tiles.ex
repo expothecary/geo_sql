@@ -1,4 +1,4 @@
-defmodule GeoSQL.PostGIS.Tiles do
+defmodule GeoSQL.PostGIS.VectorTiles do
   import Ecto.Query
   use GeoSQL.MM2
   require GeoSQL.PostGIS

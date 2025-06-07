@@ -93,7 +93,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     from(g in subquery(geometry, prefix: db_prefix),
       select: as_mvt(g, name: g.name)
     )
-    |> repo.all()
+    |> repo.one()
   end
 
   @spec geom_query(

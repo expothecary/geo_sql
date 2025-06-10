@@ -12,7 +12,6 @@ defmodule GeoSQL.Test.PostGIS.Helper do
     quote do
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
       setup_all [{GeoSQL.Test.PostGIS.Helper, :ecto_setup}] ++ unquote(setup_funs)
-      setup_all {GeoSQL.Test.PostGIS.Helper, :ecto_setup}
 
       setup tags do
         pid = Ecto.Adapters.SQL.Sandbox.start_owner!(PostGISRepo, shared: not tags[:async])

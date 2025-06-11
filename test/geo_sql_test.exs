@@ -7,7 +7,7 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, point) VALUES ($1, $2)",
         [
           42,
@@ -16,7 +16,11 @@ defmodule GeoSQL.Test do
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, point FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, point FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end
@@ -26,7 +30,7 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, t, point) VALUES ($1, $2, $3)",
         [
           42,
@@ -36,7 +40,11 @@ defmodule GeoSQL.Test do
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, t, point FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, t, point FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, "test", geo]])
   end
@@ -46,13 +54,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, pointz) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, pointz FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, pointz FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end
@@ -62,13 +74,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, linestring) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, linestring FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, linestring FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end
@@ -78,13 +94,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, linestringz) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, linestringz FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, linestringz FROM specified_columns",
+        []
+      )
 
     assert result.rows == [[42, geo]]
   end
@@ -97,13 +117,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, linestringzm) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, linestringzm FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, linestringzm FROM specified_columns",
+        []
+      )
 
     assert result.rows == [[42, geo]]
   end
@@ -119,13 +143,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, polygon) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, polygon FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, polygon FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end
@@ -135,13 +163,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, multipoint) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, multipoint FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, multipoint FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end
@@ -154,14 +186,14 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, multilinestring) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "SELECT id, multilinestring FROM specified_columns",
         []
       )
@@ -183,13 +215,17 @@ defmodule GeoSQL.Test do
 
     {:ok, _} =
       Ecto.Adapters.SQL.query(
-        PostGISRepo,
+        PostGISRepo.get_dynamic_repo(),
         "INSERT INTO specified_columns (id, multipolygon) VALUES ($1, $2)",
         [42, geo]
       )
 
     {:ok, result} =
-      Ecto.Adapters.SQL.query(PostGISRepo, "SELECT id, multipolygon FROM specified_columns", [])
+      Ecto.Adapters.SQL.query(
+        PostGISRepo.get_dynamic_repo(),
+        "SELECT id, multipolygon FROM specified_columns",
+        []
+      )
 
     assert(result.rows == [[42, geo]])
   end

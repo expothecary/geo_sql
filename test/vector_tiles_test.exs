@@ -123,11 +123,12 @@ defmodule GeoSQL.TilesTest do
         source: "vector_tile_pois",
         prefix: "map",
         columns: %{geometry: :geom, id: :id, tags: :tags},
-        compose_query_fn: fn query -> from(q in query, where: q.id == 10_000) end
+        compose_query_fn: fn query -> from(q in query, where: q.id == 3) end
       }
     ]
 
-    expected_tile = ""
+    expected_tile =
+      "\x1Am\n\tuser_pois\x12\x13\x12\b\0\0\x01\x01\x02\x02\x03\x03\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x1A\x04name\x1A\x02id\x1A\x06access\x1A\aamenity\"\v\n\tuser_pois\"\x02(\x03\"\t\n\aprivate\"\x0F\n\rswimming_pool(\x80 x\x02"
 
     z = 17
     x = 68645

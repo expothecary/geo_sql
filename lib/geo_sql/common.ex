@@ -18,6 +18,22 @@ defmodule GeoSQL.Common do
   end
 
   defguard is_fraction(value) when value >= 0 and value <= 1
+  @spec add_measure(
+          line :: Geo.Geometry.t(),
+          measure_start :: number,
+          measure_end :: number
+        ) ::
+          Ecto.Query.fragment()
+  defmacro add_measure(line, measure_start, measure_end) do
+    quote do
+      fragment(
+        "ST_AddMeasure(?,?,?)",
+        unquote(line),
+        unquote(measure_start),
+        unquote(measure_end)
+      )
+    end
+  end
 
   defmacro azimuth(originGeometry, targetGeometry) do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))

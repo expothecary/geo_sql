@@ -172,9 +172,14 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec shortest_line(Geo.Geometry.t(), Geo.Geometry.t(), spheroid? :: boolean, Ecto.Repo.t()) ::
+  @spec shortest_line(
+          Geo.Geometry.t(),
+          Geo.Geometry.t(),
+          spheroid? :: boolean,
+          Ecto.Repo.t() | nil
+        ) ::
           Ecto.Query.fragment()
-  defmacro shortest_line(geometryA, geometryB, spheroid?, repo) do
+  defmacro shortest_line(geometryA, geometryB, spheroid? \\ false, repo \\ nil) do
     if spheroid? and repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_ShortestLine(?,?,true)", unquote(geometryA), unquote(geometryB))
     else

@@ -244,6 +244,15 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Subdivide(?, ?)", unquote(geometry), unquote(max_vertices))
   end
 
+  @spec triangulate_polygon(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
+  defmacro triangulate_polygon(geometry, repo \\ nil) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ConstrainedDelaunayTriangulation(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_TriangulatePolygon()", unquote(geometry))
+    end
+  end
+
   defmacro unary_union(geometry) do
     quote do: fragment("ST_UnaryUnion(?, ?)", unquote(geometry))
   end

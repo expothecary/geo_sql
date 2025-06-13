@@ -313,6 +313,11 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec locate_along(Geo.Geometry.t(), measure :: number) :: Ecto.Query.fragment()
+  defmacro locate_along(geometry, measure) when is_number(measure) do
+    quote do: fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
+  end
+
   defmacro make_valid(geometry) do
     quote do: fragment("ST_MakeValid(?)", unquote(geometry))
   end

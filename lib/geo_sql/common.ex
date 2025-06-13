@@ -73,8 +73,37 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
 
-  @spec largest_empty_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) ::
+  @spec estimated_extent(table :: String.t(), column :: String.t(), Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
+  defmacro estimated_extent(table, column, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GetLayerExtent(?, ?)", unquote(table), unquote(column))
+    else
+      quote do: fragment("ST_ExtimatedEtent(?, ?)::geometry", unquote(table), unquote(column))
+    end
+  end
+
+  @spec estimated_extent(
+          table :: String.t(),
+          column :: String.t(),
+          schema :: String.t(),
+          Ecto.Repo.t() | nil
+        ) :: Ecto.Query.fragment()
+  defmacro estimated_extent(table, column, schema, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GetLayerExtent(?, ?)", unquote(table), unquote(column))
+    else
+      quote do:
+              fragment(
+                "ST_ExtimatedEtent(?, ?, ?)::geometry",
+                unquote(table),
+                unquote(column),
+                unquote(schema)
+              )
+    end
+  end
+
+  @spec extent(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro extent(geometry, repo) do
     if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
       quote do: fragment("extent(?)", unquote(geometry))

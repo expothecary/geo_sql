@@ -165,4 +165,16 @@ defmodule GeoSQL.Common do
       quote do: fragment("ST_ShortestLine(?,?)", unquote(geometryA), unquote(geometryB))
     end
   end
+
+  defmacro split(inputGeometry, bladeGeometry) do
+    quote do: fragment("ST_Split(?, ?)", unquote(inputGeometry), unquote(bladeGeometry))
+  end
+
+  defmacro subdivide(geometry, max_vertices \\ 256) do
+    quote do: fragment("ST_Subdivide(?, ?)", unquote(geometry), unquote(max_vertices))
+  end
+
+  defmacro unary_union(geometry) do
+    quote do: fragment("ST_UnaryUnion(?, ?)", unquote(geometry))
+  end
 end

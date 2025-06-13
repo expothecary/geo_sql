@@ -16,13 +16,6 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defmacro shift_longitude(geometry, repo) do
-    case GeoSQL.repo_adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
-      _ -> quote do: fragment("ST_Shift_Longitude(?)", unquote(geometry))
-    end
-  end
-
   defmacro covers(geometryA, geometryB) do
     quote do: fragment("ST_Covers(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -49,6 +42,13 @@ defmodule GeoSQL.Common do
 
   defmacro build_area(geometryA) do
     quote do: fragment("ST_BuildArea(?)", unquote(geometryA))
+  end
+
+  defmacro flip_coordinates(geometry, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
+    end
   end
 
   defmacro node(geometry) do
@@ -106,14 +106,14 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defmacro flip_coordinates(geometry, repo) do
-    case GeoSQL.repo_adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
-    end
-  end
-
   defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
+  end
+
+  defmacro shift_longitude(geometry, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
+      _ -> quote do: fragment("ST_Shift_Longitude(?)", unquote(geometry))
+    end
   end
 end

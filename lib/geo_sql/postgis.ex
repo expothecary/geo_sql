@@ -13,6 +13,10 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  defmacro angle(geometryA, geometryB) do
+    quote do: fragment("ST_Angle(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
   defmacro contains_properly(geometryA, geometryB, use_indexes? \\ :with_indexes)
 
   defmacro contains_properly(geometryA, geometryB, :with_indexes) do

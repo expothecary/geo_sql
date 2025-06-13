@@ -103,6 +103,11 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec expand(Geo.Geometry.t(), units_to_expand :: number) :: Exto.Query.fragment()
+  defmacro expand(geometry, units_to_expand) do
+    quote do: fragment("ST_Expand(?,?)", unquote(geometry), unquote(units_to_expand))
+  end
+
   @spec extent(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro extent(geometry, repo) do
     if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do

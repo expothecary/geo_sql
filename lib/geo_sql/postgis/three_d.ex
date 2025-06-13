@@ -24,9 +24,13 @@ defmodule GeoSQL.PostGIS.ThreeD do
     end
   end
 
+  @spec extent(geometryA :: Geo.Geometry.t()) :: Ecto.Query.fragment()
+  defmacro extent(geometry) do
+    quote do: fragment("ST_3DExtent(?)", unquote(geometry))
+  end
+
   @spec longest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
           Ecto.Query.fragment()
-
   defmacro longest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DLongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end

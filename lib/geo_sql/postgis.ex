@@ -13,6 +13,66 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec affine(
+          Geo.Geometry.t(),
+          a :: float,
+          b :: float,
+          c :: float,
+          d :: float,
+          e :: float,
+          f :: float,
+          g :: float,
+          h :: float,
+          i :: float,
+          x_offset :: float,
+          y_offset :: float,
+          z_offset :: float
+        ) :: Ecto.Query.fragment()
+  defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
+    quote do
+      fragment(
+        "ST_Affine(?,?,?,?,?,?,?,?,?,?,?)",
+        unquote(geometry),
+        unquote(a),
+        unquote(b),
+        unquote(c),
+        unquote(d),
+        unquote(e),
+        unquote(f),
+        unquote(g),
+        unquote(h),
+        unquote(i),
+        unquote(x_offset),
+        unquote(y_offset),
+        unquote(z_offset)
+      )
+    end
+  end
+
+  @spec affine(
+          Geo.Geometry.t(),
+          a :: float,
+          b :: float,
+          d :: float,
+          e :: float,
+          x_offset :: float,
+          y_offset :: float
+        ) :: Ecto.Query.fragment()
+  defmacro affine(geometry, a, b, d, e, x_offset, y_offset) do
+    quote do
+      fragment(
+        "ST_Affine(?,?,?,?,?,?,?)",
+        unquote(geometry),
+        unquote(a),
+        unquote(b),
+        unquote(d),
+        unquote(e),
+        unquote(x_offset),
+        unquote(y_offset)
+      )
+    end
+  end
+
   defmacro angle(geometryA, geometryB) do
     quote do: fragment("ST_Angle(?,?)", unquote(geometryA), unquote(geometryB))
   end

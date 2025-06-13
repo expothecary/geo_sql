@@ -21,10 +21,10 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
-  @spec closest_point(Geo.Geometry.t(), Geo.Geometry.t(), spheroid? :: boolean, Ecto.Repo.t()) ::
+  @spec closest_point(Geo.Geometry.t(), Geo.Geometry.t(), use_spheroid? :: boolean, Ecto.Repo.t()) ::
           Ecto.Query.fragment()
-  defmacro closest_point(geometryA, geometryB, spheroid? \\ false, repo \\ nil) do
-    if spheroid? and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
+  defmacro closest_point(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
+    if use_spheroid? and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_ClosestPoint(?,?,true)", unquote(geometryA), unquote(geometryB))
     else
       quote do: fragment("ST_ClosestPoint(?,?)", unquote(geometryA), unquote(geometryB))
@@ -125,6 +125,94 @@ defmodule GeoSQL.Common do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
       Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
+    end
+  end
+
+  @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro line_interpolate_point(line, fraction, repo)
+           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_LineInterpolatePoint(?,?)", unquote(line), unquote(fraction))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_Line_Interpolate_Point(?,?)", unquote(line), unquote(fraction))
+    end
+  end
+
+  @spec line_interpolate_point(
+          line :: Geo.Geometry.t(),
+          fraction :: number,
+          use_spheroid? :: boolean,
+          Ecto.Repo.t() | nil
+        ) ::
+          Ecto.Query.fragment()
+  defmacro line_interpolate_point(line, fraction, use_spheroid?, repo)
+           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_LineInterpolatePoint(?,?,?)",
+            unquote(line),
+            unquote(fraction),
+            unquote(use_spheroid?)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_Line_Interpolate_Point(?,?)", unquote(line), unquote(fraction))
+    end
+  end
+
+  @spec line_interpolate_points(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro line_interpolate_points(line, fraction, repo)
+           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_LineInterpolatePoints(?,?,true)", unquote(line), unquote(fraction))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment(
+            "ST_Line_Interpolate_Equidistant_Points(?,?)",
+            unquote(line),
+            unquote(fraction)
+          )
+        end
+    end
+  end
+
+  @spec line_interpolate_points(
+          line :: Geo.Geometry.t(),
+          fraction :: number,
+          use_spheroid? :: boolean,
+          Ecto.Repo.t() | nil
+        ) ::
+          Ecto.Query.fragment()
+  defmacro line_interpolate_points(line, fraction, use_spheroid?, repo)
+           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_LineInterpolatePoints(?,?,?,true)",
+            unquote(line),
+            unquote(fraction),
+            unquote(use_spheroid?)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment(
+            "ST_Line_Interpolate_Equidistant_Points(?,?)",
+            unquote(line),
+            unquote(fraction)
+          )
+        end
     end
   end
 
@@ -371,12 +459,12 @@ defmodule GeoSQL.Common do
   @spec shortest_line(
           Geo.Geometry.t(),
           Geo.Geometry.t(),
-          spheroid? :: boolean,
+          use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
           Ecto.Query.fragment()
-  defmacro shortest_line(geometryA, geometryB, spheroid? \\ false, repo \\ nil) do
-    if spheroid? and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
+  defmacro shortest_line(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
+    if use_spheroid? and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_ShortestLine(?,?,true)", unquote(geometryA), unquote(geometryB))
     else
       quote do: fragment("ST_ShortestLine(?,?)", unquote(geometryA), unquote(geometryB))

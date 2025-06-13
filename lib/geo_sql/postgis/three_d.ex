@@ -29,6 +29,13 @@ defmodule GeoSQL.PostGIS.ThreeD do
     quote do: fragment("ST_3DExtent(?)", unquote(geometry))
   end
 
+  @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number) ::
+          Ecto.Query.fragment()
+  defmacro line_interpolate_point(line, fraction)
+           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+    quote do: fragment("ST_3DLineInterpolatePoint(?,?)", unquote(line), unquote(fraction))
+  end
+
   @spec longest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
           Ecto.Query.fragment()
   defmacro longest_line(geometryA, geometryB) do

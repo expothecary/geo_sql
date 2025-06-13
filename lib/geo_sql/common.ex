@@ -17,6 +17,8 @@ defmodule GeoSQL.Common do
     end
   end
 
+  defguard is_fraction(value) when value >= 0 and value <= 1
+
   defmacro azimuth(originGeometry, targetGeometry) do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
@@ -34,7 +36,7 @@ defmodule GeoSQL.Common do
   @spec concave_hull(Geo.Geometry.t(), precision :: number(), allow_holes? :: boolean) ::
           Ecto.Query.fragment()
   defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
-           when precision >= 0 and precision <= 1 do
+           when is_fraction(precision) do
     quote do
       fragment(
         "ST_ConcaveHull(?,?,?)",
@@ -256,10 +258,42 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec line_substring(
+          line :: Geo.Geometry.t() | Ecto.Query.fragment(),
+          start_fraction :: number,
+          end_fraction :: number,
+          Ecto.Repo.t() | nil
+        ) ::
+          Ecto.Query.fragment()
+  defmacro line_substring(line, start_fraction, end_fraction, repo)
+           when is_fraction(start_fraction) and is_fraction(end_fraction) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_LineSubstring(?,?,?)",
+            unquote(line),
+            unquote(start_fraction),
+            unquote(end_fraction)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment(
+            "ST_Line_Substring(?,?,?)",
+            unquote(line),
+            unquote(start_fraction),
+            unquote(end_fraction)
+          )
+        end
+    end
+  end
+
   @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
-           when tolerance >= 0 and tolerance <= 1 do
+           when is_fraction(tolerance) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_LargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))

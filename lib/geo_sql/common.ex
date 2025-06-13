@@ -147,6 +147,15 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec interpolate_point(
+          line :: Geo.Geometry.t(),
+          point :: Geo.Geometry.t()
+        ) ::
+          Ecto.Query.fragment()
+  defmacro interpolate_point(line, point) do
+    quote do: fragment("ST_InterpolatePoint(?,?)", unquote(line), unquote(point))
+  end
+
   @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)

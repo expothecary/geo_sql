@@ -15,18 +15,18 @@ defmodule GeoSQL.PostGIS do
 
   @spec affine(
           Geo.Geometry.t(),
-          a :: float,
-          b :: float,
-          c :: float,
-          d :: float,
-          e :: float,
-          f :: float,
-          g :: float,
-          h :: float,
-          i :: float,
-          x_offset :: float,
-          y_offset :: float,
-          z_offset :: float
+          a :: number,
+          b :: number,
+          c :: number,
+          d :: number,
+          e :: number,
+          f :: number,
+          g :: number,
+          h :: number,
+          i :: number,
+          x_offset :: number,
+          y_offset :: number,
+          z_offset :: number
         ) :: Ecto.Query.fragment()
   defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
     quote do
@@ -51,12 +51,12 @@ defmodule GeoSQL.PostGIS do
 
   @spec affine(
           Geo.Geometry.t(),
-          a :: float,
-          b :: float,
-          d :: float,
-          e :: float,
-          x_offset :: float,
-          y_offset :: float
+          a :: number,
+          b :: number,
+          d :: number,
+          e :: number,
+          x_offset :: number,
+          y_offset :: number
         ) :: Ecto.Query.fragment()
   defmacro affine(geometry, a, b, d, e, x_offset, y_offset) do
     quote do

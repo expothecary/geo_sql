@@ -31,7 +31,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec concave_hull(Geo.Geometry.t(), precision :: float(), allow_holes? :: boolean) ::
+  @spec concave_hull(Geo.Geometry.t(), precision :: number(), allow_holes? :: boolean) ::
           Ecto.Query.fragment()
   defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
            when precision >= 0 and precision <= 1 do
@@ -81,7 +81,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: float(), Ecto.Repo.t() | nil) ::
+  @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
            when tolerance >= 0 and tolerance <= 1 do
@@ -240,7 +240,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec scale(Geo.Geometry.t(), scale_x :: float, scale_y :: float) :: Ecto.Query.fragment()
+  @spec scale(Geo.Geometry.t(), scale_x :: number, scale_y :: number) :: Ecto.Query.fragment()
   defmacro scale(geometry, scale_x, scale_y) when is_number(scale_x) and is_number(scale_y) do
     quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_x), unquote(scale_y))
   end

@@ -188,6 +188,33 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_MemUnion(?)", unquote(geometryList))
   end
 
+  defmacro rotate(geometry, rotate_radians) when is_float(rotate_radians) do
+    quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
+  end
+
+  defmacro rotate(geometry, rotate_radians, origin_point) when is_float(rotate_radians) do
+    quote do
+      fragment(
+        "ST_Rotate(?, ?, ?)",
+        unquote(geometry),
+        unquote(rotate_radians),
+        unquote(origin_point)
+      )
+    end
+  end
+
+  defmacro rotate_x(geometry, rotate_radians) when is_float(rotate_radians) do
+    quote do: fragment("ST_RotateX(?, ?)", unquote(geometry), unquote(rotate_radians))
+  end
+
+  defmacro rotate_y(geometry, rotate_radians) when is_float(rotate_radians) do
+    quote do: fragment("ST_RotateY(?, ?)", unquote(geometry), unquote(rotate_radians))
+  end
+
+  defmacro rotate_z(geometry, rotate_radians) when is_float(rotate_radians) do
+    quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
+  end
+
   defmacro set_srid(geometry, srid) do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
   end

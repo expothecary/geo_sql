@@ -248,4 +248,29 @@ defmodule GeoSQL.PostGIS do
   defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
   end
+
+  @spec trans_scale(
+          Geo.Geometry.t(),
+          translate_x :: number,
+          translate_y :: number,
+          scale_x :: number,
+          scale_y :: number
+        ) ::
+          Ecto.Query.fragment()
+  defmacro trans_scale(geometry, translate_x, translate_y, scale_x, scale_y)
+           when is_number(translate_x) and
+                  is_number(translate_y) and
+                  is_number(scale_x) and
+                  is_number(scale_y) do
+    quote do
+      fragment(
+        "ST_TransScale(?,?,?,?,?)",
+        unquote(geometry),
+        unquote(translate_x),
+        unquote(translate_y),
+        unquote(scale_x),
+        unquote(scale_y)
+      )
+    end
+  end
 end

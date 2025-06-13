@@ -124,6 +124,26 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  defmacro minimum_clearance(geometry, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_MinimumClearance(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GEOSMinimumClearance(?)", unquote(geometry))
+    end
+  end
+
+  defmacro minimum_clearance_line(geometry, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_MinimumClearanceLine(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GEOSMinimumClearanceLine(?)", unquote(geometry))
+    end
+  end
+
   defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end

@@ -79,6 +79,17 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: float(), Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
+           when tolerance >= 0 and tolerance <= 1 do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GEOSLargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
+    else
+      quote do: fragment("ST_LargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
+    end
+  end
+
   @spec line_merge(Geo.Geometry.t(), directed? :: boolean, Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro line_merge(geometryA, directed? \\ false, repo \\ nil) do

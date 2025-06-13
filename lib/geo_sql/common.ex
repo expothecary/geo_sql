@@ -79,8 +79,14 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defmacro node(geometry) do
-    quote do: fragment("ST_Node(?)", unquote(geometry))
+  @spec line_merge(Geo.Geometry.t(), directed? :: boolean, Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro line_merge(geometryA, directed? \\ false, repo \\ nil) do
+    if directed? and repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
+      quote do: fragment("ST_LineMerge(?,?,true)", unquote(geometryA))
+    else
+      quote do: fragment("ST_LineMerge(?,?)", unquote(geometryA))
+    end
   end
 
   defmacro make_valid(geometry) do

@@ -230,6 +230,16 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
+  defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_float(rotate_radians) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      degrees_per_radian = 57.2958
+      degrees = rotate_radians * degrees_per_radian
+      quote do: fragment("RotateCoordinates(?, ?)", unquote(geometry), unquote(degrees))
+    else
+      quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
+    end
+  end
+
   defmacro shared_paths(geometryA, geometryB) do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end

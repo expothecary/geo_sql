@@ -216,6 +216,46 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec line_locate_point(
+          line :: Geo.Geometry.t(),
+          point :: Geo.Geometry.t(),
+          Ecto.Repo.t() | nil
+        ) ::
+          Ecto.Query.fragment()
+  defmacro line_locate_point(line, point, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_LineLocatePoint(?,?)", unquote(line), unquote(point))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_Line_Locate_Point(?,?)", unquote(line), unquote(point))
+    end
+  end
+
+  @spec line_locate_point(
+          line :: Geo.Geometry.t(),
+          point :: Geo.Geometry.t(),
+          use_spheroid? :: boolean,
+          Ecto.Repo.t() | nil
+        ) ::
+          Ecto.Query.fragment()
+  defmacro line_locate_point(line, point, use_spheroid?, repo) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_LineLocatePoint(?,?,?)",
+            unquote(line),
+            unquote(point),
+            unquote(use_spheroid?)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_Line_Locate_Point(?,?)", unquote(line), unquote(point))
+    end
+  end
+
   @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)

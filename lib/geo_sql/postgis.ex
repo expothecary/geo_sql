@@ -12,6 +12,16 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  defmacro contains_properly(geometryA, geometryB, use_indexes? \\ :with_indexes)
+
+  defmacro contains_properly(geometryA, geometryB, :with_indexes) do
+    quote do: fragment("ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro contains_properly(geometryA, geometryB, :without_indexes) do
+    quote do: fragment("_ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
   defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end

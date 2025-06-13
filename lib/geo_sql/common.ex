@@ -73,6 +73,16 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
 
+  @spec largest_empty_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro extent(geometry, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("extent(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_Etent(?)::geometry", unquote(geometry))
+    end
+  end
+
   @spec flip_coordinates(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro flip_coordinates(geometry, repo) do
     case GeoSQL.repo_adapter(repo) do

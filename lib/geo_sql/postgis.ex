@@ -122,10 +122,6 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
-  defmacro extent(geometry) do
-    quote do: fragment("ST_EXTENT(?)::geometry", unquote(geometry))
-  end
-
   defmacro generate_points(geometryA, npoints) do
     quote do: fragment("ST_GeneratePoints(?,?)", unquote(geometryA), unquote(npoints))
   end

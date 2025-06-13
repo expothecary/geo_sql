@@ -209,8 +209,28 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Node(?)", unquote(geometry))
   end
 
+  defmacro oriented_envelope(geometry) do
+    quote do: fragment("ST_OrientedEnvelope(?)", unquote(geometry))
+  end
+
+  defmacro offset_curve(line, distance) when is_float(distance) do
+    quote do: fragment("ST_OffsetCurve(?,?)", unquote(line), unquote(distance))
+  end
+
+  defmacro polygonize(geometry) do
+    quote do: fragment("ST_Polygonize(?)", unquote(geometry))
+  end
+
+  defmacro reduce_precision(geometry, grid_size) when is_float(grid_size) do
+    quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
+  end
+
   defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
+  end
+
+  defmacro shared_paths(geometryA, geometryB) do
+    quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
   @spec shift_longitude(Geo.Geometry.t(), Ecto.Repo.t()) :: Ecto.Query.fragment()
@@ -234,6 +254,14 @@ defmodule GeoSQL.Common do
     else
       quote do: fragment("ST_ShortestLine(?,?)", unquote(geometryA), unquote(geometryB))
     end
+  end
+
+  defmacro simplify(geometry, tolerance) when is_float(tolerance) do
+    quote do: fragment("ST_Simplify(?, ?)", unquote(geometry), unquote(tolerance))
+  end
+
+  defmacro simplify_preserve_topology(geometry, tolerance) when is_float(tolerance) do
+    quote do: fragment("ST_SimplifyPreserveTopology(?, ?)", unquote(geometry), unquote(tolerance))
   end
 
   defmacro split(inputGeometry, bladeGeometry) do

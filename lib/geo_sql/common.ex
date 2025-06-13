@@ -30,6 +30,20 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec concave_hull(Geo.Geometry.t(), precision :: float(), allow_holes? :: boolean) ::
+          Ecto.Query.fragment()
+  defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
+           when precision >= 0 and precision <= 1 do
+    quote do
+      fragment(
+        "ST_ConcaveHull(?,?,?)",
+        unquote(geometry),
+        unquote(precision),
+        unquote(allow_holes?)
+      )
+    end
+  end
+
   defmacro covers(geometryA, geometryB) do
     quote do: fragment("ST_Covers(?,?)", unquote(geometryA), unquote(geometryB))
   end

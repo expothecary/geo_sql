@@ -110,27 +110,29 @@ defmodule GeoSQL.Common do
   defmacro make_point(x, y, z, m, repo) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
-        quote do:
-                quote(
-                  do:
-                    fragment(
-                      "ST_MakePoint(?, ?, ?, ?)",
-                      unquote(x),
-                      unquote(y),
-                      unquote(z),
-                      unquote(m)
-                    )
-                )
+        quote do
+          quote(
+            do:
+              fragment(
+                "ST_MakePoint(?, ?, ?, ?)",
+                unquote(x),
+                unquote(y),
+                unquote(z),
+                unquote(m)
+              )
+          )
+        end
 
       Ecto.Adapters.SQLite3 ->
-        quote do:
-                fragment(
-                  "MakePointZM(?, ?, ?, ?)",
-                  unquote(x),
-                  unquote(y),
-                  unquote(z),
-                  unquote(m)
-                )
+        quote do
+          fragment(
+            "MakePointZM(?, ?, ?, ?)",
+            unquote(x),
+            unquote(y),
+            unquote(z),
+            unquote(m)
+          )
+        end
     end
   end
 

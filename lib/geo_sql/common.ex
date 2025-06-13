@@ -199,6 +199,58 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec min_coord(Geo.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro min_coord(geometry, :x, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MinX(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_XMin(?)", unquote(geometry))
+    end
+  end
+
+  defmacro min_coord(geometry, :y, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MinY(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_YMin(?)", unquote(geometry))
+    end
+  end
+
+  defmacro min_coord(geometry, :z, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MinZ(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_ZMin(?)", unquote(geometry))
+    end
+  end
+
+  @spec max_coord(Geo.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro max_coord(geometry, :x, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MaxX(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_XMax(?)", unquote(geometry))
+    end
+  end
+
+  defmacro max_coord(geometry, :y, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MaxY(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_YMax(?)", unquote(geometry))
+    end
+  end
+
+  defmacro max_coord(geometry, :z, repo) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("ST_MaxZ(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_ZMax(?)", unquote(geometry))
+    end
+  end
+
   defmacro max_distance(geometryA, geometryB) do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
   end

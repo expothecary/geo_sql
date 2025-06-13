@@ -8,6 +8,7 @@ defmodule GeoSQL.PostGIS do
       require GeoSQL.PostGIS
       require GeoSQL.PostGIS.Operators
       require GeoSQL.PostGIS.VectorTiles
+      require GeoSQL.PostGIS.ThreeD
       alias GeoSQL.PostGIS
     end
   end
@@ -26,15 +27,15 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  defmacro dwithin(geometryA, geometryB, float, return_value \\ :by_srid)
+  defmacro d_within(geometryA, geometryB, float, return_value \\ :by_srid)
 
-  defmacro dwithin(geometryA, geometryB, float, :by_srid) do
+  defmacro d_within(geometryA, geometryB, float, :by_srid) do
     quote do
       fragment("ST_DWithin(?,?,?)", unquote(geometryA), unquote(geometryB), unquote(float))
     end
   end
 
-  defmacro dwithin(geometryA, geometryB, float, use_spheroid) when is_boolean(use_spheroid) do
+  defmacro d_within(geometryA, geometryB, float, use_spheroid) when is_boolean(use_spheroid) do
     quote do
       fragment(
         "ST_DWithin(?::geography, ?::geography, ?)",
@@ -42,6 +43,17 @@ defmodule GeoSQL.PostGIS do
         unquote(geometryB),
         unquote(float),
         unquote(use_spheroid)
+      )
+    end
+  end
+
+  defmacro d_fully_within(geometryA, geometryB, distance) when is_number(distance) do
+    quote do
+      fragment(
+        "ST_DFullyWithin(?,?,?)",
+        unquote(geometryA),
+        unquote(geometryB),
+        unquote(distance)
       )
     end
   end

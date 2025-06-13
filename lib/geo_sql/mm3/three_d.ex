@@ -53,7 +53,7 @@ defmodule GeoSQL.MM3.ThreeD do
     quote do: fragment("CG_Volume(?)", unquote(geometry))
   end
 
-  defmacro within(geometryA, geometryB, distance) do
+  defmacro d_within(geometryA, geometryB, distance) do
     quote do
       fragment("ST_3DDWithin(?)", unquote(geometryA), unquote(geometryB), unquote(distance))
     end

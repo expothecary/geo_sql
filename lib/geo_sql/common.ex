@@ -20,6 +20,16 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
+  @spec closest_point(Geo.Geometry.t(), Geo.Geometry.t(), spheroid? :: boolean, Ecto.Repo.t()) ::
+          Ecto.Query.fragment()
+  defmacro closest_point(geometryA, geometryB, spheroid? \\ false, repo \\ nil) do
+    if spheroid? and repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
+      quote do: fragment("ST_ClosestPoint(?,?,true)", unquote(geometryA), unquote(geometryB))
+    else
+      quote do: fragment("ST_ClosestPoint(?,?)", unquote(geometryA), unquote(geometryB))
+    end
+  end
+
   defmacro covers(geometryA, geometryB) do
     quote do: fragment("ST_Covers(?,?)", unquote(geometryA), unquote(geometryB))
   end

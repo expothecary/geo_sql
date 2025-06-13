@@ -68,10 +68,20 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_BdMPolyFromText(?, ?)", unquote(wkt), unquote(srid))
   end
 
-  defmacro build_area(geometryA) do
-    quote do: fragment("ST_BuildArea(?)", unquote(geometryA))
+  defmacro build_area(geometry) do
+    quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
 
+  @spec minimum_bounding_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
+  defmacro minimum_bounding_circle(geometry, repo \\ nil) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GEOSMinimumBoundingCircle(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_MinimumBoundingCircle(?)", unquote(geometry))
+    end
+  end
+
+  @spec flip_coordinates(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro flip_coordinates(geometry, repo) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))

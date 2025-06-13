@@ -148,10 +148,21 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
+  @spec shift_longitude(Geo.Geometry.t(), Ecto.Repo.t()) :: Ecto.Query.fragment()
   defmacro shift_longitude(geometry, repo) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
       _ -> quote do: fragment("ST_Shift_Longitude(?)", unquote(geometry))
+    end
+  end
+
+  @spec shortest_line(Geo.Geometry.t(), Geo.Geometry.t(), spheroid? :: boolean, Ecto.Repo.t()) ::
+          Ecto.Query.fragment()
+  defmacro shortest_line(geometryA, geometryB, spheroid?, repo) do
+    if spheroid? and repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.Postgres do
+      quote do: fragment("ST_ShortestLine(?,?,true)", unquote(geometryA), unquote(geometryB))
+    else
+      quote do: fragment("ST_ShortestLine(?,?)", unquote(geometryA), unquote(geometryB))
     end
   end
 end

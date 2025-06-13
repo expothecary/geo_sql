@@ -72,24 +72,6 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
 
-  @spec minimum_bounding_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
-  defmacro minimum_bounding_circle(geometry, repo \\ nil) do
-    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
-      quote do: fragment("GEOSMinimumBoundingCircle(?)", unquote(geometry))
-    else
-      quote do: fragment("ST_MinimumBoundingCircle(?)", unquote(geometry))
-    end
-  end
-
-  @spec minimum_bounding_radius(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
-  defmacro minimum_bounding_radius(geometry, repo \\ nil) do
-    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
-      quote do: fragment("GEOSMinimumBoundingRadius(?)", unquote(geometry))
-    else
-      quote do: fragment("ST_MinimumBoundingRadius(?)", unquote(geometry))
-    end
-  end
-
   @spec flip_coordinates(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro flip_coordinates(geometry, repo) do
     case GeoSQL.repo_adapter(repo) do
@@ -174,6 +156,33 @@ defmodule GeoSQL.Common do
 
   defmacro max_distance(geometryA, geometryB) do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
+  @spec maximum_inscribed_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
+  defmacro maximum_inscribed_circle(geometry, repo \\ nil) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GEOSMaximumInscribedCircle(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_MaximumInscribedCircle(?)", unquote(geometry))
+    end
+  end
+
+  @spec minimum_bounding_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
+  defmacro minimum_bounding_circle(geometry, repo \\ nil) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GEOSMinimumBoundingCircle(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_MinimumBoundingCircle(?)", unquote(geometry))
+    end
+  end
+
+  @spec minimum_bounding_radius(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
+  defmacro minimum_bounding_radius(geometry, repo \\ nil) do
+    if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
+      quote do: fragment("GEOSMinimumBoundingRadius(?)", unquote(geometry))
+    else
+      quote do: fragment("ST_MinimumBoundingRadius(?)", unquote(geometry))
+    end
   end
 
   defmacro minimum_clearance(geometry, repo) do

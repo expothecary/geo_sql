@@ -65,6 +65,12 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  defmacro line_crossing_direction(linestringA, linestringB) do
+    quote do
+      fragment("ST_LineCrossingDirection(?, ?)", unquote(linestringA), unquote(linestringB))
+    end
+  end
+
   defmacro make_box_2d(geometryA, geometryB) do
     quote do: fragment("ST_MakeBox2D(?, ?)", unquote(geometryA), unquote(geometryB))
   end

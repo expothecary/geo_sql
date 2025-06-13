@@ -130,6 +130,19 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
+          Ecto.Query.fragment()
+  defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
+           when is_fraction(tolerance) do
+    case GeoSQL.repo_adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_LargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GEOSLargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
+    end
+  end
+
   @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
   defmacro line_interpolate_point(line, fraction, repo)
@@ -287,19 +300,6 @@ defmodule GeoSQL.Common do
             unquote(end_fraction)
           )
         end
-    end
-  end
-
-  @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
-          Ecto.Query.fragment()
-  defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
-           when is_fraction(tolerance) do
-    case GeoSQL.repo_adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_LargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do: fragment("GEOSLargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
     end
   end
 

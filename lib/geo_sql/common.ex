@@ -301,6 +301,18 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Subdivide(?, ?)", unquote(geometry), unquote(max_vertices))
   end
 
+  defmacro translate(geometry, delta_x, delta_y, delta_z \\ 0) do
+    quote do
+      fragment(
+        "ST_Translate(?,?,?,?)",
+        unquote(geometry),
+        unquote(delta_x),
+        unquote(delta_y),
+        unquote(delta_z)
+      )
+    end
+  end
+
   @spec triangulate_polygon(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: Ecto.Query.fragment()
   defmacro triangulate_polygon(geometry, repo \\ nil) do
     if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do

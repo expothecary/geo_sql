@@ -112,4 +112,8 @@ defmodule GeoSQL.Common do
       Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
     end
   end
+
+  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
+    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
+  end
 end

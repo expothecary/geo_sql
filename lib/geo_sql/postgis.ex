@@ -215,6 +215,32 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
+  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t()) :: Ecto.Query.fragment()
+  defmacro scale(geometry, scale_by) do
+    quote do: fragment("ST_Scale(?,?)", unquote(geometry), unquote(scale_by))
+  end
+
+  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t(), origin :: Geo.Geometry.t()) ::
+          Ecto.Query.fragment()
+  defmacro scale(geometry, scale_by, origin) do
+    quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_by), unquote(origin))
+  end
+
+  @spec scale(Geo.Geometry.t(), scale_x :: number, scale_y :: number, scale_z :: number) ::
+          Ecto.Query.fragment()
+  defmacro scale(geometry, scale_x, scale_y, scale_z)
+           when is_number(scale_x) and is_number(scale_y) and is_number(scale_z) do
+    quote do
+      fragment(
+        "ST_Scale(?,?,?,?)",
+        unquote(geometry),
+        unquote(scale_x),
+        unquote(scale_y),
+        unquote(scale_z)
+      )
+    end
+  end
+
   defmacro set_srid(geometry, srid) do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
   end

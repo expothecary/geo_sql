@@ -240,6 +240,11 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec scale(Geo.Geometry.t(), scale_x :: float, scale_y :: float) :: Ecto.Query.fragment()
+  defmacro scale(geometry, scale_x, scale_y) when is_number(scale_x) and is_number(scale_y) do
+    quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_x), unquote(scale_y))
+  end
+
   defmacro shared_paths(geometryA, geometryB) do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end

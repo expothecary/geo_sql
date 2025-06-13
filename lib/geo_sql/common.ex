@@ -17,7 +17,8 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defguard is_fraction(value) when value >= 0 and value <= 1
+  defguard is_fraction(value) when is_number(value) and value >= 0 and value <= 1
+
   @spec add_measure(
           line :: Geo.Geometry.t(),
           measure_start :: number,
@@ -161,8 +162,7 @@ defmodule GeoSQL.Common do
 
   @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
-  defmacro line_interpolate_point(line, fraction, repo)
-           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+  defmacro line_interpolate_point(line, fraction, repo) when is_fraction(fraction) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_LineInterpolatePoint(?,?)", unquote(line), unquote(fraction))
@@ -180,7 +180,7 @@ defmodule GeoSQL.Common do
         ) ::
           Ecto.Query.fragment()
   defmacro line_interpolate_point(line, fraction, use_spheroid?, repo)
-           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+           when is_fraction(fraction) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
@@ -199,8 +199,7 @@ defmodule GeoSQL.Common do
 
   @spec line_interpolate_points(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
           Ecto.Query.fragment()
-  defmacro line_interpolate_points(line, fraction, repo)
-           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+  defmacro line_interpolate_points(line, fraction, repo) when is_fraction(fraction) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_LineInterpolatePoints(?,?,true)", unquote(line), unquote(fraction))
@@ -224,7 +223,7 @@ defmodule GeoSQL.Common do
         ) ::
           Ecto.Query.fragment()
   defmacro line_interpolate_points(line, fraction, use_spheroid?, repo)
-           when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
+           when is_fraction(fraction) do
     case GeoSQL.repo_adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do

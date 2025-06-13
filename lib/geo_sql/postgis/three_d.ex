@@ -15,4 +15,8 @@ defmodule GeoSQL.PostGIS.ThreeD do
       )
     end
   end
+
+  defmacro longest_line(geometryA, geometryB) do
+    quote do: fragment("ST_3DLongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
+  end
 end

@@ -143,6 +143,24 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec locate_between_elevations(
+          Geo.Geometry.t(),
+          elevation_start :: number,
+          elevation_end :: number
+        ) ::
+          Ecto.Query.fragment()
+  defmacro locate_between_elevations(geometry, elevation_start, elevation_end)
+           when is_number(elevation_start) and is_number(elevation_end) do
+    quote do
+      fragment(
+        "ST_LocateBetweenElevations(?,?,?)",
+        unquote(geometry),
+        unquote(elevation_start),
+        unquote(elevation_end)
+      )
+    end
+  end
+
   defmacro longest_line(geometryA, geometryB) do
     quote do: fragment("ST_LongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end

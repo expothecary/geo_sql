@@ -12,20 +12,9 @@ defmodule GeoSQL do
   hide those differences behind single function calls.
   """
 
-  @default_adapter Ecto.Adapters.Postgres
-
-  def init(repo) do
-    repo
-    |> repo_adapter()
+  def init(repo) when is_atom(repo) do
+    repo.__adapter__()
     |> init_spatial_capabilities(repo)
-  end
-
-  def repo_adapter(nil) do
-    @default_adapter
-  end
-
-  def repo_adapter(repo) do
-    Macro.expand(repo, __ENV__).__adapter__()
   end
 
   defp init_spatial_capabilities(Ecto.Adapters.SQLite3, repo) do

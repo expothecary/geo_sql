@@ -12,6 +12,7 @@ defmodule GeoSQL.Common do
   defmacro __using__(_) do
     quote do
       require GeoSQL.Common
+      require GeoSQL.Common.ThreeD
       alias GeoSQL.Common
     end
   end

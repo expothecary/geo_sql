@@ -318,6 +318,20 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
   end
 
+  @spec locate_between(Geo.Geometry.t(), measure_start :: number, measure_end :: number) ::
+          Ecto.Query.fragment()
+  defmacro locate_between(geometry, measure_start, measure_end)
+           when is_number(measure_start) and is_number(measure_end) do
+    quote do
+      fragment(
+        "ST_LocateBetween(?,?,?)",
+        unquote(geometry),
+        unquote(measure_start),
+        unquote(measure_end)
+      )
+    end
+  end
+
   defmacro make_valid(geometry) do
     quote do: fragment("ST_MakeValid(?)", unquote(geometry))
   end

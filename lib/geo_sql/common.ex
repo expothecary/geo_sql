@@ -214,7 +214,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_OrientedEnvelope(?)", unquote(geometry))
   end
 
-  defmacro offset_curve(line, distance) when is_float(distance) do
+  defmacro offset_curve(line, distance) when is_number(distance) do
     quote do: fragment("ST_OffsetCurve(?,?)", unquote(line), unquote(distance))
   end
 
@@ -222,7 +222,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Polygonize(?)", unquote(geometry))
   end
 
-  defmacro reduce_precision(geometry, grid_size) when is_float(grid_size) do
+  defmacro reduce_precision(geometry, grid_size) when is_number(grid_size) do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
   end
 
@@ -230,7 +230,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
-  defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_float(rotate_radians) do
+  defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
     if repo != nil and GeoSQL.repo_adapter(repo) == Ecto.Adapters.SQLite3 do
       degrees_per_radian = 57.2958
       degrees = rotate_radians * degrees_per_radian
@@ -272,11 +272,11 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defmacro simplify(geometry, tolerance) when is_float(tolerance) do
+  defmacro simplify(geometry, tolerance) when is_number(tolerance) do
     quote do: fragment("ST_Simplify(?, ?)", unquote(geometry), unquote(tolerance))
   end
 
-  defmacro simplify_preserve_topology(geometry, tolerance) when is_float(tolerance) do
+  defmacro simplify_preserve_topology(geometry, tolerance) when is_number(tolerance) do
     quote do: fragment("ST_SimplifyPreserveTopology(?, ?)", unquote(geometry), unquote(tolerance))
   end
 

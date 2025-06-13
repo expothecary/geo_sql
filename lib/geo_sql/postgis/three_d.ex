@@ -20,6 +20,12 @@ defmodule GeoSQL.PostGIS.ThreeD do
     quote do: fragment("ST_3DLongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @spec make_box(low_left_bottom :: Geo.Geometry.t(), high_right_top :: Geo.Geometry.t()) ::
+          Ecto.Query.fragment()
+  defmacro make_box(low_left_bottom, high_right_top) do
+    quote do: fragment("ST_3DMakeBox(?,?)", unquote(low_left_bottom), unquote(high_right_top))
+  end
+
   defmacro shortest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DShortestLine(?,?)", unquote(geometryA), unquote(geometryB))
   end

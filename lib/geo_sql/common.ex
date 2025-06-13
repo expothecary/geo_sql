@@ -16,6 +16,10 @@ defmodule GeoSQL.Common do
     end
   end
 
+  defmacro azimuth(originGeometry, targetGeometry) do
+    quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
+  end
+
   defmacro covers(geometryA, geometryB) do
     quote do: fragment("ST_Covers(?,?)", unquote(geometryA), unquote(geometryB))
   end

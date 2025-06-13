@@ -120,6 +120,10 @@ defmodule GeoSQL.Common do
     end
   end
 
+  defmacro max_distance(geometryA, geometryB) do
+    quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
   defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end

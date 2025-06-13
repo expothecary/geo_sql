@@ -97,7 +97,9 @@ defmodule GeoSQL.Ecto.Test do
 
     PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query = from(location in Location, select: PostGIS.extent(location.geom))
+    query =
+      from(location in Location, select: Common.extent(location.geom, GeoSQL.Test.PostGIS.Repo))
+
     assert [%Geo.Polygon{coordinates: [coordinates]}] = PostGISRepo.all(query)
     assert length(coordinates) == 5
   end

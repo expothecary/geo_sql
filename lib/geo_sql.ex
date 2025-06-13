@@ -11,16 +11,21 @@ defmodule GeoSQL do
   Where there are subtle differences between implementations of the same functions, GeoSQL strives to
   hide those differences behind single function calls.
   """
+
+  @default_adapter Ecto.Adapters.Postgres
+
   def init(repo) do
     repo
     |> repo_adapter()
     |> init_spatial_capabilities(repo)
   end
 
+  def repo_adapter(nil) do
+    @default_adapter
+  end
+
   def repo_adapter(repo) do
-    repo
-    |> Application.get_env(:yaybr_core)
-    |> Keyword.get(:adapter)
+    Macro.expand(repo, __ENV__).__adapter__()
   end
 
   defp init_spatial_capabilities(Ecto.Adapters.SQLite3, repo) do

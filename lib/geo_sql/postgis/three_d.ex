@@ -1,10 +1,18 @@
 defmodule GeoSQL.PostGIS.ThreeD do
   @moduledoc "Non-standard PostGIS 3D functions"
 
+  @spec closest_point(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+          Ecto.Query.fragment()
   defmacro closest_point(geometryA, geometryB) do
     quote do: fragment("ST_3DClosestPoint(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @spec d_fully_within(
+          geometryA :: Geo.Geometry.t(),
+          geometryB :: Geo.Geometry.t(),
+          distance :: number
+        ) ::
+          Ecto.Query.fragment()
   defmacro d_fully_within(geometryA, geometryB, distance) when is_number(distance) do
     quote do
       fragment(
@@ -16,6 +24,9 @@ defmodule GeoSQL.PostGIS.ThreeD do
     end
   end
 
+  @spec longest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+          Ecto.Query.fragment()
+
   defmacro longest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DLongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end
@@ -26,6 +37,8 @@ defmodule GeoSQL.PostGIS.ThreeD do
     quote do: fragment("ST_3DMakeBox(?,?)", unquote(low_left_bottom), unquote(high_right_top))
   end
 
+  @spec shortest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+          Ecto.Query.fragment()
   defmacro shortest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DShortestLine(?,?)", unquote(geometryA), unquote(geometryB))
   end

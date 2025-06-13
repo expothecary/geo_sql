@@ -111,3 +111,7 @@ ST_Y
 ST_Z
 ST_SRID
 
+## Nonstandard Not Implemented
+ST_DistanceSpheroid
+ST_FrechetDistance
+ST_HausdorffDistance

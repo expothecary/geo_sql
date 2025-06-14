@@ -256,7 +256,7 @@ defmodule GeoSQL.MM2 do
   end
 
   defmacro transform(wkt, srid) do
-    quote do: fragment("ST_Transform(?, ?)", unquote(wkt), unquote(srid))
+    quote do: fragment("ST_Transform(?, ?::integer)", unquote(wkt), unquote(srid))
   end
 
   defmacro union(geometryList) do

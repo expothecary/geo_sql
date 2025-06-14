@@ -15,7 +15,7 @@ defmodule GeoSQL.PostGIS do
   end
 
   @spec affine(
-          Geo.Geometry.t(),
+          GeoSQL.geometry_input(),
           a :: number,
           b :: number,
           c :: number,
@@ -53,7 +53,7 @@ defmodule GeoSQL.PostGIS do
 
   @doc group: "Affine Transformations"
   @spec affine(
-          Geo.Geometry.t(),
+          GeoSQL.geometry_input(),
           a :: number,
           b :: number,
           d :: number,
@@ -81,10 +81,12 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Angle(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Measurement"
   defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Distance Relationships"
   defmacro d_within(geometryA, geometryB, float, return_value \\ :by_srid)
 
   defmacro d_within(geometryA, geometryB, float, :by_srid) do
@@ -93,6 +95,7 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Distance Relationships"
   defmacro d_within(geometryA, geometryB, float, use_spheroid) when is_boolean(use_spheroid) do
     quote do
       fragment(
@@ -105,6 +108,7 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Distance Relationships"
   defmacro d_fully_within(geometryA, geometryB, distance) when is_number(distance) do
     quote do
       fragment(
@@ -116,10 +120,12 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Geometry Processing"
   defmacro generate_points(geometryA, npoints) do
     quote do: fragment("ST_GeneratePoints(?,?)", unquote(geometryA), unquote(npoints))
   end
 
+  @doc group: "Geometry Processing"
   defmacro generate_points(geometryA, npoints, seed) do
     quote do
       fragment(
@@ -131,14 +137,9 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
-  defmacro line_crossing_direction(linestringA, linestringB) do
-    quote do
-      fragment("ST_LineCrossingDirection(?, ?)", unquote(linestringA), unquote(linestringB))
-    end
-  end
-
+  @doc group: "Linear Referencing"
   @spec locate_between_elevations(
-          Geo.Geometry.t(),
+          GeoSQL.geometry_input(),
           elevation_start :: number,
           elevation_end :: number
         ) ::
@@ -155,14 +156,17 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Measurement"
   defmacro longest_line(geometryA, geometryB) do
     quote do: fragment("ST_LongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Bounding Boxes"
   defmacro make_box_2d(geometryA, geometryB) do
     quote do: fragment("ST_MakeBox2D(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Geometry Constructors"
   defmacro make_envelope(xMin, yMin, xMax, yMax) do
     quote do
       fragment(
@@ -175,6 +179,7 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Geometry Constructors"
   defmacro make_envelope(xMin, yMin, xMax, yMax, srid) do
     quote do
       fragment(
@@ -188,18 +193,22 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Geometry Validation"
   defmacro make_valid(geometry, params) do
     quote do: fragment("ST_MakeValid(?, ?)", unquote(geometry), unquote(params))
   end
 
+  @doc group: "Overlays"
   defmacro mem_union(geometryList) do
     quote do: fragment("ST_MemUnion(?)", unquote(geometryList))
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians, origin_point) when is_float(rotate_radians) do
     quote do
       fragment(
@@ -211,31 +220,37 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate_x(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_RotateX(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate_y(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_RotateY(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate_z(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
+  @spec scale(GeoSQL.geometry_input(), scale :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
 
-  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t()) :: GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_by) do
     quote do: fragment("ST_Scale(?,?)", unquote(geometry), unquote(scale_by))
   end
 
-  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t(), origin :: Geo.Geometry.t()) ::
+  @spec scale(GeoSQL.geometry_input(), scale :: GeoSQL.geometry_input(), origin :: GeoSQL.geometry_input()) ::
           GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_by, origin) do
     quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_by), unquote(origin))
   end
 
-  @spec scale(Geo.Geometry.t(), scale_x :: number, scale_y :: number, scale_z :: number) ::
+  @spec scale(GeoSQL.geometry_input(), scale_x :: number, scale_y :: number, scale_z :: number) ::
           GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_x, scale_y, scale_z)
            when is_number(scale_x) and is_number(scale_y) and is_number(scale_z) do
     quote do
@@ -249,22 +264,25 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Spatial Reference Systems"
   defmacro set_srid(geometry, srid) do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
   end
 
+  @doc group: "Geometry Editors"
   defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
   end
 
   @spec trans_scale(
-          Geo.Geometry.t(),
+          GeoSQL.geometry_input(),
           translate_x :: number,
           translate_y :: number,
           scale_x :: number,
           scale_y :: number
         ) ::
           GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro trans_scale(geometry, translate_x, translate_y, scale_x, scale_y)
            when is_number(translate_x) and
                   is_number(translate_y) and

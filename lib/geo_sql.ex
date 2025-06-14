@@ -36,8 +36,12 @@ defmodule GeoSQL do
   end
 
   defp register_types(Ecto.Adapters.Postgres = adapter, repo, opts) do
-    [app | _] = Module.split(repo)
-    types_module = Module.concat(app, PostgrexTypes)
+    types_module =
+      repo.config()
+      |> Keyword.get_lazy(:types, fn ->
+        [app | _] = Module.split(repo)
+        Module.concat(app, PostgresTypes)
+      end)
 
     if not Code.ensure_loaded?(types_module) do
       Postgrex.Types.define(

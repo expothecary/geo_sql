@@ -535,10 +535,6 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
   end
 
-  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
-    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
-  end
-
   defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
       degrees_per_radian = 57.2958

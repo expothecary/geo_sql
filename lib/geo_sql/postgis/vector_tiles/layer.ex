@@ -5,6 +5,7 @@ defmodule GeoSQL.PostGIS.VectorTiles.Layer do
     :source,
     :columns,
     prefix: nil,
+    srid: 4326,
     compose_query_fn: &__MODULE__.identity_composer/1
   ]
 

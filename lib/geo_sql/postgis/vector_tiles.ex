@@ -109,14 +109,14 @@ defmodule GeoSQL.PostGIS.VectorTiles do
         where:
           bbox_intersects?(
             field(g, ^columns.geometry),
-            MM2.transform(tile_envelope(^z, ^x, ^y), 4326)
+            MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
           ),
         select: %{
           name: ^layer.name,
           geom:
             as_mvt_geom(
               field(g, ^columns.geometry),
-              MM2.transform(tile_envelope(^z, ^x, ^y), 4326)
+              MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
             ),
           id: field(g, ^columns.id),
           tags: field(g, ^columns.tags)

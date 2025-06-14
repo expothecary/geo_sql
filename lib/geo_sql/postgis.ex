@@ -7,8 +7,9 @@ defmodule GeoSQL.PostGIS do
     quote do
       require GeoSQL.PostGIS
       require GeoSQL.PostGIS.Operators
-      require GeoSQL.PostGIS.VectorTiles
       require GeoSQL.PostGIS.ThreeD
+      require GeoSQL.PostGIS.Topo
+      require GeoSQL.PostGIS.VectorTiles
       alias GeoSQL.PostGIS
     end
   end

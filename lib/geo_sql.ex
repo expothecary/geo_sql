@@ -12,6 +12,8 @@ defmodule GeoSQL do
   hide those differences behind single function calls.
   """
 
+  @type fragment :: term
+
   def init(repo) when is_atom(repo) do
     repo.__adapter__()
     |> init_spatial_capabilities(repo)

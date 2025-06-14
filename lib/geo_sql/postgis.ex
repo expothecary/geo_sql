@@ -27,7 +27,7 @@ defmodule GeoSQL.PostGIS do
           x_offset :: number,
           y_offset :: number,
           z_offset :: number
-        ) :: Ecto.Query.fragment()
+        ) :: GeoSQL.fragment()
   defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
     quote do
       fragment(
@@ -57,7 +57,7 @@ defmodule GeoSQL.PostGIS do
           e :: number,
           x_offset :: number,
           y_offset :: number
-        ) :: Ecto.Query.fragment()
+        ) :: GeoSQL.fragment()
   defmacro affine(geometry, a, b, d, e, x_offset, y_offset) do
     quote do
       fragment(
@@ -148,7 +148,7 @@ defmodule GeoSQL.PostGIS do
           elevation_start :: number,
           elevation_end :: number
         ) ::
-          Ecto.Query.fragment()
+          GeoSQL.fragment()
   defmacro locate_between_elevations(geometry, elevation_start, elevation_end)
            when is_number(elevation_start) and is_number(elevation_end) do
     quote do
@@ -229,19 +229,19 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
-  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t()) :: Ecto.Query.fragment()
+  @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t()) :: GeoSQL.fragment()
   defmacro scale(geometry, scale_by) do
     quote do: fragment("ST_Scale(?,?)", unquote(geometry), unquote(scale_by))
   end
 
   @spec scale(Geo.Geometry.t(), scale :: Geo.Geometry.t(), origin :: Geo.Geometry.t()) ::
-          Ecto.Query.fragment()
+          GeoSQL.fragment()
   defmacro scale(geometry, scale_by, origin) do
     quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_by), unquote(origin))
   end
 
   @spec scale(Geo.Geometry.t(), scale_x :: number, scale_y :: number, scale_z :: number) ::
-          Ecto.Query.fragment()
+          GeoSQL.fragment()
   defmacro scale(geometry, scale_x, scale_y, scale_z)
            when is_number(scale_x) and is_number(scale_y) and is_number(scale_z) do
     quote do
@@ -270,7 +270,7 @@ defmodule GeoSQL.PostGIS do
           scale_x :: number,
           scale_y :: number
         ) ::
-          Ecto.Query.fragment()
+          GeoSQL.fragment()
   defmacro trans_scale(geometry, translate_x, translate_y, scale_x, scale_y)
            when is_number(translate_x) and
                   is_number(translate_y) and

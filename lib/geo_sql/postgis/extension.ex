@@ -1,28 +1,5 @@
 defmodule GeoSQL.PostGIS.Extension do
-  @moduledoc """
-  PostGIS extension for Postgrex. Supports Geometry and Geography data types.
-
-  ## Examples
-
-  Create a new Postgrex Types module:
-
-      Postgrex.Types.define(MyApp.PostgresTypes, [GeoSQL.Extension], [])
-
-  If using with Ecto, you may want something like thing instead:
-
-      Postgrex.Types.define(MyApp.PostgresTypes,
-                    [GeoSQL.Extension] ++ Ecto.Adapters.Postgres.extensions())
-
-  By default, the extension works on a copy of the binary data received. By passing
-  `decode_binary: :reference` as an option, it will instead not copy the binary that is used to
-  populate the types. While faster, this can have side-effects such as large binaries
-  remaining in memory due to ref-counting for longer than one might way. As such, it
-  is recommended to change this option only after testing.
-
-  Normally one does not need to add the types directly, as type registration is handled
-  automatically by `GeoSQL.init/1`.
-  """
-
+  @moduledoc false
   @behaviour Postgrex.Extension
 
   @geo_types [

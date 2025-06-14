@@ -1,15 +1,15 @@
 defmodule GeoSQL.PostGIS.ThreeD do
   @moduledoc "Non-standard PostGIS 3D functions"
 
-  @spec closest_point(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+  @spec closest_point(geometryA :: GeoSQL.Geometry.t(), geometryB :: GeoSQL.Geometry.t()) ::
           GeoSQL.fragment()
   defmacro closest_point(geometryA, geometryB) do
     quote do: fragment("ST_3DClosestPoint(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
   @spec d_fully_within(
-          geometryA :: Geo.Geometry.t(),
-          geometryB :: Geo.Geometry.t(),
+          geometryA :: GeoSQL.Geometry.t(),
+          geometryB :: GeoSQL.Geometry.t(),
           distance :: number
         ) ::
           GeoSQL.fragment()
@@ -24,31 +24,31 @@ defmodule GeoSQL.PostGIS.ThreeD do
     end
   end
 
-  @spec extent(geometryA :: Geo.Geometry.t()) :: GeoSQL.fragment()
+  @spec extent(geometryA :: GeoSQL.Geometry.t()) :: GeoSQL.fragment()
   defmacro extent(geometry) do
     quote do: fragment("ST_3DExtent(?)", unquote(geometry))
   end
 
-  @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number) ::
+  @spec line_interpolate_point(line :: GeoSQL.Geometry.t(), fraction :: number) ::
           GeoSQL.fragment()
   defmacro line_interpolate_point(line, fraction)
            when is_number(fraction) and fraction <= 1.0 and fraction >= 0 do
     quote do: fragment("ST_3DLineInterpolatePoint(?,?)", unquote(line), unquote(fraction))
   end
 
-  @spec longest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+  @spec longest_line(geometryA :: GeoSQL.Geometry.t(), geometryB :: GeoSQL.Geometry.t()) ::
           GeoSQL.fragment()
   defmacro longest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DLongestLine(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec make_box(low_left_bottom :: Geo.Geometry.t(), high_right_top :: Geo.Geometry.t()) ::
+  @spec make_box(low_left_bottom :: GeoSQL.Geometry.t(), high_right_top :: GeoSQL.Geometry.t()) ::
           GeoSQL.fragment()
   defmacro make_box(low_left_bottom, high_right_top) do
     quote do: fragment("ST_3DMakeBox(?,?)", unquote(low_left_bottom), unquote(high_right_top))
   end
 
-  @spec shortest_line(geometryA :: Geo.Geometry.t(), geometryB :: Geo.Geometry.t()) ::
+  @spec shortest_line(geometryA :: GeoSQL.Geometry.t(), geometryB :: GeoSQL.Geometry.t()) ::
           GeoSQL.fragment()
   defmacro shortest_line(geometryA, geometryB) do
     quote do: fragment("ST_3DShortestLine(?,?)", unquote(geometryA), unquote(geometryB))

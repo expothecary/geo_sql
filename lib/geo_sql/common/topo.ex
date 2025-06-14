@@ -6,7 +6,7 @@ defmodule GeoSQL.Common.Topo do
     quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
-  @spec get_edge_by_point(topology :: String.t(), point :: Geo.Geometry.t(), tolerance :: number) ::
+  @spec get_edge_by_point(topology :: String.t(), point :: GeoSQL.Geometry.t(), tolerance :: number) ::
           GeoSQL.fragment()
   @doc group: "Accessors"
   defmacro get_edge_by_point(topology, point, tolerance) do

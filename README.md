@@ -39,7 +39,7 @@ Run the usual `mix deps.get`!
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling
 `GeoSQL.init/1`. This can be done once the repo has been started by implementing
-the `Ecto.Repo.init/2` callback like this:
+the `init/2` callback in your repo module like this:
 
   ```elixir
   defmodule MyApp.Repo do

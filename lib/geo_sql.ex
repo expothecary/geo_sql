@@ -12,7 +12,6 @@ defmodule GeoSQL do
   Where there are subtle differences between implementations of the same functions, GeoSQL strives to
   hide those differences behind single function calls.
   """
-
   @type fragment :: term
   @type geometry_input :: GeoSQL.Geometry.t() | fragment
   @type init_option :: {:json, atom} | {:decode_binary, :copy | :reference}
@@ -28,7 +27,7 @@ defmodule GeoSQL do
   end
 
   defp init_spatial_capabilities(Ecto.Adapters.SQLite3 = adapter, repo, _opts) do
-    apply(Ecto.Adapters.SQLite3, :query, [repo, "SELECT InitSpatialMetadata()"])
+    run_query(repo, "SELECT InitSpatialMetadata()")
     adapter
   end
 
@@ -49,4 +48,13 @@ defmodule GeoSQL do
   end
 
   defp register_types(adapter, _opts), do: adapter
+
+  defp run_query(repo, sql) do
+    try do
+      Ecto.Adapters.SQL.query!(repo.get_dynamic_repo(), sql)
+      :ok
+    rescue
+      _ -> :error
+    end
+  end
 end

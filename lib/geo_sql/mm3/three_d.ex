@@ -1,6 +1,6 @@
 defmodule GeoSQL.MM3.ThreeD do
   @moduledoc """
-  SQL/MM3 3D functions prefixed with `ST_3D` or `CG_3D` in the standard which can be used in ecto queries.
+  SQL/MM3 3D functions, typically prefixed with `ST_3D` or `CG_3D` in the standard.
 
   This may require additional dependencies and configuration in the GIS store. For example,
   PostGIS requires the SFCGAL backend for some of these functions.

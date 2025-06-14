@@ -1,4 +1,6 @@
 defmodule GeoSQL.PostGIS.Utils do
+  @moduledoc false
+
   @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
           {param_string :: String.t(), params :: list}
   @doc """

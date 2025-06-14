@@ -6,11 +6,46 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   alias GeoSQL.PostGIS
 
   @moduledoc """
-    Non-standard tile generation functions found in PostGIS.
+  Generate Mapbox-compatible vector tiles.
 
-    These are often more optimized and/or specialized than their ST_* equivalents.
+  In addition to support for the full set of functions realted to Mapbox vector tiles, this module
+  provides support for generating complete tiles with a single call.
+
+  The `generate/5` function takes a list of `GeoSQL.PostGIS.VectorTiles.Layer` structs along
+  with the tile coordinates and an `Ecto.Repo`:
+
+    ```elixir
+      use GeoSQL.PostGIS
+
+      def tile(zoom, x, y) do
+        layers = [
+          %PostGIS.VectorTiles.Layer{
+            name: "pois",
+            source: "nodes",
+            columns: %{geometry: :geom, id: :node_id, tags: :tags}
+          },
+          %PostGIS.VectorTiles.Layer{
+            name: "buildings",
+            source: "buildings",
+            columns: %{geometry: :footprint, id: :id, tags: :tags}
+          }
+        ]
+
+
+        PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y, layers)
+      end
+    ```
+
+  The resulting data can be loaded directly into map renderers such as `MapLibre` or `OpenLayers`
+  with the `MVT` vector tile layer format.
+
+  Database prefixes ("schemas" in PostgreSQL) are also supported both on the whole tile query
+  as well as per-layer.
+
+  For non-trivial tables, ensure that a `GIST` index exists on the geometry columns used.
   """
 
+  @doc group: "SQL Functions"
   defmacro as_mvt(rows, options) do
     allowed = [:name, :extent, :geom_name, :feature_id_name]
 
@@ -28,10 +63,12 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     end
   end
 
+  @doc group: "SQL Functions"
   defmacro as_mvt_geom(geometry, bounds) do
     quote do: fragment("ST_AsMVTGeom(?, ?)", unquote(geometry), unquote(bounds))
   end
 
+  @doc group: "SQL Functions"
   defmacro as_mvt_geom(geometry, bounds, options) do
     allowed = [:extent, :buffer, :clip_geom]
     {param_string, params} = PostGIS.Utils.as_positional_params(options, allowed)
@@ -47,6 +84,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     end
   end
 
+  @doc group: "SQL Functions"
   defmacro tile_envelope(zoom, x, y) do
     quote do
       fragment(
@@ -58,10 +96,12 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     end
   end
 
+  @doc group: "SQL Functions"
   defmacro as_mvt(rows) do
     quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end
 
+  @doc group: "SQL Functions"
   defmacro tile_envelope(zoom, x, y, bounds, margin \\ 0.0) do
     quote do
       fragment(
@@ -83,6 +123,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
           layers :: [__MODULE__.Layer.t()],
           db_prefix :: String.t() | nil
         ) :: term
+  @doc group: "Tile Generation"
   def generate(repo, zoom, x, y, layers, db_prefix \\ nil)
 
   def generate(_repo, _zoom, _x, _y, [], _db_prefix), do: []

@@ -1,12 +1,28 @@
 defmodule GeoSQL.Common do
   @moduledoc """
-  This module contains common, but non-standard, GIS SQL functions. These are
+  Commonly supported, but non-standard, GIS SQL functions. These are
   found in multiple database implementations, though they may differ in minor
   syntactical details in each implementation.
 
-  Note that some backends may require to have special initialization or
-  dependencies loaded for some of these functions to work. e.g. SpatialList
+  ## Implementation differences
+
+  In cases where the generated SQL differs based on the database in use, those
+  functions will take an optional `Ecto.Repo` argument. When provided, this allows
+  the function to decide which implementation-specific ipmlementation to use.
+
+  When no `Ecto.Repo` is provided, functions default to `PostGIS`-compatible syntax.
+
+  ## Database support
+
+  The features in the `GeoSQL.Common` modules are intended to contain functions
+  available in all support SQL GIS extensions.
+
+  Some backends may require special initialization or
+  dependencies loaded for some of these functions to work. For examplke, SpatialLite
   must be built with the GEO package for some of these functions to be available.
+
+  Consult the documentation for the database GIS extension being used for such
+  requirements.
   """
 
   defmacro __using__(_) do
@@ -31,6 +47,7 @@ defmodule GeoSQL.Common do
           measure_end :: number
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro add_measure(line, measure_start, measure_end) do
     quote do
       fragment(
@@ -42,12 +59,14 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Measurement"
   defmacro azimuth(originGeometry, targetGeometry) do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
   @spec closest_point(Geo.Geometry.t(), Geo.Geometry.t(), use_spheroid? :: boolean, Ecto.Repo.t()) ::
           GeoSQL.fragment()
+  @doc group: "Measurement"
   defmacro closest_point(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
     if use_spheroid? and RepoUtils.adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_ClosestPoint(?,?,true)", unquote(geometryA), unquote(geometryB))
@@ -58,6 +77,7 @@ defmodule GeoSQL.Common do
 
   @spec concave_hull(Geo.Geometry.t(), precision :: number(), allow_holes? :: boolean) ::
           GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
            when is_fraction(precision) do
     quote do
@@ -70,30 +90,37 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Coverages"
   defmacro covers(geometryA, geometryB) do
     quote do: fragment("ST_Covers(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Coverages"
   defmacro covered_by(geometryA, geometryB) do
     quote do: fragment("ST_CoveredBy(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Geometry Constructors"
   defmacro collect(geometryList) do
     quote do: fragment("ST_Collect(?)", unquote(geometryList))
   end
 
+  @doc group: "Geometry Constructors"
   defmacro collect(geometryA, geometryB) do
     quote do: fragment("ST_Collect(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Well-Known Text (WKT)"
   defmacro bd_poly_from_text(wkt, srid) do
     quote do: fragment("ST_BdPolyFromText(?, ?)", unquote(wkt), unquote(srid))
   end
 
+  @doc group: "Well-Known Text (WKT)"
   defmacro bd_m_poly_from_text(wkt, srid) do
     quote do: fragment("ST_BdMPolyFromText(?, ?)", unquote(wkt), unquote(srid))
   end
 
+  @doc group: "Geometry Processing"
   defmacro build_area(geometry) do
     quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
@@ -103,6 +130,7 @@ defmodule GeoSQL.Common do
           column :: String.t(),
           Ecto.Repo.t() | nil
         ) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
   defmacro estimated_extent(table, column, repo \\ nil)
 
   defmacro estimated_extent({schema, table}, column, repo) do
@@ -133,11 +161,13 @@ defmodule GeoSQL.Common do
   end
 
   @spec expand(Geo.Geometry.t(), units_to_expand :: number) :: Exto.Query.fragment()
+  @doc group: "Bounding Boxes"
   defmacro expand(geometry, units_to_expand) do
     quote do: fragment("ST_Expand(?,?)", unquote(geometry), unquote(units_to_expand))
   end
 
   @spec extent(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
   defmacro extent(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_Extent(?)::geometry", unquote(geometry))
@@ -146,6 +176,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec flip_coordinates(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Mutations"
   defmacro flip_coordinates(geometry, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
@@ -158,12 +189,14 @@ defmodule GeoSQL.Common do
           point :: Geo.Geometry.t()
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro interpolate_point(line, point) do
     quote do: fragment("ST_InterpolatePoint(?,?)", unquote(line), unquote(point))
   end
 
   @spec largest_empty_circle(Geo.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
            when is_fraction(tolerance) do
     case RepoUtils.adapter(repo) do
@@ -177,6 +210,7 @@ defmodule GeoSQL.Common do
 
   @spec line_interpolate_point(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_interpolate_point(line, fraction, repo) when is_fraction(fraction) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -194,6 +228,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_interpolate_point(line, fraction, use_spheroid?, repo)
            when is_fraction(fraction) do
     case RepoUtils.adapter(repo) do
@@ -214,6 +249,7 @@ defmodule GeoSQL.Common do
 
   @spec line_interpolate_points(line :: Geo.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_interpolate_points(line, fraction, repo) when is_fraction(fraction) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -237,6 +273,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_interpolate_points(line, fraction, use_spheroid?, repo)
            when is_fraction(fraction) do
     case RepoUtils.adapter(repo) do
@@ -267,6 +304,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_locate_point(line, point, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -284,6 +322,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_locate_point(line, point, use_spheroid?, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -308,6 +347,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro line_substring(line, start_fraction, end_fraction, repo)
            when is_fraction(start_fraction) and is_fraction(end_fraction) do
     case RepoUtils.adapter(repo) do
@@ -335,6 +375,7 @@ defmodule GeoSQL.Common do
 
   @spec line_merge(Geo.Geometry.t(), directed? :: boolean, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro line_merge(geometryA, directed? \\ false, repo \\ nil) do
     if directed? and RepoUtils.adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_LineMerge(?,?,true)", unquote(geometryA))
@@ -344,12 +385,14 @@ defmodule GeoSQL.Common do
   end
 
   @spec locate_along(Geo.Geometry.t(), measure :: number) :: GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro locate_along(geometry, measure) when is_number(measure) do
     quote do: fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
   end
 
   @spec locate_between(Geo.Geometry.t(), measure_start :: number, measure_end :: number) ::
           GeoSQL.fragment()
+  @doc group: "Linear Referencing"
   defmacro locate_between(geometry, measure_start, measure_end)
            when is_number(measure_start) and is_number(measure_end) do
     quote do
@@ -362,10 +405,12 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Geometry Validation"
   defmacro make_valid(geometry) do
     quote do: fragment("ST_MakeValid(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Constructors"
   defmacro make_point(x, y, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -376,6 +421,7 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Geometry Constructors"
   defmacro make_point(x, y, z, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -386,6 +432,7 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Geometry Constructors"
   defmacro make_point(x, y, z, m, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -417,6 +464,7 @@ defmodule GeoSQL.Common do
 
   @spec min_coord(Geo.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
   defmacro min_coord(geometry, :x, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_MinX(?)", unquote(geometry))
@@ -440,6 +488,7 @@ defmodule GeoSQL.Common do
 
   @spec max_coord(Geo.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
   defmacro max_coord(geometry, :x, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_XMax(?)", unquote(geometry))
@@ -461,11 +510,13 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Measurement"
   defmacro max_distance(geometryA, geometryB) do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
   @spec maximum_inscribed_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro maximum_inscribed_circle(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -477,6 +528,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec minimum_bounding_circle(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro minimum_bounding_circle(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -488,6 +540,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec minimum_bounding_radius(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro minimum_bounding_radius(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -498,6 +551,7 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Measurement"
   defmacro minimum_clearance(geometry, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_MinimumClearance(?)", unquote(geometry))
@@ -505,6 +559,7 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Measurement"
   defmacro minimum_clearance_line(geometry, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
@@ -515,26 +570,32 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Overlays"
   defmacro node(geometry) do
     quote do: fragment("ST_Node(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Processing"
   defmacro oriented_envelope(geometry) do
     quote do: fragment("ST_OrientedEnvelope(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Processing"
   defmacro offset_curve(line, distance) when is_number(distance) do
     quote do: fragment("ST_OffsetCurve(?,?)", unquote(line), unquote(distance))
   end
 
+  @doc group: "Geometry Processing"
   defmacro polygonize(geometry) do
     quote do: fragment("ST_Polygonize(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Processing"
   defmacro reduce_precision(geometry, grid_size) when is_number(grid_size) do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
   end
 
+  @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
       degrees_per_radian = 57.2958
@@ -547,6 +608,7 @@ defmodule GeoSQL.Common do
 
   @spec scale(Geo.Geometry.t(), scale_x :: number, scale_y :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_x, scale_y, repo \\ nil)
            when is_number(scale_x) and is_number(scale_y) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
@@ -563,10 +625,12 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Geometry Processing"
   defmacro shared_paths(geometryA, geometryB) do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Geometry Mutations"
   @spec shift_longitude(Geo.Geometry.t(), Ecto.Repo.t()) :: GeoSQL.fragment()
   defmacro shift_longitude(geometry, repo) do
     case RepoUtils.adapter(repo) do
@@ -582,6 +646,7 @@ defmodule GeoSQL.Common do
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
+  @doc group: "Measurement"
   defmacro shortest_line(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
     if use_spheroid? and RepoUtils.adapter(repo) == Ecto.Adapters.Postgres do
       quote do: fragment("ST_ShortestLine(?,?,true)", unquote(geometryA), unquote(geometryB))
@@ -590,22 +655,27 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Geometry Processing"
   defmacro simplify(geometry, tolerance) when is_number(tolerance) do
     quote do: fragment("ST_Simplify(?, ?)", unquote(geometry), unquote(tolerance))
   end
 
+  @doc group: "Geometry Processing"
   defmacro simplify_preserve_topology(geometry, tolerance) when is_number(tolerance) do
     quote do: fragment("ST_SimplifyPreserveTopology(?, ?)", unquote(geometry), unquote(tolerance))
   end
 
+  @doc group: "Overlays"
   defmacro split(inputGeometry, bladeGeometry) do
     quote do: fragment("ST_Split(?, ?)", unquote(inputGeometry), unquote(bladeGeometry))
   end
 
+  @doc group: "Overlays"
   defmacro subdivide(geometry, max_vertices \\ 256) do
     quote do: fragment("ST_Subdivide(?, ?)", unquote(geometry), unquote(max_vertices))
   end
 
+  @doc group: "Affine Transformations"
   defmacro translate(geometry, delta_x, delta_y, delta_z \\ 0) do
     quote do
       fragment(
@@ -619,6 +689,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec triangulate_polygon(Geo.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Processing"
   defmacro triangulate_polygon(geometry, repo \\ nil) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
       quote do: fragment("ConstrainedDelaunayTriangulation(?)", unquote(geometry))
@@ -627,6 +698,7 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @doc group: "Overlays"
   defmacro unary_union(geometry) do
     quote do: fragment("ST_UnaryUnion(?, ?)", unquote(geometry))
   end

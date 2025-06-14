@@ -29,6 +29,7 @@ defmodule GeoSQL.PostGIS do
           y_offset :: number,
           z_offset :: number
         ) :: GeoSQL.fragment()
+  @doc group: "Affine Transformations"
   defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
     quote do
       fragment(
@@ -50,6 +51,7 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @doc group: "Affine Transformations"
   @spec affine(
           Geo.Geometry.t(),
           a :: number,

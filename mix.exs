@@ -56,9 +56,9 @@ defmodule GeoSQL.Mixfile do
       source_ref: "v#{@version}",
       formatters: ["html"],
       groups_for_modules: [
-        "SQL MM Standard": [~r/GeoSQL.MM[23].*/],
-        "Common Non-Standard": [~r/GeoSQL.Common.*/],
-        "PostGIS-Specific": [~r/GeoSQL.PostGIS.*/]
+        Standard: [~r/GeoSQL.MM[23].*/],
+        "Non-Standard": [~r/GeoSQL.Common.*/],
+        "PostGIS Only": [~r/GeoSQL.PostGIS.*/]
       ]
     ]
   end

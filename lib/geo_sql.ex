@@ -15,17 +15,38 @@ defmodule GeoSQL do
 
   @type fragment :: term
   @type geometry_input :: GeoSQL.Geometry.t() | fragment
+  @type init_option :: {:json, atom} | {:decode_binary, :copy | :reference}
+  @type init_options :: [init_option]
 
-  def init(repo) when is_atom(repo) do
+  @spec init(Ecto.Repo.t(), init_options) :: :ok
+  def init(repo, opts \\ [json: Jason, decode_binary: :copy]) when is_atom(repo) do
     repo.__adapter__()
-    |> init_spatial_capabilities(repo)
+    |> register_types(opts)
+    |> init_spatial_capabilities(repo, opts)
+
+    :ok
   end
 
-  defp init_spatial_capabilities(Ecto.Adapters.SQLite3, repo) do
+  defp init_spatial_capabilities(Ecto.Adapters.SQLite3 = adapter, repo, _opts) do
     apply(Ecto.Adapters.SQLite3, :query, [repo, "SELECT InitSpatialMetadata()"])
+    adapter
   end
 
-  defp init_spatial_capabilities(_, _repo) do
-    {:ok, :none}
+  defp init_spatial_capabilities(adapter, _repo, _opts) do
+    adapter
   end
+
+  defp register_types(Ecto.Adapters.Postgres = adapter, opts) do
+    if not Code.ensure_loaded?(GeoSQL.PostgrexTypes) do
+      Postgrex.Types.define(
+        GeoSQL.PostgrexTypes,
+        [GeoSQL.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
+        opts
+      )
+    end
+
+    adapter
+  end
+
+  defp register_types(adapter, _opts), do: adapter
 end

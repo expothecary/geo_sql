@@ -1,5 +1,7 @@
 defmodule GeoSQL.Geometry do
-  @moduledoc false
+  @moduledoc """
+  Geometry types for use with Ecto.
+  """
 
   alias Geo.{
     Point,

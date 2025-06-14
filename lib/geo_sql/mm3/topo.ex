@@ -1,9 +1,12 @@
 defmodule GeoSQL.MM3.Topo do
   @moduledoc """
-  SQL/MM3 Topological functions prefixed with `ST_` in the standard which can be used in ecto queries.
+  SQL/MM3 Topological functions which can be applied to a toplogy object.
 
-  This may require additional dependencies and configuration in the GIS store. For example,
-  PostGIS requires the SFCGAL backend for some of these functions.
+  Topology functions which operate on geometries that are passed into them rather than a
+  topology object are found in the `GeoSQL.MM3` module.
+
+  These function may also require additional dependencies and configuration in the GIS store.
+  For example, PostGIS requires the SFCGAL backend for some of these functions.
   """
 
   @doc group: "Editors"

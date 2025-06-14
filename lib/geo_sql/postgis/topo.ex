@@ -1,29 +1,26 @@
 defmodule GeoSQL.PostGIS.Topo do
-  @spec contains_properly(
-          GeoSQL.geometry_input(),
-          GeoSQL.geometry_input(),
-          use_indexes? :: :with_indexes | :without_indexes
-        ) :: GeoSQL.fragment()
-  @doc group: "Relationships"
-  defmacro contains_properly(geometryA, geometryB, use_indexes? \\ :with_indexes)
+  @moduledoc """
+  Topological functions implemented in PostGIS which can be applied to a toplogy object.
 
-  defmacro contains_properly(geometryA, geometryB, :with_indexes) do
-    quote do: fragment("ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
-  end
+  Topology functions which operate on geometries that are passed into them rather than a
+  topology object are found in the `GeoSQL.PostGIS` module.
+  """
 
-  defmacro contains_properly(geometryA, geometryB, :without_indexes) do
-    quote do: fragment("_ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
-  end
-
-  @spec line_crossing_direction(
-          linestringA :: Geo.LineString.t() | GeoSQL.fragment(),
-          linestringB :: Geo.LineString.t() | GeoSQL.fragment()
+  @spec get_face_containing_point(
+          topology :: String.t(),
+          topology_name :: String.t(),
+          point :: GeoSQL.geometry_input()
         ) ::
           GeoSQL.fragment()
-  @doc group: "Relationships"
-  defmacro line_crossing_direction(linestringA, linestringB) do
+  @doc group: "Accessors"
+  defmacro get_face_containing_point(object, topology_name, point) do
     quote do
-      fragment("ST_LineCrossingDirection(?, ?)", unquote(linestringA), unquote(linestringB))
+      fragment(
+        "?.GetFaceeContainingPoint(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(point)
+      )
     end
   end
 end

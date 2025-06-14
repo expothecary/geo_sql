@@ -64,7 +64,12 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
-  @spec closest_point(GeoSQL.geometry_input(), GeoSQL.geometry_input(), use_spheroid? :: boolean, Ecto.Repo.t()) ::
+  @spec closest_point(
+          GeoSQL.geometry_input(),
+          GeoSQL.geometry_input(),
+          use_spheroid? :: boolean,
+          Ecto.Repo.t()
+        ) ::
           GeoSQL.fragment()
   @doc group: "Measurement"
   defmacro closest_point(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
@@ -208,7 +213,11 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec line_interpolate_point(line :: GeoSQL.geometry_input(), fraction :: number, Ecto.Repo.t() | nil) ::
+  @spec line_interpolate_point(
+          line :: GeoSQL.geometry_input(),
+          fraction :: number,
+          Ecto.Repo.t() | nil
+        ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro line_interpolate_point(line, fraction, repo) when is_fraction(fraction) do
@@ -247,7 +256,11 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec line_interpolate_points(line :: GeoSQL.geometry_input(), fraction :: number, Ecto.Repo.t() | nil) ::
+  @spec line_interpolate_points(
+          line :: GeoSQL.geometry_input(),
+          fraction :: number,
+          Ecto.Repo.t() | nil
+        ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro line_interpolate_points(line, fraction, repo) when is_fraction(fraction) do
@@ -515,7 +528,8 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec maximum_inscribed_circle(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec maximum_inscribed_circle(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro maximum_inscribed_circle(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -588,6 +602,11 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Processing"
   defmacro polygonize(geometry) do
     quote do: fragment("ST_Polygonize(?)", unquote(geometry))
+  end
+
+  @doc group: "Topology Relationships"
+  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
+    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
   @doc group: "Geometry Processing"

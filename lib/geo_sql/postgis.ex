@@ -81,6 +81,22 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Angle(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @spec contains_properly(
+          GeoSQL.geometry_input(),
+          GeoSQL.geometry_input(),
+          use_indexes? :: :with_indexes | :without_indexes
+        ) :: GeoSQL.fragment()
+  @doc group: "Topology Relationships"
+  defmacro contains_properly(geometryA, geometryB, use_indexes? \\ :with_indexes)
+
+  defmacro contains_properly(geometryA, geometryB, :with_indexes) do
+    quote do: fragment("ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro contains_properly(geometryA, geometryB, :without_indexes) do
+    quote do: fragment("_ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
   @doc group: "Measurement"
   defmacro distance_sphere(geometryA, geometryB) do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
@@ -134,6 +150,18 @@ defmodule GeoSQL.PostGIS do
         unquote(npoints),
         unquote(seed)
       )
+    end
+  end
+
+  @spec line_crossing_direction(
+          linestringA :: Geo.LineString.t() | GeoSQL.fragment(),
+          linestringB :: Geo.LineString.t() | GeoSQL.fragment()
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Topology Relationships"
+  defmacro line_crossing_direction(linestringA, linestringB) do
+    quote do
+      fragment("ST_LineCrossingDirection(?, ?)", unquote(linestringA), unquote(linestringB))
     end
   end
 
@@ -234,6 +262,7 @@ defmodule GeoSQL.PostGIS do
   defmacro rotate_z(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
+
   @spec scale(GeoSQL.geometry_input(), scale :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
 
   @doc group: "Affine Transformations"
@@ -241,7 +270,11 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Scale(?,?)", unquote(geometry), unquote(scale_by))
   end
 
-  @spec scale(GeoSQL.geometry_input(), scale :: GeoSQL.geometry_input(), origin :: GeoSQL.geometry_input()) ::
+  @spec scale(
+          GeoSQL.geometry_input(),
+          scale :: GeoSQL.geometry_input(),
+          origin :: GeoSQL.geometry_input()
+        ) ::
           GeoSQL.fragment()
   @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_by, origin) do

@@ -1,19 +1,45 @@
 defmodule GeoSQL.Common.Topo do
-  @moduledoc "Non-standard but commonly implemented topology functions"
+  @moduledoc """
+  Non-standard but commonly implement Topological functions which can be applied to a toplogy object.
 
-  @doc group: "Relationships"
-  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
-    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
-  end
+  Topology functions which operate on geometries that are passed into them rather than a
+  topology object are found in the `GeoSQL.Common` module.
+  """
 
-  @spec get_edge_by_point(topology :: String.t(), point :: GeoSQL.geometry_input(), tolerance :: number) ::
+  @spec get_edge_by_point(
+          topology :: String.t(),
+          topology_name :: String.t(),
+          point :: GeoSQL.geometry_input(),
+          tolerance :: number
+        ) ::
           GeoSQL.fragment()
   @doc group: "Accessors"
-  defmacro get_edge_by_point(topology, point, tolerance) do
+  defmacro get_edge_by_point(object, topology_name, point, tolerance) do
     quote do
       fragment(
-        "?.ST_GetFaceEdges(?, ?)",
-        unquote(topology),
+        "?.GetEdgeByPoint(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(point),
+        unquote(tolerance)
+      )
+    end
+  end
+
+  @spec get_face_by_point(
+          topology :: String.t(),
+          topology_name :: String.t(),
+          point :: GeoSQL.geometry_input(),
+          tolerance :: number
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Accessors"
+  defmacro get_face_by_point(object, topology_name, point, tolerance) do
+    quote do
+      fragment(
+        "?.GetFaceeByPoint(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
         unquote(point),
         unquote(tolerance)
       )

@@ -1,4 +1,5 @@
 defmodule GeoSQL.RepoUtils do
+  @moduledoc false
   @default_adapter Ecto.Adapters.Postgres
 
   defmacro adapter(nil) do

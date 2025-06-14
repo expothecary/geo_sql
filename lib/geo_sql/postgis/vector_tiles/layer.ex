@@ -16,8 +16,10 @@ defmodule GeoSQL.PostGIS.VectorTiles.Layer do
           source: String.t(),
           prefix: String.t() | nil,
           columns: columns_definition,
+          srid: number,
           compose_query_fn: (Ecto.Query.t() -> Ecto.Query.t())
         }
 
+  @doc false
   def identity_composer(query), do: query
 end

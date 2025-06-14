@@ -8,6 +8,7 @@ defmodule GeoSQL.Test.PostGIS.Helper do
     #
     # A globally shared repo is problematic due to not wanting to polute the main library
     # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
+
     repo_name = String.to_atom(to_string(context.module) <> "Repo")
     repo_spec = GeoSQL.Test.PostGIS.Repo.child_spec(name: repo_name) |> Map.put(:id, repo_name)
     pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
@@ -15,6 +16,7 @@ defmodule GeoSQL.Test.PostGIS.Helper do
     # Set the dynamic repo name within the parent test suite process to that any setup functions
     # in the test suite itself have access to the repo
     GeoSQL.Test.PostGIS.Repo.put_dynamic_repo(repo_name)
+    GeoSQL.init(GeoSQL.Test.PostGIS.Repo, json: Jason, decode_binary: :reference)
 
     # Add the repo pid and name into the context so that tests can access it
     [repo: pid, repo_name: repo_name]
@@ -41,6 +43,7 @@ defmodule GeoSQL.Test.PostGIS.Helper do
         # Get a repo pid for ourselves here, via the repository that was started in setup_all
         pid = Ecto.Adapters.SQL.Sandbox.start_owner!(context.repo, shared: not context[:async])
 
+        GeoSQL.init(GeoSQL.Test.PostGIS.Repo, json: Jason, decode_binary: :reference)
         # Register an on_exit handler that stops that pid
         on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
         :ok

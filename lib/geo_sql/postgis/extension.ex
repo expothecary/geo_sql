@@ -13,28 +13,14 @@ defmodule GeoSQL.PostGIS.Extension do
       Postgrex.Types.define(MyApp.PostgresTypes,
                     [GeoSQL.Extension] ++ Ecto.Adapters.Postgres.extensions())
 
-      opts = [hostname: "localhost", username: "postgres", database: "geo_postgrex_test",
-      types: MyApp.PostgresTypes ]
+  By default, the extension works on a copy of the binary data received. By passing
+  `decode_binary: :reference` as an option, it will instead not copy the binary that is used to
+  populate the types. While faster, this can have side-effects such as large binaries
+  remaining in memory due to ref-counting for longer than one might way. As such, it
+  is recommended to change this option only after testing.
 
-      [hostname: "localhost", username: "postgres", database: "geo_postgrex_test",
-        types: MyApp.PostgresTypes]
-
-      {:ok, pid} = Postgrex.Connection.start_link(opts)
-      {:ok, #PID<0.115.0>}
-
-      geo = %Geo.Point{coordinates: {30, -90}, srid: 4326}
-      %Geo.Point{coordinates: {30, -90}, srid: 4326}
-
-      {:ok, _} = Postgrex.Connection.query(pid, "CREATE TABLE point_test (id int, geom geometry(Point, 4326))")
-      {:ok, %Postgrex.Result{columns: nil, command: :create_table, num_rows: 0, rows: nil}}
-
-      {:ok, _} = Postgrex.Connection.query(pid, "INSERT INTO point_test VALUES ($1, $2)", [42, geo])
-      {:ok, %Postgrex.Result{columns: nil, command: :insert, num_rows: 1, rows: nil}}
-
-      Postgrex.Connection.query(pid, "SELECT * FROM point_test")
-      {:ok, %Postgrex.Result{columns: ["id", "geom"], command: :select, num_rows: 1,
-      rows: [{42, %Geo.Point{coordinates: {30.0, -90.0}, srid: 4326}}]}}
-
+  Normally one does not need to add the types directly, as type registration is handled
+  automatically by `GeoSQL.init/1`.
   """
 
   @behaviour Postgrex.Extension

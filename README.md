@@ -7,17 +7,22 @@ non-standard functions that are found in commonly used GIS-enabled databases,
 implementation-specific functions found in specific backends, as well as high-
 level functions for features such as generating Mapbox vector tiles.
 
-The over-all goals of this library are:
+The goals of this library are:
 
+ * Ease of use: it should be clear how to get started and moving.
  * Support a variety of GIS extensions that are available via Eto, including
    PostGIS and SpatialLite.
  * Provide extensive support for GIS SQL functions available, not only those which
    are commonly used.
  * Separate functions into modules by their availability and standards compliance to
    make it easy to only use functions available in the backend being targetted
- * Provide out-of-the-box support for common use cases, not just individual SQL
-   functions, for great ease-of-use and sharing of best practies. Vector map tile
-   generation is a good example of this.
+ * Provide out-of-the-box support for high-level use cases, not just individual SQL
+   functions. Vector map tile generation is a good example of this.
+
+Non-goals include:
+
+ * Having the fewest possible dependencies. Ecto adapters are pulled in as necessary,
+   along with other dependencies such as `Jason` needed to make use easy.
 
 ## Usage
 
@@ -28,16 +33,36 @@ it to your project by adding the following to the `deps` section in `mix.exs`:
   {:geo_sql, github: "aseigo/geo_sql"}
   ```
 
-Once added to your project, an `Ecto.Repo` can be readied for use by calling:
+### `GeoSQL.init/1`
+Once added to your project, an `Ecto.Repo` can be readied for use by calling
+`GeoSQL.init/1`:
 
-  ```elixir
+  ```
   GeoSQL.init(MyApp.Repo)
   ```
 
-While for some databases this is essentially a no-op, it does ensure that any
-runtime setup requirements are handled regardless of the backend being used.
+once the repository has been started (usually under a supervisor such as in
+`MyApp.Application`). If migrations are failing, place a `GeoSQL.init/1` call
+in the top-level of the file the Repo is defined in:
 
-From that point, the wide array of macros can be used with `Ecto` queries:
+  ```
+  defmodule MyApp.Repo do
+    use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.Postgres
+  end
+
+  # For the migrations.
+  GeoSQL.init(MyApp.Repo)
+  ```
+
+This will ensure that any special types are defined and registered, though it
+will still need to be called after the repo has been started.
+
+Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` should be
+called after the call to `Repo.put_dynamic_repo/1` has completed.
+
+### Macro usage
+
+Once initialized, the wide array of macros can be used with `Ecto` queries:
 
   ```elixir
   from(location in Location, select: Common.extent(location.geom, MyApp.Repo))

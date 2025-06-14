@@ -33,12 +33,28 @@ it to your project by adding the following to the `deps` section in `mix.exs`:
   {:geo_sql, github: "aseigo/geo_sql"}
   ```
 
-### `GeoSQL.init/1`
-Once added to your project, an `Ecto.Repo` can be readied for use by calling
-`GeoSQL.init/1`:
+Run the usual `mix deps.get`!
 
-  ```
-  GeoSQL.init(MyApp.Repo)
+### Readying the Repo with `GeoSQL.init/1`
+
+Once added to your project, an `Ecto.Repo` can be readied for use by calling
+`GeoSQL.init/1`. This can be done once the repo has been started by implementing
+the `Ecto.Repo.init/2` callback like this:
+
+  ```elixir
+  defmodule MyApp.Repo do
+    use Ecto.Repo,
+      otp_app: :my_app,
+      adapter: Ecto.Adapters.Postgres
+
+    @impl true
+    def init(:supervisor, config) do
+      GeoSQL.init(__MODULE__, json: Jason)
+      {:ok, config}
+    end
+
+    def init(:runtime, config), do: {:ok, config}
+  end
   ```
 
 once the repository has been started (usually under a supervisor such as in
@@ -57,7 +73,7 @@ in the top-level of the file the Repo is defined in:
 This will ensure that any special types are defined and registered, though it
 will still need to be called after the repo has been started.
 
-Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` should be
+Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` can be
 called after the call to `Repo.put_dynamic_repo/1` has completed.
 
 ### Macro usage

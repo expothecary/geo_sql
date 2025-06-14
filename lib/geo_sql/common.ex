@@ -13,6 +13,7 @@ defmodule GeoSQL.Common do
     quote do
       require GeoSQL.Common
       require GeoSQL.Common.ThreeD
+      require GeoSQL.Common.Topo
       alias GeoSQL.Common
     end
   end

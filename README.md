@@ -2,21 +2,155 @@
 
 This library provides access to geometry and geography-related SQL functions.
 
-This includes the entire suite of SQL/MM spatial functions as well as
-non-standard functions that are found in commonly used GIS-enabled databases.
+This includes the entire suite of SQL/MM spatial functions,
+non-standard functions that are found in commonly used GIS-enabled databases,
+implementation-specific functions found in specific backends, as well as high-
+level functions for features such as generating Mapbox vector tiles.
 
-Implementation-specific functions are collected in modules, such as the
-`GeoSQL.PostGIS` module.
+The over-all goals of this library are:
 
-## Use
+ * Support a variety of GIS extensions that are available via Eto, including
+   PostGIS and SpatialLite.
+ * Provide extensive support for GIS SQL functions available, not only those which
+   are commonly used.
+ * Separate functions into modules by their availability and standards compliance to
+   make it easy to only use functions available in the backend being targetted
+ * Provide out-of-the-box support for common use cases, not just individual SQL
+   functions, for great ease-of-use and sharing of best practies. Vector map tile
+   generation is a good example of this.
+
+## Usage
 
 This library is currently not available on `hex.pm`. Until it is, you may add
 it to your project by adding the following to the `deps` section in `mix.exs`:
 
-  `{:geo_sql, github: "aseigo/geo_sql"}`
+  ```
+  {:geo_sql, github: "aseigo/geo_sql"}
+  ```
 
-Documentation is in progress as well, though generally available as standard
-module docs which can be generated locally with `mix docs`.
+Once added to your project, an `Ecto.Repo` can be readied for use by calling:
+
+  ```elixir
+  GeoSQL.init(MyApp.Repo)
+  ```
+
+While for some databases this is essentially a no-op, it does ensure that any
+runtime setup requirements are handled regardless of the backend being used.
+
+From that point, the wide array of macros can be used with `Ecto` queries:
+
+  ```elixir
+  from(location in Location, select: Common.extent(location.geom, MyApp.Repo))
+  ```
+
+Some macros, such as `GeoSQL.Common.extent`, take an optional `Ecto.Repo` parameter.
+This allows those macros to generate the correct SQL statements for the backend being used.
+
+`GeoSQL` macros can also be freely composted and used together, such as this query which
+uses a number of standard and Postgis-specific features together:
+
+  ```elixir
+  from(g in layer.source,
+    prefix: ^layer.prefix,
+    where:
+      bbox_intersects?(
+        field(g, ^columns.geometry),
+        MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
+      ),
+    select: %{
+      name: ^layer.name,
+      geom:
+        as_mvt_geom(
+          field(g, ^columns.geometry),
+          MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
+        ),
+      id: field(g, ^columns.id),
+      tags: field(g, ^columns.tags)
+    }
+  )
+  ```
+
+Full documentation can be generated locally with `mix docs`.
+
+### Module organization
+
+Features are organized into modules by their availability and topic.
+
+The v2 and v3 sets of standard SQL/MM functions for geospatial applications are found
+in the `GeoSQL.MM2` and `GeoSQL.MM3` modules. Non-standardized but
+commonly implemented functions are found in the `GeoSQL.Common` namespace, while
+implementation-specific fuctions are found in namespaces indicating the target
+database (e.g. `GeoSQL.PostGIS`).
+
+Topological and 3D functions are found in `Topo` and `ThreeD` modules within this
+hierarchy, as they less-used and/or have very similar names to more commonly used
+SQL functions.
+
+This helps make it clear what features your code relies on, allowing
+one to audit feature usage for compability and avoid incompatible use
+in the first place.
+
+For example, if you using an older version of `PostGIS`, you may want to stick with only the
+functions in the `GeoSQL.MM2` modules as the `GeoSQL.MM3` standard functions were
+only implemented in later versions. Similarly, if targeting both `SpatialLite` and
+`PostGIS`, the code should only use the standard features plus those in the `GeoSQL.Common`
+modules.
+
+To make this even easier, each of the top-level modules supports the `use` syntax which
+pulls in their suite of features and introduces helpful aliases with one line in your code:
+
+  ```elixir
+  use GeoSQL.MM2
+  use GeoSQL.MM3
+
+  def query() do
+    from(
+      features in MyApp.FeatureLayer,
+      select: %{
+        area_2d: MM2.area(features.geometry),
+        area_3d: MM3.ThreeD.area(features.geometry)
+      }
+    )
+  end
+
+  ```
+
+### Mapbox Vector Tiles
+
+`GeoSQL` can generate vector tiles using the Mapbox encoding directly from PostGIS databases.
+It works with any table that has an id column, a column with geometry information, and a set of
+tagged information such as names. The tag information is usually fetch as (or from) a `jsonb` data.
+
+The `PostGIS.VectorTiles.generate/5` function takes a layer definition in the form of a list of
+`PostGIS.VectorTiles.Layer` structs along with the tile coordinates and an `Ecto.Repo`:
+
+  ```elixir
+    use GeoSQL.PostGIS
+
+    def tile(zoom, x, y) do
+      layers = [
+        %PostGIS.VectorTiles.Layer{
+          name: "pois",
+          source: "nodes",
+          columns: %{geometry: :geom, id: :node_id, tags: :tags}
+        },
+        %PostGIS.VectorTiles.Layer{
+          name: "buildings",
+          source: "buildings",
+          columns: %{geometry: :footprint, id: :id, tags: :tags}
+        }
+      ]
+
+
+      PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y, layers)
+    end
+  ```
+
+The resulting data can be loaded directly into map renderers such as `MapLibre` or `OpenLayers`
+with the `MVT` vector tile layer format.
+
+Database prefixes ("schemas" in PostgreSQL) are also supported both on the whole tile query
+as well as per-layer.
 
 ## Building
 
@@ -28,7 +162,7 @@ To build and interact with the library locally:
     mix compile
     iex -S mix
 
-    
+
 ## Unit Tests
 
 Unit tests currently assume a working PostGIS installation is available locally.
@@ -60,7 +194,7 @@ library.
 
 Unfortunately, `geo-postgis` is both PostGIS-specific (as the name correctly
 implies), supports functions found in older versions (e.g. pre v3), and is incomplete
-in coverage of GIS functions. 
+in coverage of GIS functions.
 
 This library therefore came into being to scratch the author's itch of a similar
 library that has a bit less legacy baggage, can also be used with other databases such

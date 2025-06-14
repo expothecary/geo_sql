@@ -17,7 +17,9 @@ The goals of this library are:
  * Separate functions into modules by their availability and standards compliance to
    make it easy to only use functions available in the backend being targetted
  * Provide out-of-the-box support for high-level use cases, not just individual SQL
-   functions. Vector map tile generation is a good example of this.
+   functions. Mapbox vector tile generation is a good example: one call to
+   `GeoSQL.PostGIS.VectorTiles.generate/6` is enough to retrieve complete vector tiles
+   based on any table in the database that has a geometry field.
 
 Non-goals include:
 

@@ -45,9 +45,7 @@ defmodule GeoSQL.PostGIS.Extension do
     Geo.PolygonZ
   ]
 
-  def init(opts) do
-    Keyword.get(opts, :decode_copy, :copy)
-  end
+  def init(_opts), do: nil
 
   def matching(_) do
     [type: "geometry", type: "geography"]
@@ -65,17 +63,10 @@ defmodule GeoSQL.PostGIS.Extension do
     end
   end
 
-  def decode(:reference) do
+  def decode(_opts) do
     quote location: :keep do
       <<len::integer-size(32), wkb::binary-size(len)>> ->
         Geo.WKB.decode!(wkb)
-    end
-  end
-
-  def decode(:copy) do
-    quote location: :keep do
-      <<len::integer-size(32), wkb::binary-size(len)>> ->
-        Geo.WKB.decode!(:binary.copy(wkb))
     end
   end
 end

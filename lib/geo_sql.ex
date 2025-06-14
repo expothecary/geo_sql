@@ -20,7 +20,7 @@ defmodule GeoSQL do
   @spec init(Ecto.Repo.t(), init_options) :: :ok
   def init(repo, opts \\ [json: Jason, decode_binary: :copy]) when is_atom(repo) do
     repo.__adapter__()
-    |> register_types(opts)
+    |> register_types(repo, opts)
     |> init_spatial_capabilities(repo, opts)
 
     :ok
@@ -35,10 +35,13 @@ defmodule GeoSQL do
     adapter
   end
 
-  defp register_types(Ecto.Adapters.Postgres = adapter, opts) do
-    if not Code.ensure_loaded?(GeoSQL.PostgrexTypes) do
+  defp register_types(Ecto.Adapters.Postgres = adapter, repo, opts) do
+    [app | _] = Module.split(repo)
+    types_module = Module.concat(app, PostgrexTypes)
+
+    if not Code.ensure_loaded?(types_module) do
       Postgrex.Types.define(
-        GeoSQL.PostgrexTypes,
+        types_module,
         [GeoSQL.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
         opts
       )
@@ -47,7 +50,7 @@ defmodule GeoSQL do
     adapter
   end
 
-  defp register_types(adapter, _opts), do: adapter
+  defp register_types(adapter, _repo, _opts), do: adapter
 
   defp run_query(repo, sql) do
     try do

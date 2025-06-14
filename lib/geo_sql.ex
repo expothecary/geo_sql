@@ -14,6 +14,7 @@ defmodule GeoSQL do
   """
 
   @type fragment :: term
+  @type geometry_input :: GeoSQL.Geometry.t() | fragment
 
   def init(repo) when is_atom(repo) do
     repo.__adapter__()

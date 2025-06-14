@@ -42,7 +42,7 @@ defmodule GeoSQL.Common do
   defguard is_fraction(value) when is_number(value) and value >= 0 and value <= 1
 
   @spec add_measure(
-          line :: GeoSQL.Geometry.t(),
+          line :: GeoSQL.geometry_input(),
           measure_start :: number,
           measure_end :: number
         ) ::
@@ -64,7 +64,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
-  @spec closest_point(GeoSQL.Geometry.t(), GeoSQL.Geometry.t(), use_spheroid? :: boolean, Ecto.Repo.t()) ::
+  @spec closest_point(GeoSQL.geometry_input(), GeoSQL.geometry_input(), use_spheroid? :: boolean, Ecto.Repo.t()) ::
           GeoSQL.fragment()
   @doc group: "Measurement"
   defmacro closest_point(geometryA, geometryB, use_spheroid? \\ false, repo \\ nil) do
@@ -75,7 +75,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec concave_hull(GeoSQL.Geometry.t(), precision :: number(), allow_holes? :: boolean) ::
+  @spec concave_hull(GeoSQL.geometry_input(), precision :: number(), allow_holes? :: boolean) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
@@ -160,13 +160,13 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec expand(GeoSQL.Geometry.t(), units_to_expand :: number) :: Exto.Query.fragment()
+  @spec expand(GeoSQL.geometry_input(), units_to_expand :: number) :: Exto.Query.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, units_to_expand) do
     quote do: fragment("ST_Expand(?,?)", unquote(geometry), unquote(units_to_expand))
   end
 
-  @spec extent(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec extent(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro extent(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -175,7 +175,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec flip_coordinates(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec flip_coordinates(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Mutations"
   defmacro flip_coordinates(geometry, repo) do
     case RepoUtils.adapter(repo) do
@@ -185,8 +185,8 @@ defmodule GeoSQL.Common do
   end
 
   @spec interpolate_point(
-          line :: GeoSQL.Geometry.t(),
-          point :: GeoSQL.Geometry.t()
+          line :: GeoSQL.geometry_input(),
+          point :: GeoSQL.geometry_input()
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
@@ -194,7 +194,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_InterpolatePoint(?,?)", unquote(line), unquote(point))
   end
 
-  @spec largest_empty_circle(GeoSQL.Geometry.t(), tolerance :: number(), Ecto.Repo.t() | nil) ::
+  @spec largest_empty_circle(GeoSQL.geometry_input(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
@@ -208,7 +208,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec line_interpolate_point(line :: GeoSQL.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
+  @spec line_interpolate_point(line :: GeoSQL.geometry_input(), fraction :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro line_interpolate_point(line, fraction, repo) when is_fraction(fraction) do
@@ -222,7 +222,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec line_interpolate_point(
-          line :: GeoSQL.Geometry.t(),
+          line :: GeoSQL.geometry_input(),
           fraction :: number,
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
@@ -247,7 +247,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec line_interpolate_points(line :: GeoSQL.Geometry.t(), fraction :: number, Ecto.Repo.t() | nil) ::
+  @spec line_interpolate_points(line :: GeoSQL.geometry_input(), fraction :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro line_interpolate_points(line, fraction, repo) when is_fraction(fraction) do
@@ -267,7 +267,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec line_interpolate_points(
-          line :: GeoSQL.Geometry.t(),
+          line :: GeoSQL.geometry_input(),
           fraction :: number,
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
@@ -299,8 +299,8 @@ defmodule GeoSQL.Common do
   end
 
   @spec line_locate_point(
-          line :: GeoSQL.Geometry.t(),
-          point :: GeoSQL.Geometry.t(),
+          line :: GeoSQL.geometry_input(),
+          point :: GeoSQL.geometry_input(),
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
@@ -316,8 +316,8 @@ defmodule GeoSQL.Common do
   end
 
   @spec line_locate_point(
-          line :: GeoSQL.Geometry.t(),
-          point :: GeoSQL.Geometry.t(),
+          line :: GeoSQL.geometry_input(),
+          point :: GeoSQL.geometry_input(),
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
@@ -341,7 +341,7 @@ defmodule GeoSQL.Common do
   end
 
   @spec line_substring(
-          line :: GeoSQL.Geometry.t() | GeoSQL.fragment(),
+          line :: GeoSQL.geometry_input() | GeoSQL.fragment(),
           start_fraction :: number,
           end_fraction :: number,
           Ecto.Repo.t() | nil
@@ -373,7 +373,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec line_merge(GeoSQL.Geometry.t(), directed? :: boolean, Ecto.Repo.t() | nil) ::
+  @spec line_merge(GeoSQL.geometry_input(), directed? :: boolean, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro line_merge(geometryA, directed? \\ false, repo \\ nil) do
@@ -384,13 +384,13 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec locate_along(GeoSQL.Geometry.t(), measure :: number) :: GeoSQL.fragment()
+  @spec locate_along(GeoSQL.geometry_input(), measure :: number) :: GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro locate_along(geometry, measure) when is_number(measure) do
     quote do: fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
   end
 
-  @spec locate_between(GeoSQL.Geometry.t(), measure_start :: number, measure_end :: number) ::
+  @spec locate_between(GeoSQL.geometry_input(), measure_start :: number, measure_end :: number) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
   defmacro locate_between(geometry, measure_start, measure_end)
@@ -462,7 +462,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec min_coord(GeoSQL.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
+  @spec min_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro min_coord(geometry, :x, repo) do
@@ -486,7 +486,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec max_coord(GeoSQL.Geometry.t(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
+  @spec max_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro max_coord(geometry, :x, repo) do
@@ -515,7 +515,7 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_MaxDistance(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec maximum_inscribed_circle(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec maximum_inscribed_circle(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro maximum_inscribed_circle(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -527,7 +527,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec minimum_bounding_circle(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec minimum_bounding_circle(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro minimum_bounding_circle(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -539,7 +539,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec minimum_bounding_radius(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec minimum_bounding_radius(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro minimum_bounding_radius(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -606,7 +606,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec scale(GeoSQL.Geometry.t(), scale_x :: number, scale_y :: number, Ecto.Repo.t() | nil) ::
+  @spec scale(GeoSQL.geometry_input(), scale_x :: number, scale_y :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Affine Transformations"
   defmacro scale(geometry, scale_x, scale_y, repo \\ nil)
@@ -631,7 +631,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Geometry Mutations"
-  @spec shift_longitude(GeoSQL.Geometry.t(), Ecto.Repo.t()) :: GeoSQL.fragment()
+  @spec shift_longitude(GeoSQL.geometry_input(), Ecto.Repo.t()) :: GeoSQL.fragment()
   defmacro shift_longitude(geometry, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
@@ -640,8 +640,8 @@ defmodule GeoSQL.Common do
   end
 
   @spec shortest_line(
-          GeoSQL.Geometry.t(),
-          GeoSQL.Geometry.t(),
+          GeoSQL.geometry_input(),
+          GeoSQL.geometry_input(),
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
@@ -688,7 +688,7 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec triangulate_polygon(GeoSQL.Geometry.t(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @spec triangulate_polygon(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro triangulate_polygon(geometry, repo \\ nil) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do

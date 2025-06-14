@@ -6,12 +6,10 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   alias GeoSQL.PostGIS
 
   @moduledoc """
-  Generate Mapbox-compatible vector tiles.
+  In addition to support for functions related to Mapbox vector tiles, this module also
+  provides support for generating complete tiles via `generate/6`.
 
-  In addition to support for the full set of functions realted to Mapbox vector tiles, this module
-  provides support for generating complete tiles with a single call.
-
-  The `generate/5` function takes a list of `GeoSQL.PostGIS.VectorTiles.Layer` structs along
+  The `generate/6` function takes a list of `GeoSQL.PostGIS.VectorTiles.Layer` structs along
   with the tile coordinates and an `Ecto.Repo`:
 
     ```elixir

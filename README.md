@@ -9,22 +9,18 @@ level functions for features such as generating Mapbox vector tiles.
 
 The goals of this library are:
 
- * Ease of use: it should be clear how to get started and moving.
- * Support a variety of GIS extensions that are available via Eto, including
-   PostGIS and SpatialLite.
- * Provide extensive support for GIS SQL functions available, not only those which
-   are commonly used.
- * Separate functions into modules by their availability and standards compliance to
-   make it easy to only use functions available in the backend being targetted
- * Provide out-of-the-box support for high-level use cases, not just individual SQL
-   functions. Mapbox vector tile generation is a good example: one call to
-   `GeoSQL.PostGIS.VectorTiles.generate/6` is enough to retrieve complete vector tiles
-   based on any table in the database that has a geometry field.
+ * Ease of use: fast to get started, hides complexity where possible
+ * Portable: currently supports PostGIS and SpatialLite.
+ * Complete: extensive support for GIS SQL functions, not just the obvious ones.
+ * Clarity: Functions organized by their availability and standards compliance
+ * Beyond functions: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
+   generation is a good example: one call to `GeoSQL.PostGIS.VectorTiles.generate/6`
+   is enough to retrieve complete vector tiles based on any table in the database that has a geometry field.
 
 Non-goals include:
 
  * Having the fewest possible dependencies. Ecto adapters are pulled in as necessary,
-   along with other dependencies such as `Jason` needed to make use easy.
+   along with other dependencies such as `Jason` needed to ease use.
 
 ## Usage
 

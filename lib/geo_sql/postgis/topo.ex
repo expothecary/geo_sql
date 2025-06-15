@@ -6,6 +6,57 @@ defmodule GeoSQL.PostGIS.Topo do
   topology object are found in the `GeoSQL.PostGIS` module.
   """
 
+  @spec add_face(
+          object :: String.t(),
+          polygon :: GeoSQL.geometry_input(),
+          force_new :: boolean
+        ) :: GeoSQL.fragment()
+  @doc group: "Processors"
+  defmacro add_face(object, polygon, force_new \\ false) do
+    quote do
+      fragment(
+        "?.AddFace(?,?)",
+        unquote(object),
+        unquote(polygon),
+        unquote(force_new)
+      )
+    end
+  end
+
+  @spec add_polygon(
+          object :: String.t(),
+          topology_name :: String.t(),
+          polygon :: GeoSQL.geometry_input(),
+          tolerance :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Constructors"
+  defmacro add_node(object, topology_name, polygon, tolerance) do
+    fragment(
+      "?.TopoGeo_AddPolygon(?,?,?)",
+      unquote(object),
+      unquote(topology_name),
+      unquote(polygon),
+      unquote(tolerance)
+    )
+  end
+
+  @spec load_geometry(
+          object :: String.t(),
+          topology_name :: String.t(),
+          geometry :: GeoSQL.geometry_input(),
+          tolerance :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Constructors"
+  defmacro load_geometry(object, topology_name, geometry, tolerance) do
+    fragment(
+      "?.TopoGeo_LoadGeometry(?,?,?)",
+      unquote(object),
+      unquote(topology_name),
+      unquote(geometry),
+      unquote(tolerance)
+    )
+  end
+
   @spec get_face_containing_point(
           object :: String.t(),
           topology_name :: String.t(),

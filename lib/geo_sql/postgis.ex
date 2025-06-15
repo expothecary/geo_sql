@@ -136,6 +136,50 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec expand(
+          geometry :: GeoSQL.geometry_input(),
+          dx :: number,
+          dy :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
+  defmacro expand(geometry, dx, dy) do
+    quote do: fragment("ST_Expand(?,?,?)", unquote(geometry), unquote(dx), unquote(dy))
+  end
+
+  @spec expand(
+          geometry :: GeoSQL.geometry_input(),
+          dx :: number,
+          dy :: number,
+          dz :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
+  defmacro expand(geometry, dx, dy, dz) do
+    quote do
+      fragment("ST_Expand(?,?,?)", unquote(geometry), unquote(dx), unquote(dy), unquote(dz))
+    end
+  end
+
+  @spec expand(
+          geometry :: GeoSQL.geometry_input(),
+          dx :: number,
+          dy :: number,
+          dz :: number,
+          dm :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
+  defmacro expand(geometry, dx, dy, dz, dm) do
+    quote do
+      fragment(
+        "ST_Expand(?,?,?)",
+        unquote(geometry),
+        unquote(dx),
+        unquote(dy),
+        unquote(dz),
+        unquote(dm)
+      )
+    end
+  end
+
   @doc group: "Geometry Processing"
   defmacro generate_points(geometryA, npoints) do
     quote do: fragment("ST_GeneratePoints(?,?)", unquote(geometryA), unquote(npoints))

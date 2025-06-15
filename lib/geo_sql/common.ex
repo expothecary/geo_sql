@@ -165,6 +165,15 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec expand(
+          geometry :: GeoSQL.geometry_input(),
+          units_to_expand :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
+  defmacro expand(geometry, units_to_expand) do
+    quote do: fragment("ST_Expand(?,?)", unquote(geometry), unquote(units_to_expand))
+  end
+
   @spec expand(GeoSQL.geometry_input(), units_to_expand :: number) :: Exto.Query.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, units_to_expand) do

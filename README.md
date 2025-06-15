@@ -85,6 +85,7 @@ Once initialized, the wide array of macros can be used with `Ecto` queries:
 
 Some macros, such as `GeoSQL.Common.extent`, take an optional `Ecto.Repo` parameter.
 This allows those macros to generate the correct SQL statements for the backend being used.
+If no rep is passed to those functions, they assume PostGIS compatibility.
 
 `GeoSQL` macros can also be freely composted and used together, such as this query which
 uses a number of standard and Postgis-specific features together:

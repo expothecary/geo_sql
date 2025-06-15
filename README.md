@@ -1,6 +1,7 @@
 # GeoSQL
 
-This library provides access to geometry and geography-related SQL functions.
+This library provides access to geometric and geographic SQL functions as
+implemented in SQL extensions such as PostGIS and SpatialLite.
 
 This includes the entire suite of SQL/MM spatial functions,
 non-standard functions that are found in commonly used GIS-enabled databases,

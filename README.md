@@ -235,9 +235,12 @@ library.
 
 Unfortunately, `geo-postgis` is both PostGIS-specific (as the name correctly
 implies), supports functions found in older versions (e.g. pre v3), and is incomplete
-in coverage of GIS functions.
+in its coverage of GIS functions. All of this makes sense within the context
+of that project, where backwards compatibility and pragmatic coverage of the
+SQL/MM specification and non-standard functions keeps the codebase lean.
 
-This library therefore came into being to scratch the author's itch of a similar
-library that has a bit less legacy baggage, can also be used with other databases such
-as SpatialLite, and which has additional features such as easy generation of
-Mapbox vector tiles directly from the database.
+This library came into being to scratch the author's itch for a GIS library
+that isn't constrainted by legacy commitments, can be used with other databases such
+as SQLite, and which provides high-level features such as easy generation of
+Mapbox vector tiles. The path there can be traced through the `geo-postgix`
+codebase, however, and that deserves acknowledgement and gratitude.

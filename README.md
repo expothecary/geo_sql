@@ -9,11 +9,11 @@ level functions for features such as generating Mapbox vector tiles.
 
 The goals of this library are:
 
- * Ease of use: fast to get started, hides complexity where possible
- * Portable: currently supports PostGIS and SpatialLite.
- * Complete: extensive support for GIS SQL functions, not just the obvious ones.
+ * Ease: fast to get started, hide complexity where possible
+ * Portability: currently supports PostGIS and SpatialLite.
+ * Completeness: extensive support for GIS SQL functions, not just the obvious ones.
  * Clarity: Functions organized by their availability and standards compliance
- * Beyond functions: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
+ * Utility: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
    generation is a good example: one call to `GeoSQL.PostGIS.VectorTiles.generate/6`
    is enough to retrieve complete vector tiles based on any table in the database that has a geometry field.
 

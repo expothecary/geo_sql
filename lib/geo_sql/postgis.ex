@@ -197,6 +197,18 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec has_m(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro has_m(geometry) do
+    quote do: fragment("ST_HasM(?)", unquote(geometry))
+  end
+
+  @spec has_z(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro has_z(geometry) do
+    quote do: fragment("ST_HasZ(?)", unquote(geometry))
+  end
+
   @spec line_crossing_direction(
           linestringA :: Geo.LineString.t() | GeoSQL.fragment(),
           linestringB :: Geo.LineString.t() | GeoSQL.fragment()

@@ -230,6 +230,12 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec has_arc(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro has_arc(geometry) do
+    quote do: fragment("ST_HasArc(?)", unquote(geometry))
+  end
+
   @spec has_m(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro has_m(geometry) do

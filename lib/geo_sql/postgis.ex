@@ -209,6 +209,12 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_HasZ(?)", unquote(geometry))
   end
 
+  @spec is_collection(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro is_collection(geometry) do
+    quote do: fragment("ST_IsCollection(?)", unquote(geometry))
+  end
+
   @spec line_crossing_direction(
           linestringA :: Geo.LineString.t() | GeoSQL.fragment(),
           linestringB :: Geo.LineString.t() | GeoSQL.fragment()

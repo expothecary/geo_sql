@@ -183,6 +183,12 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec extent(GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro exterior_ring(geometry) do
+    quote do: fragment("ST_ExteriorRing(?)::geometry", unquote(geometry))
+  end
+
   @spec flip_coordinates(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Mutations"
   defmacro flip_coordinates(geometry, repo) do

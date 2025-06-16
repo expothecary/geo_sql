@@ -7,44 +7,147 @@ defmodule GeoSQL.MM2Functions.Test do
 
   alias GeoSQL.Test.Schema.Location
 
-  describe "MM2 Queries" do
-    test "query area" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
+  def geom, do: Geo.WKB.decode!(Helper.multipoint_wkb())
 
-      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+  setup do
+    PostGISRepo.insert(%Location{name: "Smallville", geom: geom()})
+    :ok
+  end
 
+  describe "SQL/MM2 Queries" do
+    test "area" do
       query = from(location in Location, limit: 5, select: MM2.area(location.geom))
       results = PostGISRepo.all(query)
 
       assert is_number(hd(results))
     end
 
-    test "query transform" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
+    test "as_binary" do
+      query = from(location in Location, select: MM2.as_binary(location.geom))
 
-      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+      results = PostGISRepo.all(query)
 
+      expected = [
+        <<1, 6, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0, 145, 161, 239, 117,
+          5, 213, 33, 192, 244, 173, 97, 130, 228, 129, 66, 64, 114, 179, 206, 146, 254, 212, 33,
+          192, 29, 72, 60, 218, 226, 129, 66, 64, 133, 24, 79, 174, 247, 212, 33, 192, 203, 21,
+          145, 17, 225, 129, 66, 64, 225, 235, 215, 251, 248, 212, 33, 192, 212, 33, 247, 200,
+          223, 129, 66, 64, 173, 17, 19, 21, 255, 212, 33, 192, 254, 31, 33, 192, 222, 129, 66,
+          64, 130, 160, 102, 153, 8, 213, 33, 192, 80, 7, 17, 24, 222, 129, 66, 64, 129, 60, 94,
+          112, 15, 213, 33, 192, 149, 78, 239, 151, 222, 129, 66, 64, 220, 136, 159, 168, 21, 213,
+          33, 192, 179, 56, 33, 130, 224, 129, 66, 64, 1, 72, 168, 24, 23, 213, 33, 192, 230, 32,
+          210, 43, 226, 129, 66, 64, 241, 233, 91, 222, 25, 213, 33, 192, 139, 213, 56, 82, 227,
+          129, 66, 64, 248, 22, 153, 226, 23, 213, 33, 192, 91, 53, 215, 220, 228, 129, 66, 64,
+          178, 135, 200, 215, 21, 213, 33, 192, 51, 99, 56, 254, 228, 129, 66, 64, 133, 136, 47,
+          185, 15, 213, 33, 192, 254, 246, 84, 132, 229, 129, 66, 64, 165, 62, 30, 70, 10, 213,
+          33, 192, 154, 14, 162, 134, 229, 129, 66, 64, 145, 161, 239, 117, 5, 213, 33, 192, 244,
+          173, 97, 130, 228, 129, 66, 64>>
+      ]
+
+      assert results === expected
+    end
+
+    test "as_text" do
+      query = from(location in Location, select: MM2.as_text(location.geom))
+
+      results = PostGISRepo.all(query)
+
+      expected = [
+        "MULTIPOLYGON(((-8.91605728674111 37.014786050505705,-8.916004741413165 37.01473548835222,-8.915952155261275 37.014681049196575,-8.915962095363229 37.014641876859656,-8.916008623674168 37.01461030595236,-8.916081231858929 37.01459027129624,-8.91613341474863 37.01460551438246,-8.91618086764759 37.0146639501776,-8.916191835920474 37.01471469650441,-8.91621298667903 37.01474979186158,-8.916197854221068 37.01479683407043,-8.916182273129241 37.01480081322952,-8.916135584881212 37.01481680058167,-8.916094008628827 37.01481707489911,-8.91605728674111 37.014786050505705)))"
+      ]
+
+      assert results === expected
+    end
+
+    test "boundary" do
+      query = from(location in Location, select: MM2.boundary(location.geom))
+
+      results = PostGISRepo.all(query)
+
+      assert [%Geo.LineString{srid: 4326, coordinates: coordinates, properties: %{}}] = results
+      assert is_list(coordinates)
+    end
+
+    test "buffer" do
+      query = from(location in Location, select: MM2.buffer(location.geom, 0))
+
+      results = PostGISRepo.all(query)
+
+      assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
+      assert is_list(coordinates)
+
+      query = from(location in Location, select: MM2.buffer(location.geom, 0, 8))
+
+      results = PostGISRepo.all(query)
+
+      assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
+      assert is_list(coordinates)
+
+      query = from(location in Location, select: MM2.buffer(location.geom, 0, "quad_segs=6"))
+
+      results = PostGISRepo.all(query)
+
+      assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
+      assert is_list(coordinates)
+    end
+
+    test "centroid" do
+      query = from(location in Location, select: MM2.centroid(location.geom))
+      results = PostGISRepo.one(query)
+      assert %Geo.Point{} = results
+    end
+
+    test "contains" do
+      query = from(location in Location, select: MM2.centroid(location.geom))
+      results = PostGISRepo.one(query)
+      assert %Geo.Point{} = results
+    end
+
+    test "convex_hull" do
+      query = from(location in Location, select: MM2.convex_hull(location.geom))
+      results = PostGISRepo.one(query)
+      assert %Geo.Polygon{} = results
+    end
+
+    test "crosses" do
+      point = %Geo.Point{coordinates: {8, 10}, srid: 4326}
+      query = from(location in Location, select: MM2.crosses(location.geom, ^point))
+      results = PostGISRepo.one(query)
+      assert not results
+    end
+
+    test "difference" do
+      query = from(location in Location, select: MM2.difference(location.geom, ^geom()))
+      results = PostGISRepo.one(query)
+      assert %Geo.Polygon{} = results
+    end
+
+    test "dimension" do
+      query = from(location in Location, select: MM2.dimension(location.geom))
+      results = PostGISRepo.one(query)
+      assert 2 = results
+    end
+
+    test "disjoint" do
+      query = from(location in Location, select: MM2.disjoint(location.geom, ^geom()))
+      results = PostGISRepo.one(query)
+      assert not results
+    end
+
+    test "distance" do
+      query = from(location in Location, select: MM2.distance(location.geom, ^geom()))
+      results = PostGISRepo.one(query)
+      assert results == 0
+    end
+
+    test "transform" do
       query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
       results = PostGISRepo.one(query)
 
       assert results.srid == 3452
     end
 
-    test "query distance" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
-
-      PostGISRepo.insert(%Location{name: "hello", geom: geom})
-
-      query = from(location in Location, limit: 5, select: MM2.distance(location.geom, ^geom))
-      results = PostGISRepo.one(query)
-
-      assert results == 0
-    end
-
     test "example" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
-      PostGISRepo.insert(%Location{name: "hello", geom: geom})
-
       defmodule Example do
         import Ecto.Query
         require GeoSQL.MM2
@@ -55,7 +158,11 @@ defmodule GeoSQL.MM2Functions.Test do
         end
       end
 
-      query = Example.example_query(geom)
+      query =
+        Helper.multipoint_wkb()
+        |> Geo.WKB.decode!()
+        |> Example.example_query()
+
       results = PostGISRepo.one(query)
       assert results == 0
     end

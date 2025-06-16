@@ -5,7 +5,7 @@ defmodule GeoSQL.MM2Functions.Test do
   use GeoSQL.Test.PostGIS.Helper
   alias GeoSQL.Test.PostGIS.Helper
 
-  alias TestSchema.Location
+  alias GeoSQL.Test.Schema.Location
 
   describe "MM2 Queries" do
     test "query area" do

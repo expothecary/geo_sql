@@ -6,7 +6,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
   use GeoSQL.Test.PostGIS.Helper
   alias GeoSQL.Test.PostGIS.Helper
 
-  alias TestSchema.{Location, LocationMulti}
+  alias GeoSQL.Test.Schema.{Location, LocationMulti}
 
   test "query sphere distance" do
     geom = Geo.WKB.decode!(Helper.multipoint_wkb())

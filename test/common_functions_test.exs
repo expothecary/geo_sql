@@ -8,7 +8,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.Test.PostGIS.Helper
   alias GeoSQL.Test.PostGIS.Helper
 
-  alias TestSchema.{Location, LocationMulti}
+  alias GeoSQL.Test.Schema.{Location, LocationMulti}
 
   describe "extent" do
     test "extent" do

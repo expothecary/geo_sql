@@ -4,7 +4,7 @@ defmodule GeoSQL.MM3Functions.Test do
   use GeoSQL.MM3
   use GeoSQL.Test.PostGIS.Helper
 
-  alias TestSchema.{LocationMulti, Geographies}
+  alias GeoSQL.Test.Schema.{LocationMulti, Geographies}
 
   describe "MM3 Queries" do
     test "order by distance" do

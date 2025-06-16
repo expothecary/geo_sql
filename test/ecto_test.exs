@@ -4,7 +4,7 @@ defmodule GeoSQL.Ecto.Test do
   use GeoSQL.Test.PostGIS.Helper
   alias GeoSQL.Test.PostGIS.Helper
 
-  alias TestSchema.{Location, Geographies, LocationMulti}
+  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti}
 
   describe "Basic geometry queries" do
     test "query multipoint" do

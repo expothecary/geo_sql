@@ -332,6 +332,12 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_MemUnion(?)", unquote(geometryList))
   end
 
+  @spec mem_size(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro mem_size(geometry) do
+    quote do: fragment("ST_MemSize(?)", unquote(geometry))
+  end
+
   @spec points(GeoSQL.Geometry.t()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro points(geometry) do
@@ -409,6 +415,11 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
   end
 
+  @doc group: "Geometry Accessors"
+  defmacro summary(geometry) do
+    quote do: fragment("ST_Summary(?)", unquote(geometry))
+  end
+
   @doc group: "Geometry Editors"
   defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
@@ -438,5 +449,10 @@ defmodule GeoSQL.PostGIS do
         unquote(scale_y)
       )
     end
+  end
+
+  @doc group: "Geometry Accessors"
+  defmacro zm_flag(geometry) do
+    quote do: fragment("ST_Zmflag(?)", unquote(geometry))
   end
 end

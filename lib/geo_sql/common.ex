@@ -610,6 +610,26 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Node(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Accessors"
+  defmacro number_of_dimensions(geometry) do
+    quote do: fragment("ST_NDims(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  defmacro number_of_points(geometry) do
+    quote do: fragment("ST_NPoints(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  defmacro number_of_rings(geometry) do
+    quote do: fragment("ST_NRings(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  defmacro number_of_geometries(geometry_collection) do
+    quote do: fragment("ST_NumGeometeries(?)", unquote(geometry_collection))
+  end
+
   @doc group: "Geometry Processing"
   defmacro oriented_envelope(geometry) do
     quote do: fragment("ST_OrientedEnvelope(?)", unquote(geometry))

@@ -294,12 +294,12 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate(geometry, rotate_radians) when is_float(rotate_radians) do
+  defmacro rotate(geometry, rotate_radians) when is_number(rotate_radians) do
     quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate(geometry, rotate_radians, origin_point) when is_float(rotate_radians) do
+  defmacro rotate(geometry, rotate_radians, origin_point) when is_number(rotate_radians) do
     quote do
       fragment(
         "ST_Rotate(?, ?, ?)",
@@ -311,17 +311,17 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_x(geometry, rotate_radians) when is_float(rotate_radians) do
+  defmacro rotate_x(geometry, rotate_radians) when is_number(rotate_radians) do
     quote do: fragment("ST_RotateX(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_y(geometry, rotate_radians) when is_float(rotate_radians) do
+  defmacro rotate_y(geometry, rotate_radians) when is_number(rotate_radians) do
     quote do: fragment("ST_RotateY(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_z(geometry, rotate_radians) when is_float(rotate_radians) do
+  defmacro rotate_z(geometry, rotate_radians) when is_number(rotate_radians) do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 

@@ -392,11 +392,11 @@ defmodule GeoSQL.Common do
   @spec line_merge(GeoSQL.geometry_input(), directed? :: boolean, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
-  defmacro line_merge(geometryA, directed? \\ false, repo \\ nil) do
+  defmacro line_merge(geometry, directed? \\ false, repo \\ nil) do
     if directed? and RepoUtils.adapter(repo) == Ecto.Adapters.Postgres do
-      quote do: fragment("ST_LineMerge(?,?,true)", unquote(geometryA))
+      quote do: fragment("ST_LineMerge(?,true)", unquote(geometry))
     else
-      quote do: fragment("ST_LineMerge(?,?)", unquote(geometryA))
+      quote do: fragment("ST_LineMerge(?)", unquote(geometry))
     end
   end
 

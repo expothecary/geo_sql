@@ -33,7 +33,11 @@ defmodule GeoSQL.Mixfile do
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:jason, "~> 1.0"},
+
+      # dev
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+
+      # testing
       {:mix_test_watch, "~> 1.3", only: [:dev, :test], runtime: false}
     ]
   end

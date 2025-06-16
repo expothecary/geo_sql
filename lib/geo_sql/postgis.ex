@@ -287,6 +287,12 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_MemUnion(?)", unquote(geometryList))
   end
 
+  @spec points(GeoSQL.Geometry.t()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro points(geometry) do
+    quote do: fragment("ST_Points(?)", unquote(geometry))
+  end
+
   @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians) when is_float(rotate_radians) do
     quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))

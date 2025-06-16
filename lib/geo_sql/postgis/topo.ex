@@ -23,7 +23,7 @@ defmodule GeoSQL.PostGIS.Topo do
     end
   end
 
-  @spec add_polygon(
+  @spec add_node(
           object :: String.t(),
           topology_name :: String.t(),
           polygon :: GeoSQL.geometry_input(),
@@ -31,13 +31,15 @@ defmodule GeoSQL.PostGIS.Topo do
         ) :: GeoSQL.fragment()
   @doc group: "Constructors"
   defmacro add_node(object, topology_name, polygon, tolerance) do
-    fragment(
-      "?.TopoGeo_AddPolygon(?,?,?)",
-      unquote(object),
-      unquote(topology_name),
-      unquote(polygon),
-      unquote(tolerance)
-    )
+    quote do
+      fragment(
+        "?.TopoGeo_AddPolygon(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(polygon),
+        unquote(tolerance)
+      )
+    end
   end
 
   @spec load_geometry(
@@ -48,13 +50,15 @@ defmodule GeoSQL.PostGIS.Topo do
         ) :: GeoSQL.fragment()
   @doc group: "Constructors"
   defmacro load_geometry(object, topology_name, geometry, tolerance) do
-    fragment(
-      "?.TopoGeo_LoadGeometry(?,?,?)",
-      unquote(object),
-      unquote(topology_name),
-      unquote(geometry),
-      unquote(tolerance)
-    )
+    quote do
+      fragment(
+        "?.TopoGeo_LoadGeometry(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(geometry),
+        unquote(tolerance)
+      )
+    end
   end
 
   @spec get_face_containing_point(

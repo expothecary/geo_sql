@@ -6,6 +6,7 @@ defmodule GeoSQL.Common.Topo do
   topology object are found in the `GeoSQL.Common` module.
   """
 
+  require GeoSQL.RepoUtils
   alias GeoSQL.RepoUtils
 
   @spec add_line_string(
@@ -16,16 +17,18 @@ defmodule GeoSQL.Common.Topo do
         ) :: GeoSQL.fragment()
   @doc group: "Processors"
   defmacro add_line_string(object, topology_name, line, tolerance) do
-    fragment(
-      "?.TopoGeo_AddLineString(?,?,?)",
-      unquote(object),
-      unquote(topology_name),
-      unquote(line),
-      unquote(tolerance)
-    )
+    quote do
+      fragment(
+        "?.TopoGeo_AddLineString(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(line),
+        unquote(tolerance)
+      )
+    end
   end
 
-  @spec add_point(
+  @spec add_node(
           object :: String.t(),
           topology_name :: String.t(),
           point :: GeoSQL.geometry_input(),
@@ -33,13 +36,15 @@ defmodule GeoSQL.Common.Topo do
         ) :: GeoSQL.fragment()
   @doc group: "Processors"
   defmacro add_node(object, topology_name, point, tolerance) do
-    fragment(
-      "?.TopoGeo_AddPoint(?,?,?)",
-      unquote(object),
-      unquote(topology_name),
-      unquote(point),
-      unquote(tolerance)
-    )
+    quote do
+      fragment(
+        "?.TopoGeo_AddPoint(?,?,?)",
+        unquote(object),
+        unquote(topology_name),
+        unquote(point),
+        unquote(tolerance)
+      )
+    end
   end
 
   @spec get_edge_by_point(
@@ -149,18 +154,22 @@ defmodule GeoSQL.Common.Topo do
            ) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
-        fragment(
-          "?.Polygonize(?)",
-          unquote(object),
-          unquote(topology_name)
-        )
+        quote do
+          fragment(
+            "?.Polygonize(?)",
+            unquote(object),
+            unquote(topology_name)
+          )
+        end
 
       Ecto.Adapters.SQLite3 ->
-        fragment(
-          "?.TopoGeo_Polygonize(?,?)",
-          unquote(object),
-          unquote(topology_name)
-        )
+        quote do
+          fragment(
+            "?.TopoGeo_Polygonize(?,?)",
+            unquote(object),
+            unquote(topology_name)
+          )
+        end
     end
   end
 end

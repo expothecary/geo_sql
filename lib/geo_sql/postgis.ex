@@ -136,6 +136,30 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Geometry Accessors"
+  @spec dump(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  defmacro dump(geometry) do
+    quote do: fragment("ST_Dump(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  @spec dump_points(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  defmacro dump_points(geometry) do
+    quote do: fragment("ST_DumpPoints(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  @spec dump_segments(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  defmacro dump_segments(geometry) do
+    quote do: fragment("ST_DumpSegments(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Accessors"
+  @spec dump_rings(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  defmacro dump_rings(geometry) do
+    quote do: fragment("ST_DumpRings(?)", unquote(geometry))
+  end
+
   @spec expand(
           geometry :: GeoSQL.geometry_input(),
           dx :: number,

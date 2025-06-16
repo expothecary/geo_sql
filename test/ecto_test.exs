@@ -412,4 +412,59 @@ defmodule GeoSQL.Ecto.Test do
       assert MapSet.new(polygon_coords) == MapSet.new(result.coordinates)
     end
   end
+
+  describe "PostGIS.dump" do
+    test "atomic geometry is returned directly" do
+      point = %Geo.Point{
+        coordinates: {0.0, 0.0},
+        srid: 4326
+      }
+
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: point})
+
+      query =
+        from(location in LocationMulti,
+          where: location.name == "point",
+          select: PostGIS.dump(location.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result == {[], point}
+    end
+
+    test "breaks a multipolygon into its constituent polygons" do
+      polygon1 = %Geo.Polygon{
+        coordinates: [[{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.0, 0.0}]],
+        srid: 4326
+      }
+
+      polygon2 = %Geo.Polygon{
+        coordinates: [[{2.0, 2.0}, {2.0, 3.0}, {3.0, 3.0}, {3.0, 2.0}, {2.0, 2.0}]],
+        srid: 4326
+      }
+
+      PostGISRepo.insert(%LocationMulti{name: "polygon1", geom: polygon1})
+      PostGISRepo.insert(%LocationMulti{name: "polygon2", geom: polygon2})
+
+      query =
+        from(
+          location in LocationMulti,
+          where: location.name in ["polygon1", "polygon2"],
+          select: PostGIS.dump(Common.collect(location.geom))
+        )
+
+      results = PostGISRepo.all(query)
+      assert length(results) == 2
+
+      Enum.each(results, fn {_path, geom} ->
+        assert %Geo.Polygon{} = geom
+      end)
+
+      expected_polygons = MapSet.new([polygon1, polygon2])
+      actual_polygons = MapSet.new(Enum.map(results, fn {_path, geom} -> geom end))
+
+      assert MapSet.equal?(expected_polygons, actual_polygons)
+    end
+  end
 end

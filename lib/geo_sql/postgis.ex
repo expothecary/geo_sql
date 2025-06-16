@@ -83,6 +83,15 @@ defmodule GeoSQL.PostGIS do
 
   @spec contains_properly(
           GeoSQL.geometry_input(),
+          best_fit? :: boolean
+        ) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro bounding_diagonal(geometry, best_fit? \\ false) do
+    quote do: fragment("ST_BoundingDiagonal(?,?)", unquote(geometry), unquote(best_fit?))
+  end
+
+  @spec contains_properly(
+          GeoSQL.geometry_input(),
           GeoSQL.geometry_input(),
           use_indexes? :: :with_indexes | :without_indexes
         ) :: GeoSQL.fragment()

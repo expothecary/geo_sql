@@ -97,11 +97,6 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("_ST_ContainsProperly(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @doc group: "Measurement"
-  defmacro distance_sphere(geometryA, geometryB) do
-    quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
-  end
-
   @doc group: "Distance Relationships"
   defmacro d_within(geometryA, geometryB, float, return_value \\ :by_srid)
 
@@ -134,6 +129,11 @@ defmodule GeoSQL.PostGIS do
         unquote(distance)
       )
     end
+  end
+
+  @doc group: "Measurement"
+  defmacro distance_sphere(geometryA, geometryB) do
+    quote do: fragment("ST_DistanceSphere(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
   @spec expand(

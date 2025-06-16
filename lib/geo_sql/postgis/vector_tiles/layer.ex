@@ -16,7 +16,7 @@ defmodule GeoSQL.PostGIS.VectorTiles.Layer do
           source: String.t(),
           prefix: String.t() | nil,
           columns: columns_definition,
-          srid: number,
+          srid: integer,
           compose_query_fn: (Ecto.Query.t() -> Ecto.Query.t())
         }
 

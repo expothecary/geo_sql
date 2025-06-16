@@ -64,21 +64,23 @@ defmodule GeoSQL.Geometry do
 
   @type t :: Geo.geometry()
 
-  if macro_exported?(Ecto.Type, :__using__, 1) do
-    use Ecto.Type
-  else
-    @behaviour Ecto.Type
-  end
+  use Ecto.Type
 
   def type, do: :geometry
 
   def blank?(_), do: false
 
   def load(%struct{} = geom) when struct in @geometries, do: {:ok, geom}
-  def load(_), do: :error
+
+  def load(_data) do
+    :error
+  end
 
   def dump(%struct{} = geom) when struct in @geometries, do: {:ok, geom}
-  def dump(_), do: :error
+
+  def dump(_data) do
+    :error
+  end
 
   def cast({:ok, value}), do: cast(value)
 
@@ -92,11 +94,33 @@ defmodule GeoSQL.Geometry do
     do_cast(geom)
   end
 
+  def cast(%{type: type, coordinates: _} = geom) when type in @types do
+    string_keys(geom)
+    |> do_cast()
+  end
+
+  def cast(%{type: "GeometryCollection", geometries: _} = geom) do
+    string_keys(geom)
+    |> do_cast()
+  end
+
   def cast(geom) when is_binary(geom) do
     do_cast(geom)
   end
 
-  def cast(_), do: :error
+  def cast(_data) do
+    :error
+  end
+
+  def string_keys(input_map) when is_map(input_map) do
+    Map.new(input_map, fn {key, val} -> {to_string(key), string_keys(val)} end)
+  end
+
+  def string_keys(input_list) when is_list(input_list) do
+    Enum.map(input_list, &string_keys(&1))
+  end
+
+  def string_keys(other), do: other
 
   defp do_cast(geom) when is_binary(geom) do
     try do

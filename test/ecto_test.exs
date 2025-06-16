@@ -68,16 +68,18 @@ defmodule GeoSQL.Ecto.Test do
     end
   end
 
-  test "insert multiple geometry types" do
-    geom1 = %Geo.Point{coordinates: {30, -90}, srid: 4326}
-    geom2 = %Geo.LineString{coordinates: [{30, -90}, {30, -91}], srid: 4326}
+  describe "Basic mutations" do
+    test "insert multiple geometry types" do
+      geom1 = %Geo.Point{coordinates: {30, -90}, srid: 4326}
+      geom2 = %Geo.LineString{coordinates: [{30, -90}, {30, -91}], srid: 4326}
 
-    PostGISRepo.insert(%LocationMulti{name: "hello point", geom: geom1})
-    PostGISRepo.insert(%LocationMulti{name: "hello line", geom: geom2})
-    query = from(location in LocationMulti, select: location)
-    [m1, m2] = PostGISRepo.all(query)
+      PostGISRepo.insert(%LocationMulti{name: "hello point", geom: geom1})
+      PostGISRepo.insert(%LocationMulti{name: "hello line", geom: geom2})
+      query = from(location in LocationMulti, select: location)
+      [m1, m2] = PostGISRepo.all(query)
 
-    assert m1.geom == geom1
-    assert m2.geom == geom2
+      assert m1.geom == geom1
+      assert m2.geom == geom2
+    end
   end
 end

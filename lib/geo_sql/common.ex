@@ -208,6 +208,18 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_InterpolatePoint(?,?)", unquote(line), unquote(point))
   end
 
+  @spec is_polygon_clockwise(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro is_polygon_clockwise(geometry) do
+    quote do: fragment("ST_IsPolygonCW(?)", unquote(geometry))
+  end
+
+  @spec is_polygon_counter_clockwise(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro is_polygon_counter_clockwise(geometry) do
+    quote do: fragment("ST_IsPolygonCCW(?)", unquote(geometry))
+  end
+
   @spec largest_empty_circle(GeoSQL.geometry_input(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"

@@ -186,11 +186,11 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Geometry Processing"
-  defmacro generate_points(geometryA, npoints, seed) do
+  defmacro generate_points(geometry, npoints, seed) do
     quote do
       fragment(
         "ST_GeneratePoints(?,?,?)",
-        unquote(geometryA),
+        unquote(geometry),
         unquote(npoints),
         unquote(seed)
       )

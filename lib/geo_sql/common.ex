@@ -617,6 +617,20 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
   end
 
+  @spec remove_repeated_points(GeoSQL.geometry_input(), tolerance :: number, Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro remove_repeated_points(geometry, tolerance \\ 0, repo \\ nil)
+           when is_number(tolerance) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_RemoveRepeatedPoints(?,?)", unquote(geometry), unquote(tolerance))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("RemoveRepeatedPoints(?,?)", unquote(geometry), unquote(tolerance))
+    end
+  end
+
   @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do

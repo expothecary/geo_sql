@@ -2,7 +2,7 @@ defmodule GeoSQL.MM3Functions.Test do
   use ExUnit.Case, async: true
   import Ecto.Query
   use GeoSQL.MM3
-  use GeoSQL.Test.PostGIS.Helper
+  use GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{LocationMulti, Geographies}
 

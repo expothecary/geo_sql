@@ -5,8 +5,8 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.MM3
   use GeoSQL.PostGIS
   use GeoSQL.Common
-  use GeoSQL.Test.PostGIS.Helper
-  alias GeoSQL.Test.PostGIS.Helper
+  use GeoSQL.Test.Helper
+  alias GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 

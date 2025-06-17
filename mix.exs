@@ -36,6 +36,7 @@ defmodule GeoSQL.Mixfile do
 
       # dev
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ecto_sqlite3, "~> 0.19", only: [:dev, :test]},
 
       # testing
       {:mix_test_watch, "~> 1.3", only: [:dev, :test], runtime: false}
@@ -69,7 +70,7 @@ defmodule GeoSQL.Mixfile do
 
   defp aliases do
     [
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test", "ecto.drop --quiet"]
+      test: ["ecto.create", "ecto.migrate", "test", "ecto.drop --quiet"]
     ]
   end
 end

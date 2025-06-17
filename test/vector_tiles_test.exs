@@ -1,6 +1,6 @@
 defmodule GeoSQL.TilesTest do
   use ExUnit.Case, async: true
-  use GeoSQL.Test.PostGIS.Helper, setup_funs: [{__MODULE__, :seed_db}]
+  use GeoSQL.Test.Helper, setup_funs: [{__MODULE__, :seed_db}]
   use GeoSQL.PostGIS
   import Ecto.Query
 

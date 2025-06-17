@@ -1,6 +1,6 @@
 defmodule GeoSQL.Test do
   use ExUnit.Case, async: true
-  use GeoSQL.Test.PostGIS.Helper
+  use GeoSQL.Test.Helper
 
   test "insert point" do
     geo = %Geo.Point{coordinates: {30, -90}, srid: 4326}

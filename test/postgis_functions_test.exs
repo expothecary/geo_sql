@@ -3,8 +3,8 @@ defmodule GeoSQL.PostGISFunctions.Test do
   import Ecto.Query
   use GeoSQL.PostGIS
   use GeoSQL.Common
-  use GeoSQL.Test.PostGIS.Helper
-  alias GeoSQL.Test.PostGIS.Helper
+  use GeoSQL.Test.Helper
+  alias GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 

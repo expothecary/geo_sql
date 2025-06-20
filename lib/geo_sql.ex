@@ -26,13 +26,6 @@ defmodule GeoSQL do
     :ok
   end
 
-  # query_results can be:
-  # <<>> -> a bare geometry on its own
-  # [ ... ] -> one list entry
-  # [ [],....] -> many lists
-  # %{} -> one map emtry
-  # [%{}, ...] -> many map emtries
-
   @doc """
   When returning a single geometry in an Ecto query `select` clause, geometries may
   be returned as raw binaries in some backends.

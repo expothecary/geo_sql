@@ -80,10 +80,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
 
   @impl true
   def convert(%x{} = geometry) when x in @geo_types do
-    #     {:ok, convert_geometry(geometry)}
-
-    {:ok, data} = Geo.WKT.encode(geometry)
-    {:ok, {:blob, ["GeomFromEWKT('", data, "')"] |> IO.iodata_to_binary()}}
+    {:ok, convert_geometry(geometry)}
   end
 
   def convert(_), do: nil
@@ -98,7 +95,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   def decode_geometry(data) do
     # it is retrieved in SpatialLite's format, so translate it to WKB
     conn = InMemorySqlite.conn()
-    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT ST_AsBinary(?1)")
+    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT AsEWKB(?1)")
     :ok = Exqlite.Sqlite3.bind(statement, [{:blob, data}])
     {:row, [wkb]} = Exqlite.Sqlite3.step(conn, statement)
     :ok = Exqlite.Sqlite3.release(conn, statement)

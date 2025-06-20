@@ -113,6 +113,23 @@ uses a number of standard and Postgis-specific features together:
 
 Full documentation can be generated locally with `mix docs`.
 
+### Queries returning binary blobs instead of geometries
+
+With certain backends (e.g. SQLite3), it is possible to craft queries that will return
+binary blobs instead of decoded `Geo` structs.
+
+In such cases, use `GeoSQL.decode_geometry/3`:
+
+  ```elixir
+  from(location in Location, select: MM2.boundary(location.geom))
+  |> Repo.all()
+  |> GeoSQL.decode_geometry(Repo)
+  ```
+
+For backends that do not suffer from this (e.g. PostGIS), the call to `GeoSQL.decode_geometry`
+is efficient, doing little more than a comparison of a single `atom` to determine no further
+action needs to be taken.
+
 ### Module organization
 
 Features are organized into modules by their availability and topic.

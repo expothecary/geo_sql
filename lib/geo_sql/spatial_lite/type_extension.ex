@@ -1,4 +1,4 @@
-defmodule GeoSQL.SpatialLite.TypesExtension do
+defmodule GeoSQL.SpatialLite.TypeExtension do
   @moduledoc """
   A type extension for `ecto_sqlite3` that implements storage and retrieval of
   `geo` structs for SpatialLite databases.
@@ -7,14 +7,15 @@ defmodule GeoSQL.SpatialLite.TypesExtension do
 
   ```elixir
     config :ecto_sqlite3,
-      extensions: [GeoSQL.SpatialLite.TypesExtension]
+      extensions: [GeoSQL.SpatialLite.TypeExtension]
   ```
 
   Also be sure to add `load_extensions: ["mod_spatialite"]` to the config of
   `Ecto.Repo`s which use the `Ecto.Adapters.SQLite3` adapter to ensure SpatialLite
   features are available.
   """
-  @behaviour Ecto.Adapters.SQLite3.Extension
+  @behaviour Ecto.Adapters.SQLite3.TypeExtension
+  @behaviour Exqlite.TypeExtension
   @geo_types [
     Geo.GeometryCollection,
     Geo.LineString,
@@ -77,14 +78,18 @@ defmodule GeoSQL.SpatialLite.TypesExtension do
 
   def dumpers(_ecto_type, _primitive_type), do: nil
 
+  @impl true
   def convert(%x{} = geometry) when x in @geo_types do
-    bind_geometry(geometry)
+    #     {:ok, convert_geometry(geometry)}
+
+    {:ok, data} = Geo.WKT.encode(geometry)
+    {:ok, {:blob, ["GeomFromEWKT('", data, "')"] |> IO.iodata_to_binary()}}
   end
 
   def convert(_), do: nil
 
   def encode_geometry(%x{} = geometry) when x in @geo_types do
-    {:ok, bind_geometry(geometry)}
+    {:ok, convert_geometry(geometry)}
   rescue
     exception ->
       {:error, exception}
@@ -105,7 +110,7 @@ defmodule GeoSQL.SpatialLite.TypesExtension do
     end
   end
 
-  defp bind_geometry(geometry) do
+  defp convert_geometry(geometry) do
     {:ok, data} = Geo.WKT.encode(geometry)
 
     # translate it to SpatialLite's format

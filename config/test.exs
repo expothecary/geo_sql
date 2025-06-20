@@ -26,7 +26,10 @@ config :geo_sql, GeoSQL.Test.SQLite3.Repo,
   load_extensions: ["mod_spatialite"]
 
 config :exqlite,
-  type_extensions: [GeoSQL.SpatialLite.TypesExtension]
+  type_extensions: [GeoSQL.SpatialLite.TypeExtension]
+
+config :ecto_sqlite3,
+  type_extensions: [GeoSQL.SpatialLite.TypeExtension]
 
 # Print only warnings and errors during test
 config :logger, level: :warning

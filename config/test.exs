@@ -20,11 +20,13 @@ config :geo_sql, GeoSQL.Test.PostGIS.Repo,
 
 config :geo_sql, GeoSQL.Test.SQLite3.Repo,
   database: "geo_sql_test.sqlite3",
-  types: GeoSQL.PostgrexTypes,
   pool_size: 20,
   pool: Ecto.Adapters.SQL.Sandbox,
   priv: "priv/repo/sqlite3",
   load_extensions: ["mod_spatialite"]
+
+config :ecto_sqlite3,
+  extensions: [GeoSQL.SpatialLite.TypesExtension]
 
 # Print only warnings and errors during test
 config :logger, level: :warning

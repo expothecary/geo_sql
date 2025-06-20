@@ -32,6 +32,7 @@ defmodule GeoSQL.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},
+      {:exqlite, path: "/home/aseigo/src/exqlite", override: true},
       {:ecto_sqlite3, path: "/home/aseigo/src/ecto_sqlite3"},
       {:jason, "~> 1.0"},
 

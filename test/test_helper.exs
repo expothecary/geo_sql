@@ -5,6 +5,9 @@ defmodule GeoSQL.Test.Helper do
     Application.get_env(:geo_sql, :ecto_repos)
   end
 
+  def is_a(%x{}, which), do: Enum.member?(which, x)
+  def is_a(_, _), do: false
+
   defmacro __using__(options \\ []) do
     setup_funs = Keyword.get(options, :setup_funs, [])
 

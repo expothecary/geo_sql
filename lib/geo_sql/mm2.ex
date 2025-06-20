@@ -397,7 +397,7 @@ defmodule GeoSQL.MM2 do
   @spec transform(wkt :: String.t(), srid :: pos_integer()) :: GeoSQL.fragment()
   @doc group: "Affine Transforms"
   defmacro transform(wkt, srid) do
-    quote do: fragment("ST_Transform(?, ?::integer)", unquote(wkt), unquote(srid))
+    quote do: fragment("ST_Transform(?, ?)", unquote(wkt), unquote(srid))
   end
 
   @spec union(geometryList :: GeoSQL.geometry_input()) :: GeoSQL.fragment()

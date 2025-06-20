@@ -73,11 +73,8 @@ defmodule GeoSQL.Test.Helper do
     repo_spec =
       GeoSQL.Test.SQLite3.Repo.child_spec(name: repo_name)
       |> Map.put(:id, repo_name)
-      |> IO.inspect(label: "SQLITE3 child spec")
 
-    pid =
-      ExUnit.Callbacks.start_link_supervised!(repo_spec)
-      |> IO.inspect(label: "STARTED LINK!")
+    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
 
     # Set the dynamic repo name within the parent test suite process so that any setup functions
     # in the test suite itself have access to the repo
@@ -114,17 +111,13 @@ defmodule GeoSQL.Test.Helper do
     info = repo_info(repo, context)
 
     repo.put_dynamic_repo(info.name)
-    |> IO.inspect(label: "PUTTING DYN FOR #{repo}")
 
     # Get a repo pid for ourselves here, via the repository that was started in setup_all
-    pid =
-      Ecto.Adapters.SQL.Sandbox.start_owner!(info.pid, shared: not context[:async])
-      |> IO.inspect(label: "PID FOR US")
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(info.pid, shared: not context[:async])
 
     #     GeoSQL.init(repo, json: Jason, decode_binary: :reference)
     # Register an on_exit handler that stops that pid
     ExUnit.Callbacks.on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
-    IO.puts("SETUP DONE")
   end
 end
 

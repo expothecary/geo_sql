@@ -54,26 +54,6 @@ defmodule GeoSQL do
     adapter
   end
 
-  defp register_types(Ecto.Adapters.SQLite3 = adapter, repo, opts) do
-    types_module =
-      repo.config()
-      |> Keyword.get_lazy(:types, fn ->
-        [app | _] = Module.split(repo)
-        Module.concat(app, SQLite3Types)
-      end)
-
-    if not Code.ensure_loaded?(types_module) do
-      #     TODO: REGISTER AN EXTENSION OF TYPES FOR EXQLITE
-      #       Postgrex.Types.define(
-      #         types_module,
-      #         [GeoSQL.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
-      #         opts
-      #       )
-    end
-
-    adapter
-  end
-
   defp register_types(adapter, _repo, _opts), do: adapter
 
   defp run_query(repo, sql) do

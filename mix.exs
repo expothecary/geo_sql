@@ -28,7 +28,8 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      {:geo, "~> 4.0"},
+      #       {:geo, "~> 4.0"},
+      {:geo, path: "/home/aseigo/src/geo"},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},

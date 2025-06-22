@@ -15,6 +15,7 @@ defmodule GeoSQL.Test.Helper do
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
       alias GeoSQL.Test.SQLite3.Repo, as: SQLite3Repo
       alias GeoSQL.Test.Fixtures
+      alias GeoSQL.Test.Helper
 
       setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++
                   unquote(setup_funs) ++ [{GeoSQL.Test.Helper, :ecto_async_prep}]

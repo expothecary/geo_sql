@@ -1,9 +1,14 @@
 defmodule GeoSQL.Test.PostGIS.Repo do
   use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.Postgres
+
+  def to_boolean(value), do: value
 end
 
 defmodule GeoSQL.Test.SQLite3.Repo do
   use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.SQLite3
+
+  def to_boolean(1), do: true
+  def to_boolean(0), do: false
 end
 
 # For the migrations.

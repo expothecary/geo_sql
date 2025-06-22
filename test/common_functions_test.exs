@@ -10,153 +10,195 @@ defmodule GeoSQL.CommonFunctions.Test do
 
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 
-  describe "extent" do
-    test "extent" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
+  for repo <- Helper.repos() do
+    describe "extent (#{repo})" do
+      test "extent" do
+        geom = Geo.WKB.decode!(Fixtures.multipoint_wkb())
 
-      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
 
-      query = from(location in Location, select: Common.extent(location.geom, PostGISRepo))
+        query = from(location in Location, select: Common.extent(location.geom, unquote(repo)))
 
-      assert [%Geo.Polygon{coordinates: [coordinates]}] = PostGISRepo.all(query)
-      assert length(coordinates) == 5
-    end
-  end
+        assert [%Geo.Polygon{coordinates: [coordinates]}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
 
-  describe "node" do
-    test "self-intersecting linestring" do
-      coordinates = [{0, 0, 0}, {2, 2, 2}, {0, 2, 0}, {2, 0, 2}]
-      cross_point = {1, 1, 1}
-
-      # Create a self-intersecting linestring (crossing at point {1, 1, 1})
-      linestring = %Geo.LineStringZ{
-        coordinates: coordinates,
-        srid: 4326
-      }
-
-      PostGISRepo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
-
-      query =
-        from(
-          location in LocationMulti,
-          select: Common.node(location.geom)
-        )
-
-      result = PostGISRepo.one(query)
-
-      assert %Geo.MultiLineStringZ{} = result
-
-      assert result.coordinates == [
-               [Enum.at(coordinates, 0), cross_point],
-               [cross_point, Enum.at(coordinates, 1), Enum.at(coordinates, 2), cross_point],
-               [cross_point, Enum.at(coordinates, 3)]
-             ]
+        assert length(coordinates) == 5
+      end
     end
 
-    test "intersecting multilinestring" do
-      coordinates1 = [{0, 0, 0}, {2, 2, 2}]
-      coordinates2 = [{0, 2, 0}, {2, 0, 2}]
-      cross_point = {1, 1, 1}
+    describe "node (#{repo})" do
+      supports_self_intersection = [GeoSQL.Test.PostGIS.Repo]
 
-      # Create a multilinestring that intersects (crossing at point {1, 1, 1})
-      linestring = %Geo.MultiLineStringZ{
-        coordinates: [
-          coordinates1,
-          coordinates2
-        ],
-        srid: 4326
-      }
+      test "nodes from a linestring" do
+        coordinates = [{0, 0, 0}, {1, 1, 1}, {2, 2, 2}]
 
-      PostGISRepo.insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+        # Create a self-intersecting linestring (crossing at point {1, 1, 1})
+        linestring = %Geo.LineStringZ{
+          coordinates: coordinates,
+          srid: 4326
+        }
 
-      query =
-        from(
-          location in LocationMulti,
-          select: Common.node(location.geom)
-        )
+        unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
 
-      result = PostGISRepo.one(query)
+        query =
+          from(
+            location in LocationMulti,
+            select: Common.node(location.geom)
+          )
 
-      assert %Geo.MultiLineStringZ{} = result
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-      assert result.coordinates == [
-               [Enum.at(coordinates1, 0), cross_point],
-               [Enum.at(coordinates2, 0), cross_point],
-               [cross_point, Enum.at(coordinates1, 1)],
-               [cross_point, Enum.at(coordinates2, 1)]
-             ]
+        assert %Geo.LineStringZ{} = result
+
+        assert result.coordinates == coordinates
+      end
+
+      if Enum.member?(supports_self_intersection, repo) do
+        test "self-intersecting linestring" do
+          coordinates = [{0, 0, 0}, {2, 2, 2}, {0, 2, 0}, {2, 0, 2}]
+          cross_point = {1, 1, 1}
+
+          # Create a self-intersecting linestring (crossing at point {1, 1, 1})
+          linestring = %Geo.LineStringZ{
+            coordinates: coordinates,
+            srid: 4326
+          }
+
+          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+
+          query =
+            from(
+              location in LocationMulti,
+              select: Common.node(location.geom)
+            )
+
+          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+
+          assert %Geo.MultiLineStringZ{} = result
+
+          assert result.coordinates == [
+                   [Enum.at(coordinates, 0), cross_point],
+                   [cross_point, Enum.at(coordinates, 1), Enum.at(coordinates, 2), cross_point],
+                   [cross_point, Enum.at(coordinates, 3)]
+                 ]
+        end
+
+        test "intersecting multilinestring" do
+          coordinates1 = [{0, 0, 0}, {2, 2, 2}]
+          coordinates2 = [{0, 2, 0}, {2, 0, 2}]
+          cross_point = {1, 1, 1}
+
+          # Create a multilinestring that intersects (crossing at point {1, 1, 1})
+          linestring = %Geo.MultiLineStringZ{
+            coordinates: [
+              coordinates1,
+              coordinates2
+            ],
+            srid: 4326
+          }
+
+          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+
+          query =
+            from(
+              location in LocationMulti,
+              select: Common.node(location.geom)
+            )
+
+          result = unquote(repo).one(query)
+
+          assert %Geo.MultiLineStringZ{} = result
+
+          assert result.coordinates == [
+                   [Enum.at(coordinates1, 0), cross_point],
+                   [Enum.at(coordinates2, 0), cross_point],
+                   [cross_point, Enum.at(coordinates1, 1)],
+                   [cross_point, Enum.at(coordinates2, 1)]
+                 ]
+        end
+      end
     end
-  end
 
-  describe "line_merge/2" do
-    test "lines with opposite directions not merged if directed is true" do
-      multiline = %Geo.MultiLineString{
-        coordinates: [
-          [{60, 30}, {10, 70}],
-          [{120, 50}, {60, 30}],
-          [{120, 50}, {180, 30}]
-        ],
-        srid: 4326
-      }
+    describe "line_merge/2 (#{repo})" do
+      supports_directed_merges = [GeoSQL.Test.PostGIS.Repo]
 
-      PostGISRepo.insert(%LocationMulti{name: "lines with direction", geom: multiline})
+      if Enum.member?(supports_directed_merges, repo) do
+        test "lines with opposite directions not merged if directed is true" do
+          multiline = %Geo.MultiLineString{
+            coordinates: [
+              [{60, 30}, {10, 70}],
+              [{120, 50}, {60, 30}],
+              [{120, 50}, {180, 30}]
+            ],
+            srid: 4326
+          }
 
-      query =
-        from(
-          location in LocationMulti,
-          where: location.name == "lines with direction",
-          select: Common.line_merge(location.geom, true)
-        )
+          unquote(repo).insert(%LocationMulti{name: "lines with direction", geom: multiline})
 
-      result = PostGISRepo.one(query)
+          query =
+            from(
+              location in LocationMulti,
+              where: location.name == "lines with direction",
+              select: Common.line_merge(location.geom, true, unquote(repo))
+            )
 
-      # Verify the result is still a MultiLineString with only 2 lines merged
+          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
 
-      assert %Geo.MultiLineString{} = result
+          # Verify the result is still a MultiLineString with only 2 lines merged
 
-      assert length(result.coordinates) == 2
+          assert %Geo.MultiLineString{} = result
 
-      expected_linestrings = [
-        [{120, 50}, {60, 30}, {10, 70}],
-        [{120, 50}, {180, 30}]
-      ]
+          assert length(result.coordinates) == 2
 
-      sorted_result = Enum.sort_by(result.coordinates, fn linestring -> hd(linestring) end)
+          expected_linestrings = [
+            [{120, 50}, {60, 30}, {10, 70}],
+            [{120, 50}, {180, 30}]
+          ]
 
-      sorted_expected = Enum.sort_by(expected_linestrings, fn linestring -> hd(linestring) end)
+          sorted_result = Enum.sort_by(result.coordinates, fn linestring -> hd(linestring) end)
 
-      assert sorted_result == sorted_expected
-    end
+          sorted_expected =
+            Enum.sort_by(expected_linestrings, fn linestring -> hd(linestring) end)
 
-    test "lines with opposite directions merged if directed is false" do
-      multiline = %Geo.MultiLineString{
-        coordinates: [
-          [{60, 30}, {10, 70}],
-          [{120, 50}, {60, 30}],
-          [{120, 50}, {180, 30}]
-        ],
-        srid: 4326
-      }
+          assert sorted_result == sorted_expected
+        end
+      end
 
-      PostGISRepo.insert(%LocationMulti{name: "lines with direction", geom: multiline})
+      test "lines with opposite directions merged if directed is false" do
+        multiline = %Geo.MultiLineString{
+          coordinates: [
+            [{60, 30}, {10, 70}],
+            [{120, 50}, {60, 30}],
+            [{120, 50}, {180, 30}]
+          ],
+          srid: 4326
+        }
 
-      query =
-        from(
-          location in LocationMulti,
-          where: location.name == "lines with direction",
-          select: Common.line_merge(location.geom, false)
-        )
+        unquote(repo).insert(%LocationMulti{name: "lines with direction", geom: multiline})
 
-      result = PostGISRepo.one(query)
+        query =
+          from(
+            location in LocationMulti,
+            where: location.name == "lines with direction",
+            select: Common.line_merge(location.geom, false)
+          )
 
-      assert %Geo.LineString{} = result
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-      assert result.coordinates == [
-               {180, 30},
-               {120, 50},
-               {60, 30},
-               {10, 70}
-             ]
+        assert %Geo.LineString{} = result
+
+        assert result.coordinates == [
+                 {180, 30},
+                 {120, 50},
+                 {60, 30},
+                 {10, 70}
+               ]
+      end
     end
   end
 end

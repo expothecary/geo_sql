@@ -3,7 +3,6 @@ defmodule GeoSQL.MM2Functions.Test do
   import Ecto.Query
   use GeoSQL.MM2
   use GeoSQL.Test.Helper
-  alias GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.Location
 

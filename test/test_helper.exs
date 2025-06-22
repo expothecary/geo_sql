@@ -31,10 +31,8 @@ defmodule GeoSQL.Test.Helper do
 
   def ecto_setup_all(context) do
     Enum.reduce(repos(), [repo_info: %{}], fn repo, acc ->
-      case repo do
-        GeoSQL.Test.PostGIS.Repo -> ecto_setup_all_postgis(context, acc)
-        GeoSQL.Test.SQLite3.Repo -> ecto_setup_all_sqlite3(context, acc)
-      end
+      repo_name = String.to_atom(to_string(context.module) <> repo_name_suffix(repo))
+      ecto_setup_repo(repo, repo_name, acc)
     end)
   end
 
@@ -42,50 +40,28 @@ defmodule GeoSQL.Test.Helper do
     Map.get(repo_info, repo)
   end
 
-  def ecto_setup_all_postgis(context, acc) do
-    # Since the Repo is not being started by the application under test (this library)
-    # it needs to be started. However, to run multiple test suites concurrently, there
-    # needs to either be a globally shared Repo, or one Repo per test suite.
-    #
-    # A globally shared repo is problematic due to not wanting to polute the main library
-    # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
+  # Since the Repo is not being started by the application under test (this library)
+  # it needs to be started. However, to run multiple test suites concurrently, there
+  # needs to either be a globally shared Repo, or one Repo per test suite.
+  #
+  # A globally shared repo is problematic due to not wanting to polute the main library
+  # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
+  def repo_name_suffix(GeoSQL.Test.PostGIS.Repo), do: "PostGISRepo"
+  def repo_name_suffix(GeoSQL.Test.SQLite3.Repo), do: "SQLite3Repo"
 
-    repo_name = String.to_atom(to_string(context.module) <> "Repo")
-    repo_spec = GeoSQL.Test.PostGIS.Repo.child_spec(name: repo_name) |> Map.put(:id, repo_name)
-    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
-
-    # Set the dynamic repo name within the parent test suite process so that any setup functions
-    # in the test suite itself have access to the repo
-    GeoSQL.Test.PostGIS.Repo.put_dynamic_repo(repo_name)
-    GeoSQL.init(GeoSQL.Test.PostGIS.Repo, json: Jason, decode_binary: :reference)
-
-    # Add the repo pid and name into the context so that tests can access it
-    add_repo_to_context(GeoSQL.Test.PostGIS.Repo, pid, repo_name, acc)
-  end
-
-  def ecto_setup_all_sqlite3(context, acc) do
-    # Since the Repo is not being started by the application under test (this library)
-    # it needs to be started. However, to run multiple test suites concurrently, there
-    # needs to either be a globally shared Repo, or one Repo per test suite.
-    #
-    # A globally shared repo is problematic due to not wanting to polute the main library
-    # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
-
-    repo_name = String.to_atom(to_string(context.module) <> "Repo")
-
+  def ecto_setup_repo(repo, repo_name, acc) do
     repo_spec =
-      GeoSQL.Test.SQLite3.Repo.child_spec(name: repo_name)
+      repo.child_spec(name: repo_name)
       |> Map.put(:id, repo_name)
 
     pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
 
     # Set the dynamic repo name within the parent test suite process so that any setup functions
     # in the test suite itself have access to the repo
-    #     GeoSQL.Test.SQLite3.Repo.put_dynamic_repo(repo_name)
-    GeoSQL.init(GeoSQL.Test.SQLite3.Repo, json: Jason, decode_binary: :reference)
+    GeoSQL.init(repo, json: Jason, decode_binary: :reference)
 
     # Add the repo pid and name into the context so that tests can access it
-    add_repo_to_context(GeoSQL.Test.SQLite3.Repo, pid, repo_name, acc)
+    add_repo_to_context(repo, pid, repo_name, acc)
   end
 
   defp add_repo_to_context(repo, pid, name, context) do

@@ -108,7 +108,9 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   end
 
   defp convert_geometry(geometry) do
-    {:ok, data} = Geo.WKT.encode(geometry)
+    data =
+      Geo.WKT.encode(geometry)
+      |> remove_zm_labels()
 
     # translate it to SpatialLite's format
     conn = InMemorySqlite.conn()
@@ -116,6 +118,18 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
     :ok = Exqlite.Sqlite3.bind(statement, [data])
     {:row, [encoded]} = Exqlite.Sqlite3.step(conn, statement)
     :ok = Exqlite.Sqlite3.release(conn, statement)
-    {:blob, encoded}
+
+    case encoded do
+      nil -> nil
+      _ -> {:blob, encoded}
+    end
+  end
+
+  # SpatialLite does not like Z/ZM suffixes on the primitive types.
+  # e.g. POINTZ will error, while a POINT with 3-dimensional will work.
+  # HOWEVER ... POINTM is a thing. *sigh*
+  defp remove_zm_labels({:ok, wkt_encoded_string}) do
+    wkt_encoded_string
+    |> String.replace(~r/ZM?([( ])/, "\\1")
   end
 end

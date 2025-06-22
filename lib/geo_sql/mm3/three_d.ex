@@ -18,7 +18,7 @@ defmodule GeoSQL.MM3.ThreeD do
     # There is also a CG_3DDiference in PostGIS but it does not seem to be in a bare-bones build?
     quote do:
             fragment(
-              "ST_3DDistance(?::geometry, ?::geometry)",
+              "ST_3DDistance(?, ?)",
               unquote(geometryA),
               unquote(geometryB)
             )

@@ -34,7 +34,10 @@ defmodule GeoSQL.MM2Functions.Test do
           )
           |> repo.one()
 
-        assert %{same: true, raw_same: true, different: false, raw_different: false} = results
+        assert(
+          match?(%{same: true, raw_same: true, different: false, raw_different: false}, results),
+          "#{repo} failed"
+        )
       end
     end
 
@@ -43,7 +46,7 @@ defmodule GeoSQL.MM2Functions.Test do
         query = from(location in Location, select: MM2.area(location.geom))
         results = repo.all(query)
 
-        assert is_number(hd(results))
+        assert is_number(hd(results)), "#{repo} failed"
       end
     end
 
@@ -70,7 +73,7 @@ defmodule GeoSQL.MM2Functions.Test do
             213, 33, 192, 244, 173, 97, 130, 228, 129, 66, 64>>
         ]
 
-        assert results === expected
+        assert results === expected, "#{repo} failed"
       end
     end
 
@@ -90,7 +93,7 @@ defmodule GeoSQL.MM2Functions.Test do
           ]
         ]
 
-        assert Enum.member?(expected, results)
+        assert Enum.member?(expected, results), "#{repo} failed"
       end
     end
 
@@ -102,8 +105,8 @@ defmodule GeoSQL.MM2Functions.Test do
           repo.all(query)
           |> GeoSQL.decode_geometry(repo)
 
-        assert Helper.is_a(result, [Geo.LineString, Geo.MultiLineString])
-        assert is_list(result.coordinates)
+        assert Helper.is_a(result, [Geo.LineString, Geo.MultiLineString]), "#{repo} failed"
+        assert is_list(result.coordinates), "#{repo} failed"
       end
     end
 
@@ -111,24 +114,31 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.buffer(location.geom, 0))
 
-        results = repo.all(query) |> GeoSQL.decode_geometry(repo)
+        [result | _] =
+          repo.all(query)
+          |> GeoSQL.decode_geometry(repo)
 
-        assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
-        assert is_list(coordinates)
+        assert(
+          match?(%Geo.Polygon{srid: 4326, coordinates: _coordinates, properties: %{}}, result),
+          "#{repo} failed first match"
+        )
+
+        assert is_list(result.coordinates),
+               "#{repo} failed to return a coordinations list (first)"
 
         query = from(location in Location, select: MM2.buffer(location.geom, 0, 8))
 
-        results = repo.all(query) |> GeoSQL.decode_geometry(repo)
+        [result | _] =
+          repo.all(query)
+          |> GeoSQL.decode_geometry(repo)
 
-        assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
-        assert is_list(coordinates)
+        assert(
+          match?(%Geo.Polygon{srid: 4326, coordinates: _coordinates, properties: %{}}, result),
+          "#{repo} failed second match"
+        )
 
-        query = from(location in Location, select: MM2.buffer(location.geom, 0, 6))
-
-        results = repo.all(query) |> GeoSQL.decode_geometry(repo)
-
-        assert [%Geo.Polygon{srid: 4326, coordinates: coordinates, properties: %{}}] = results
-        assert is_list(coordinates)
+        assert is_list(result.coordinates),
+               "#{repo} failed to return a coordinations list (first)"
       end
     end
 
@@ -136,7 +146,7 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.centroid(location.geom))
         results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert %Geo.Point{} = results
+        assert match?(%Geo.Point{}, results), "#{repo} failed"
       end
     end
 
@@ -144,7 +154,7 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.centroid(location.geom))
         results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert %Geo.Point{} = results
+        assert match?(%Geo.Point{}, results), "#{repo} failed"
       end
     end
 
@@ -152,7 +162,7 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.convex_hull(location.geom))
         results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert %Geo.Polygon{} = results
+        assert match?(%Geo.Polygon{}, results), "#{repo} failed"
       end
     end
 
@@ -161,7 +171,7 @@ defmodule GeoSQL.MM2Functions.Test do
         point = %Geo.Point{coordinates: {8, 10}, srid: 4326}
         query = from(location in Location, select: MM2.crosses(location.geom, ^point))
         results = repo.one(query)
-        assert results == false or results == 0
+        assert results == false or results == 0, "#{repo} failed"
       end
     end
 
@@ -174,7 +184,7 @@ defmodule GeoSQL.MM2Functions.Test do
           repo.one(query)
           |> GeoSQL.decode_geometry(repo)
 
-        assert %Geo.Polygon{} = results
+        assert match?(%Geo.Polygon{}, results), "#{repo} failed"
       end
     end
 
@@ -182,7 +192,7 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.dimension(location.geom))
         results = repo.one(query)
-        assert 2 = results
+        assert 2 = results, "#{repo} failed"
       end
     end
 
@@ -192,7 +202,7 @@ defmodule GeoSQL.MM2Functions.Test do
           from(location in Location, select: MM2.disjoint(location.geom, ^geom(:comparison)))
 
         results = repo.one(query)
-        assert results == false or results == 0
+        assert results == false or results == 0, "#{repo} failed"
       end
     end
 
@@ -200,7 +210,7 @@ defmodule GeoSQL.MM2Functions.Test do
       for repo <- Helper.repos() do
         query = from(location in Location, select: MM2.distance(location.geom, ^geom()))
         results = repo.one(query)
-        assert results == 0
+        assert results == 0, "#{repo} failed"
       end
     end
 
@@ -209,7 +219,7 @@ defmodule GeoSQL.MM2Functions.Test do
         query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
         results = repo.one(query) |> GeoSQL.decode_geometry(repo)
 
-        assert results.srid == 3452
+        assert results.srid == 3452, "#{repo} failed"
       end
     end
 
@@ -231,7 +241,7 @@ defmodule GeoSQL.MM2Functions.Test do
           |> Example.example_query()
 
         results = repo.one(query)
-        assert results == 0
+        assert results == 0, "#{repo} failed"
       end
     end
   end

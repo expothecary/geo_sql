@@ -39,6 +39,20 @@ defmodule GeoSQL.Common do
   require GeoSQL.RepoUtils
   alias GeoSQL.RepoUtils
 
+  @doc """
+  Used to cast data to geometries in a backend-neutral fashion. This can be necessary
+  when, for example, passing geogrpahy types to geometry functions in PostGIS.
+  """
+  defmacro cast_to_geometry(geo, repo) do
+    case GeoSQL.RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("CAST(? AS geometry)", unquote(geo))
+
+      _ ->
+        quote do: unquote(geo)
+    end
+  end
+
   defguard is_fraction(value) when is_number(value) and value >= 0 and value <= 1
 
   @spec add_measure(

@@ -96,4 +96,19 @@ defmodule GeoSQL.Test.Helper do
   end
 end
 
-ExUnit.start()
+excludable_tags = [:pgsql]
+
+exclude_tags =
+  GeoSQL.Test.Helper.repos()
+  |> Enum.reduce(
+    excludable_tags,
+    fn
+      repo, exclude_tags ->
+        case repo.__adapter__() do
+          Ecto.Adapters.Postgres -> Enum.reject(exclude_tags, fn tag -> tag == :pgsql end)
+          _ -> exclude_tags
+        end
+    end
+  )
+
+ExUnit.start(exclude: exclude_tags)

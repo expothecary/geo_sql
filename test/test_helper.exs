@@ -17,8 +17,7 @@ defmodule GeoSQL.Test.Helper do
       alias GeoSQL.Test.Fixtures
       alias GeoSQL.Test.Helper
 
-      setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++
-                  unquote(setup_funs) ++ [{GeoSQL.Test.Helper, :ecto_async_prep}]
+      setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++ unquote(setup_funs)
 
       setup context do
         for repo <- GeoSQL.Test.Helper.repos() do
@@ -55,11 +54,17 @@ defmodule GeoSQL.Test.Helper do
       repo.child_spec(name: repo_name)
       |> Map.put(:id, repo_name)
 
-    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
+    # horrible hack here, but we need to start repo supervised for setup_all functions
+    # that need access to a global db object they can modify for all tests aftewards.
+    try do
+      ExUnit.Callbacks.start_link_supervised!(repo.child_spec([]))
 
-    # Set the dynamic repo name within the parent test suite process so that any setup functions
-    # in the test suite itself have access to the repo
-    GeoSQL.init(repo, json: Jason, decode_binary: :reference)
+      GeoSQL.init(repo, json: Jason, decode_binary: :reference)
+    rescue
+      _ -> :ok
+    end
+
+    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
 
     # Add the repo pid and name into the context so that tests can access it
     add_repo_to_context(repo, pid, repo_name, acc)
@@ -76,22 +81,12 @@ defmodule GeoSQL.Test.Helper do
     Keyword.put(context, :repo_info, repo_info)
   end
 
-  def ecto_async_prep(context) do
-    repo_pid = Map.get(context, :repo)
-
-    if repo_pid != nil do
-      Ecto.Adapters.SQL.Sandbox.mode(context.repo, :manual)
-    end
-
-    :ok
-  end
-
   def ecto_setup(repo, context) do
     # In the per-test context, register the name of the dynamic repo.
     info = repo_info(repo, context)
 
     repo.put_dynamic_repo(info.name)
-
+    #     :ok = Ecto.Adapters.SQL.Sandbox.checkout(info.pid)
     # Get a repo pid for ourselves here, via the repository that was started in setup_all
     pid = Ecto.Adapters.SQL.Sandbox.start_owner!(info.pid, shared: not context[:async])
 

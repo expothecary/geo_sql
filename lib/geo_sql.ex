@@ -39,6 +39,7 @@ defmodule GeoSQL do
         |> GeoSQL.decode_geometry(Repo)
   ```
   """
+  def decode_geometry(%{} = geometry, _repo), do: geometry
   def decode_geometry(nil, _repo), do: nil
   def decode_geometry([], _repo), do: []
 

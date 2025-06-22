@@ -255,15 +255,15 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_MPolyFromText(?, ?)", unquote(text), unquote(srid))
   end
 
-  @spec m_geom_colletion_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
+  @spec geom_collection_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro m_geom_colletion_from_text(text, srid \\ -1) do
+  defmacro geom_collection_from_text(text, srid \\ -1) do
     quote do: fragment("ST_GeomCollFromText(?, ?)", unquote(text), unquote(srid))
   end
 
-  @spec m_geom_from_wkb(text :: binary(), srid :: integer) :: GeoSQL.fragment()
+  @spec geom_from_wkb(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Binary (WKB)"
-  defmacro m_geom_from_wkb(bytea, srid \\ -1) do
+  defmacro geom_from_wkb(bytea, srid \\ -1) do
     quote do: fragment("ST_GeomFromWKB(?, ?)", unquote(bytea), unquote(srid))
   end
 

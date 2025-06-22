@@ -34,6 +34,8 @@ it to your project by adding the following to the `deps` section in `mix.exs`:
 
 Run the usual `mix deps.get`!
 
+Full documentation can be generated locally with `mix docs`.
+
 ### Readying the Repo with `GeoSQL.init/1`
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling
@@ -87,6 +89,14 @@ Some macros, such as `GeoSQL.Common.extent`, take an optional `Ecto.Repo` parame
 This allows those macros to generate the correct SQL statements for the backend being used.
 If no rep is passed to those functions, they assume PostGIS compatibility.
 
+Note that the value passed must be the literal repo module name. Passing in a variable
+to which the repo was assigned will usually fail unless wrapped in a macro context, as
+Ecto does all of its magic at compile-time, making the value of runtime variables unnavailable
+for constructing queries (which is different from populating them with values). Usually this is
+not an issue.
+
+#### Composition
+
 `GeoSQL` macros can also be freely composted and used together, such as this query which
 uses a number of standard and Postgis-specific features together:
 
@@ -111,7 +121,13 @@ uses a number of standard and Postgis-specific features together:
   )
   ```
 
-Full documentation can be generated locally with `mix docs`.
+#### Queries needing geometry type casting
+
+Sometimes queries will require casting to the database's native geometry type. This typically
+occurs when, for example, a query passes a geography type to a geometry function in PostGIS.
+
+Such casting can be backend-specific, and so the provided `GeoSQL.Common.cast_as_geometry/2`
+function exists
 
 ### Queries returning binary blobs instead of geometries
 

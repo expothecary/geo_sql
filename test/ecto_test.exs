@@ -8,7 +8,7 @@ defmodule GeoSQL.Ecto.Test do
 
   describe "Basic geometry queries" do
     test "query multipoint" do
-      geom = Geo.WKB.decode!(Helper.multipoint_wkb())
+      geom = Geo.WKB.decode!(Fixtures.multipoint_wkb())
 
       PostGISRepo.insert(%Location{name: "hello", geom: geom})
       query = from(location in Location, limit: 5, select: location)

@@ -9,7 +9,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 
   test "query sphere distance" do
-    geom = Geo.WKB.decode!(Helper.multipoint_wkb())
+    geom = Geo.WKB.decode!(Fixtures.multipoint_wkb())
 
     PostGISRepo.insert(%Location{name: "hello", geom: geom})
 

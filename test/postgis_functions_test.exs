@@ -1,5 +1,7 @@
 defmodule GeoSQL.PostGISFunctions.Test do
   use ExUnit.Case, async: true
+  @moduletag :pgsql
+
   import Ecto.Query
   use GeoSQL.PostGIS
   use GeoSQL.Common

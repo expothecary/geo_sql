@@ -1,5 +1,7 @@
 defmodule GeoSQL.TilesTest do
   use ExUnit.Case, async: true
+  @moduletag :pgsql
+
   use GeoSQL.Test.Helper, setup_funs: [{__MODULE__, :seed_db}], backends: ["pgsql"]
   #   use GeoSQL.Test.Helper
   use GeoSQL.PostGIS

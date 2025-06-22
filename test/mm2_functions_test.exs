@@ -214,17 +214,17 @@ defmodule GeoSQL.MM2Functions.Test do
     end
 
     test "example" do
-      for repo <- Helper.repos() do
-        defmodule Example do
-          import Ecto.Query
-          require GeoSQL.MM2
-          alias GeoSQL.MM2
+      defmodule Example do
+        import Ecto.Query
+        require GeoSQL.MM2
+        alias GeoSQL.MM2
 
-          def example_query(geom) do
-            from(location in Location, select: MM2.distance(location.geom, ^geom))
-          end
+        def example_query(geom) do
+          from(location in Location, select: MM2.distance(location.geom, ^geom))
         end
+      end
 
+      for repo <- Helper.repos() do
         query =
           Fixtures.multipoint_wkb()
           |> Geo.WKB.decode!()

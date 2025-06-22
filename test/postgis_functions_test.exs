@@ -6,7 +6,6 @@ defmodule GeoSQL.PostGISFunctions.Test do
   use GeoSQL.PostGIS
   use GeoSQL.Common
   use GeoSQL.Test.Helper
-  alias GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 

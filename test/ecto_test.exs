@@ -2,7 +2,6 @@ defmodule GeoSQL.Ecto.Test do
   use ExUnit.Case, async: true
   import Ecto.Query
   use GeoSQL.Test.Helper
-  alias GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti}
 

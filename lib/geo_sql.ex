@@ -117,7 +117,7 @@ defmodule GeoSQL do
   defp decode_all([head | _] = query_results, type_extension, fields_to_decode)
        when is_list(head) or is_map(head) do
     Enum.map(query_results, fn query_result ->
-      decode_geometry(query_result, type_extension, fields_to_decode)
+      decode_all(query_result, type_extension, fields_to_decode)
     end)
   end
 

@@ -28,13 +28,12 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      #       {:geo, "~> 4.0"},
-      {:geo, path: "/home/aseigo/src/geo"},
+      {:geo, github: "aseigo/geo", branch: "feature/wkt-empty-geometries"},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},
-      {:exqlite, path: "/home/aseigo/src/exqlite", override: true},
-      {:ecto_sqlite3, path: "/home/aseigo/src/ecto_sqlite3"},
+      {:exqlite, "~> 0.32", override: true},
+      {:ecto_sqlite3, github: "aseigo/ecto_sqlite3", branch: "feature/type-extensions"},
       {:jason, "~> 1.0"},
 
       # dev

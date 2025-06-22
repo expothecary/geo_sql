@@ -21,7 +21,10 @@ defmodule GeoSQL.MM2Functions.Test do
 
   describe "SQL/MM2 Queries" do
     test "simple equality with as_text and without" do
-      for repo <- Helper.repos() do
+      full_decoding = [GeoSQL.Test.SQLite.Repo]
+      partial_decoding = [GeoSQL.Test.PostGIS.Repo]
+
+      for repo <- Helper.repos(), Enum.member?(full_decoding, repo) do
         results =
           from(location in Location,
             limit: 1,
@@ -34,10 +37,25 @@ defmodule GeoSQL.MM2Functions.Test do
           )
           |> repo.one()
 
-        assert(
-          match?(%{same: true, raw_same: true, different: false, raw_different: false}, results),
-          "#{repo} failed"
-        )
+        assert match?(
+                 %{same: true, raw_same: true, different: false, raw_different: false},
+                 results
+               ),
+               "#{repo} failed"
+      end
+
+      for repo <- Helper.repos(), Enum.member?(partial_decoding, repo) do
+        results =
+          from(location in Location,
+            limit: 1,
+            select: %{
+              raw_different: location.geom == ^geom(:comparison),
+              raw_same: location.geom == ^geom()
+            }
+          )
+          |> repo.one()
+
+        assert match?(%{raw_same: true, raw_different: false}, results), "#{repo} failed"
       end
     end
 

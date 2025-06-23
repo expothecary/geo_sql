@@ -69,11 +69,35 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
     [&__MODULE__.decode_geometry/1, ecto_type]
   end
 
+  def loaders(:geography, ecto_type) do
+    [&__MODULE__.decode_geometry/1, ecto_type]
+  end
+
+  for module <- GeoSQL.Geometry.geometry_modules() do
+    type = module.type()
+
+    def loaders(unquote(type), ecto_type) do
+      [&__MODULE__.decode_geometry/1, ecto_type]
+    end
+  end
+
   def loaders(_primitive_type, _ecto_type), do: nil
 
   @impl true
   def dumpers(:geometry, ecto_type) do
     [ecto_type, &__MODULE__.encode_geometry/1]
+  end
+
+  def dumpers(:geography, ecto_type) do
+    [ecto_type, &__MODULE__.encode_geometry/1]
+  end
+
+  for module <- GeoSQL.Geometry.geometry_modules() do
+    type = module.type()
+
+    def dumpers(unquote(type), ecto_type) do
+      [ecto_type, &__MODULE__.encode_geometry/1]
+    end
   end
 
   def dumpers(_ecto_type, _primitive_type), do: nil

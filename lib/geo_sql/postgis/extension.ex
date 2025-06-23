@@ -2,30 +2,10 @@ defmodule GeoSQL.PostGIS.Extension do
   @moduledoc false
   @behaviour Postgrex.Extension
 
-  @geo_types [
-    Geo.GeometryCollection,
-    Geo.LineString,
-    Geo.LineStringZ,
-    Geo.LineStringZM,
-    Geo.MultiLineString,
-    Geo.MultiLineStringZ,
-    Geo.MultiLineStringZM,
-    Geo.MultiPoint,
-    Geo.MultiPointZ,
-    Geo.MultiPolygon,
-    Geo.MultiPolygonZ,
-    Geo.Point,
-    Geo.PointZ,
-    Geo.PointM,
-    Geo.PointZM,
-    Geo.Polygon,
-    Geo.PolygonZ
-  ]
-
   def extensions do
     unquote(
       Enum.reduce(
-        @geo_types,
+        GeoSQL.Geometry.all_types(),
         [__MODULE__],
         fn type, acc ->
           [Module.concat(__MODULE__, type) | acc]
@@ -40,11 +20,11 @@ defmodule GeoSQL.PostGIS.Extension do
 
   def format(_), do: :binary
 
-  def encode(opts) do
-    IO.inspect(opts, label: "Encode Opts")
+  def encode(_opts) do
+    all_types = unquote(GeoSQL.Geometry.all_types())
 
     quote location: :keep do
-      %x{} = geom when x in unquote(@geo_types) ->
+      %x{} = geom when x in unquote(all_types) ->
         data = Geo.WKB.encode_to_iodata(geom)
         [<<IO.iodata_length(data)::integer-size(32)>> | data]
     end
@@ -58,25 +38,7 @@ defmodule GeoSQL.PostGIS.Extension do
   end
 end
 
-for type <- [
-      Geo.GeometryCollection,
-      Geo.LineString,
-      Geo.LineStringZ,
-      Geo.LineStringZM,
-      Geo.MultiLineString,
-      Geo.MultiLineStringZ,
-      Geo.MultiLineStringZM,
-      Geo.MultiPoint,
-      Geo.MultiPointZ,
-      Geo.MultiPolygon,
-      Geo.MultiPolygonZ,
-      Geo.Point,
-      Geo.PointZ,
-      Geo.PointM,
-      Geo.PointZM,
-      Geo.Polygon,
-      Geo.PolygonZ
-    ] do
+for type <- GeoSQL.Geometry.all_types() do
   defmodule Module.concat(GeoSQL.PostGIS.Extension, type) do
     def init(_), do: nil
 

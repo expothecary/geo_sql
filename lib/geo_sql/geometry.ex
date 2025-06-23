@@ -66,6 +66,14 @@ defmodule GeoSQL.Geometry do
 
   use Ecto.Type
 
+  def geometry_modules do
+    Enum.map(
+      @geometries,
+      fn type -> GeoSQL.Geometry.create_geometry_module_name(type) end
+    )
+  end
+
+  def all_types, do: @geometries
   def type, do: :geometry
 
   def blank?(_), do: false
@@ -143,41 +151,32 @@ defmodule GeoSQL.Geometry do
   def embed_as(_), do: :self
 
   def equal?(a, b), do: a == b
+
+  def create_geometry_module_name(type) do
+    ["Geo", subtype] = Module.split(type)
+    Module.concat(GeoSQL.Geometry, subtype)
+  end
 end
 
-for type <- [
-      Point,
-      PointZ,
-      PointM,
-      PointZM,
-      LineString,
-      LineStringZ,
-      LineStringZM,
-      Polygon,
-      PolygonZ,
-      MultiPoint,
-      MultiPointZ,
-      MultiLineString,
-      MultiLineStringZ,
-      MultiLineStringZM,
-      MultiPolygon,
-      MultiPolygonZ
-    ] do
-  defmodule Module.concat(GeoSQL.Geometry, type) do
-    @type t :: Geo.geometry()
+for type <- GeoSQL.Geometry.all_types() do
+  module_name = GeoSQL.Geometry.create_geometry_module_name(type)
+
+  # e.g. GeoSQL.Geometry.Point or GeoSQL.Geometry.LinestringZM
+  defmodule module_name do
+    @type t :: %unquote(type){}
     use Ecto.Type
 
     def type, do: unquote(String.to_atom("geo_#{type}"))
 
     def blank?(_), do: false
 
-    def load(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+    def load(%unquote(type){} = geom), do: {:ok, geom}
     def load(_data), do: :error
 
-    def dump(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+    def dump(%unquote(type){} = geom), do: {:ok, geom}
     def dump(_data), do: :error
 
     def cast({:ok, value}), do: cast(value)
-    def cast(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+    def cast(%unquote(type){} = geom), do: {:ok, geom}
   end
 end

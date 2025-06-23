@@ -3,7 +3,7 @@ defmodule GeoSQL.Ecto.Test do
   import Ecto.Query
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti, GeoTypes, WrongGeoTypes}
+  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti, GeoType, WrongGeoType}
 
   for repo <- Helper.repos() do
     describe "Basic geometry queries #{repo}" do
@@ -25,17 +25,17 @@ defmodule GeoSQL.Ecto.Test do
 
         assert match?(
                  [
-                   %GeoTypes{
+                   %GeoType{
                      id: 42,
                      t: "test",
                      point: %Geo.Point{srid: 4326},
                      linestring: %Geo.LineString{srid: 4326}
                    }
                  ],
-                 unquote(repo).all(GeoTypes)
+                 unquote(repo).all(GeoType)
                )
 
-        assert_raise(ArgumentError, fn -> unquote(repo).all(WrongGeoTypes) end)
+        assert_raise(ArgumentError, fn -> unquote(repo).all(WrongGeoType) end)
       end
 
       test "query multipoint" do

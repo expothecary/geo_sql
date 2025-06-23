@@ -25,7 +25,7 @@ defmodule GeoSQL.Test.Schema.LocationMulti do
   end
 end
 
-defmodule GeoSQL.Test.Schema.GeoTypes do
+defmodule GeoSQL.Test.Schema.GeoType do
   use Ecto.Schema
 
   schema "specified_columns" do
@@ -35,7 +35,7 @@ defmodule GeoSQL.Test.Schema.GeoTypes do
   end
 end
 
-defmodule GeoSQL.Test.Schema.WrongGeoTypes do
+defmodule GeoSQL.Test.Schema.WrongGeoType do
   use Ecto.Schema
 
   schema "specified_columns" do

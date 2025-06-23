@@ -1,6 +1,39 @@
 defmodule GeoSQL.Geometry do
   @moduledoc """
-  Geometry types for use with Ecto.
+  Geometry types for use with ecto. Supported types include:
+
+    * GeoSQL.Geometry, a catch-all type
+    * GeoSQL.Geometry.
+    * GeoSQL.Geometry.Point
+    * GeoSQLGeometry.PointZ
+    * GeoSQLGeometry.PointM
+    * GeoSQLGeometry.PointZM
+    * GeoSQLGeometry.LineString
+    * GeoSQLGeometry.LineStringZ
+    * GeoSQLGeometry.LineStringZM
+    * GeoSQLGeometry.Polygon
+    * GeoSQLGeometry.PolygonZ
+    * GeoSQLGeometry.MultiPoint
+    * GeoSQLGeometry.MultiPointZ
+    * GeoSQLGeometry.MultiLineString
+    * GeoSQLGeometry.MultiLineStringZ
+    * GeoSQLGeometry.MultiLineStringZM
+    * GeoSQLGeometry.MultiPolygon
+    * GeoSQLGeometry.MultiPolygonZ
+    * GeoSQLGeometry.GeometryCollection
+
+  Example:
+
+      defmodule MyApp.GeoTable do
+        use Ecto.Schema
+
+        schema "specified_columns" do
+          field(:name, :string)
+          field(:geometry, GeoSQL.Geometry) # will match any Geo type
+          field(:point, GeoSQL.Geometry.Point) # will reject any non-Point data
+          field(:linestring, GeoSQL.Geometry.LineStringZ) # will reject any non-LineStringZ data
+        end
+      end
   """
 
   alias Geo.{
@@ -66,6 +99,7 @@ defmodule GeoSQL.Geometry do
 
   use Ecto.Type
 
+  @doc false
   def geometry_modules do
     Enum.map(
       @geometries,
@@ -73,23 +107,30 @@ defmodule GeoSQL.Geometry do
     )
   end
 
+  @doc false
   def all_types, do: @geometries
+
+  @doc false
   def type, do: :geometry
 
+  @doc false
   def blank?(_), do: false
 
+  @doc false
   def load(%struct{} = geom) when struct in @geometries, do: {:ok, geom}
 
   def load(_data) do
     :error
   end
 
+  @doc false
   def dump(%struct{} = geom) when struct in @geometries, do: {:ok, geom}
 
   def dump(_data) do
     :error
   end
 
+  @doc false
   def cast({:ok, value}), do: cast(value)
 
   def cast(%struct{} = geom) when struct in @geometries, do: {:ok, geom}
@@ -120,6 +161,7 @@ defmodule GeoSQL.Geometry do
     :error
   end
 
+  @doc false
   def string_keys(input_map) when is_map(input_map) do
     Map.new(input_map, fn {key, val} -> {to_string(key), string_keys(val)} end)
   end
@@ -129,6 +171,18 @@ defmodule GeoSQL.Geometry do
   end
 
   def string_keys(other), do: other
+
+  @doc false
+  def embed_as(_), do: :self
+
+  @doc false
+  def equal?(a, b), do: a == b
+
+  @doc false
+  def create_geometry_module_name(type) do
+    ["Geo", subtype] = Module.split(type)
+    Module.concat(GeoSQL.Geometry, subtype)
+  end
 
   defp do_cast(geom) when is_binary(geom) do
     try do
@@ -147,15 +201,6 @@ defmodule GeoSQL.Geometry do
       {:error, reason} -> {:error, [message: "Failed to decode GeoJSON", reason: reason]}
     end
   end
-
-  def embed_as(_), do: :self
-
-  def equal?(a, b), do: a == b
-
-  def create_geometry_module_name(type) do
-    ["Geo", subtype] = Module.split(type)
-    Module.concat(GeoSQL.Geometry, subtype)
-  end
 end
 
 for type <- GeoSQL.Geometry.all_types() do
@@ -163,6 +208,7 @@ for type <- GeoSQL.Geometry.all_types() do
 
   # e.g. GeoSQL.Geometry.Point or GeoSQL.Geometry.LinestringZM
   defmodule module_name do
+    @moduledoc false
     @type t :: %unquote(type){}
     use Ecto.Type
 
@@ -178,5 +224,9 @@ for type <- GeoSQL.Geometry.all_types() do
 
     def cast({:ok, value}), do: cast(value)
     def cast(%unquote(type){} = geom), do: {:ok, geom}
+
+    def embed_as(_), do: :self
+
+    def equal?(a, b), do: a == b
   end
 end

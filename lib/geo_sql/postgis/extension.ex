@@ -1,5 +1,7 @@
 defmodule GeoSQL.PostGIS.Extension do
-  @moduledoc false
+  @moduledoc """
+  A type extension for PostGIS data in PostgreSQL databases.
+  """
   @behaviour Postgrex.Extension
 
   def extensions do
@@ -14,12 +16,16 @@ defmodule GeoSQL.PostGIS.Extension do
     )
   end
 
+  @doc false
   def init(_opts), do: nil
 
+  @doc false
   def matching(_), do: [type: "geometry", type: "geography"]
 
+  @doc false
   def format(_), do: :binary
 
+  @doc false
   def encode(_opts) do
     all_types = unquote(GeoSQL.Geometry.all_types())
 
@@ -30,6 +36,7 @@ defmodule GeoSQL.PostGIS.Extension do
     end
   end
 
+  @doc false
   def decode(_opts) do
     quote location: :keep do
       <<len::integer-size(32), wkb::binary-size(len)>> ->
@@ -40,6 +47,7 @@ end
 
 for type <- GeoSQL.Geometry.all_types() do
   defmodule Module.concat(GeoSQL.PostGIS.Extension, type) do
+    @moduledoc false
     def init(_), do: nil
 
     def matching(_),

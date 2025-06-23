@@ -64,7 +64,8 @@ defmodule GeoSQL.Mixfile do
       groups_for_modules: [
         Standard: [~r/GeoSQL.MM[23].*/],
         "Non-Standard": [~r/GeoSQL.Common.*/],
-        "PostGIS Only": [~r/GeoSQL.PostGIS.*/]
+        PostGIS: [~r/GeoSQL.PostGIS.*/],
+        Spatialite: [~r/GeoSQL.SpatialLite.*/]
       ]
     ]
   end

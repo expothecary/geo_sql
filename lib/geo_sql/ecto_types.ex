@@ -1,4 +1,5 @@
 defmodule Int4 do
+  @moduledoc false
   use Ecto.Type
   def type, do: :int4
   def cast(value), do: {:ok, value}

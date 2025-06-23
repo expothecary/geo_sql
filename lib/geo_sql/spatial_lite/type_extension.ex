@@ -37,7 +37,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   ]
 
   defmodule InMemorySqlite do
-    # This agent
+    @moduledoc false
     use Agent
 
     def start_link() do

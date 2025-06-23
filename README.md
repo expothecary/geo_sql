@@ -40,26 +40,26 @@ Full documentation can be generated locally with `mix docs`.
 
 Ecto Schemas can have fields with the following values:
 
-  * `GeoSQL.Geometry`: this supports *all* geometry and geography types. It does no typechecking
-    beyond confirming it is a `Geo`-compatible type, making it a perfect "catch-all" generic
+  * GeoSQL.Geometry: this supports *all* geometry and geography types. It does no typechecking
+    beyond confirming it is a Geo-compatible type, making it a perfect "catch-all" generic
     type for use in schemas.
-  * `GeoSQL.Geometry.Point`
-  * `GeoSQLGeometry.PointZ`
-  * `GeoSQLGeometry.PointM`
-  * `GeoSQLGeometry.PointZM`
-  * `GeoSQLGeometry.LineString`
-  * `GeoSQLGeometry.LineStringZ`
-  * `GeoSQLGeometry.LineStringZM`
-  * `GeoSQLGeometry.Polygon`
-  * `GeoSQLGeometry.PolygonZ`
-  * `GeoSQLGeometry.MultiPoint`
-  * `GeoSQLGeometry.MultiPointZ`
-  * `GeoSQLGeometry.MultiLineString`
-  * `GeoSQLGeometry.MultiLineStringZ`
-  * `GeoSQLGeometry.MultiLineStringZM`
-  * `GeoSQLGeometry.MultiPolygon`
-  * `GeoSQLGeometry.MultiPolygonZ`
-  * `GeoSQLGeometry.GeometryCollection`
+  * GeoSQL.Geometry.Point
+  * GeoSQL.Geometry.PointZ
+  * GeoSQL.Geometry.PointM
+  * GeoSQL.Geometry.PointZM
+  * GeoSQL.Geometry.LineString
+  * GeoSQL.Geometry.LineStringZ
+  * GeoSQL.Geometry.LineStringZM
+  * GeoSQL.Geometry.Polygon
+  * GeoSQL.Geometry.PolygonZ
+  * GeoSQL.Geometry.MultiPoint
+  * GeoSQL.Geometry.MultiPointZ
+  * GeoSQL.Geometry.MultiLineString
+  * GeoSQL.Geometry.MultiLineStringZ
+  * GeoSQL.Geometry.MultiLineStringZM
+  * GeoSQL.Geometry.MultiPolygon
+  * GeoSQL.Geometry.MultiPolygonZ
+  * GeoSQL.Geometry.GeometryCollection
 
 Example:
 
@@ -80,19 +80,16 @@ Example:
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling
 `GeoSQL.init/2`. This can be done once the repo has been started by implementing
-the `init/2` callback in your repo module like this once the repository has been
-started (usually under a supervisor such as `MyApp.Application`):
+the `init/2` callback in your repo module like this:
 
   ```elixir
   defmodule MyApp.Repo do
-    use Ecto.Repo,
-  * `GeoSQLGeometry..otp_app: :my_app`
-      adapter: Ecto.Adapters.Postgres
+    use Ecto.Repo, otp_app: :my_app, adapter: Ecto.Adapters.Postgres
 
     @impl true
     def init(:supervisor, config) do
-  * `GeoSQLGeometry..GeoSQL.init(__MODULE__` json: Jason)
-  * `GeoSQLGeometry..{:ok` config}
+      GeoSQL.init(__MODULE__, json: Jason)
+      {:ok, config}
     end
 
     def init(:runtime, config), do: {:ok, config}
@@ -141,25 +138,28 @@ not an issue.
 #### Composition
 
 `GeoSQL` macros can also be freely composted and used together, such as this query which
-uses a number of standard and Postgis-specific features together:
+uses a number of standard and PostGIS-specific features together:
 
   ```elixir
   from(g in layer.source,
     prefix: ^layer.prefix,
     where:
       bbox_intersects?(
-  * `GeoSQLGeometry..  field(g, ^columns.geometry)`
-  * `GeoSQLGeometry..  MM2.transform(tile_envelope(^z, ^x, ^y)` ^layer.srid)
-  * `GeoSQLGeometry..)`
+        field(g, ^columns.geometry),
+        MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, Int4))
+      ),
     select: %{
-  * `GeoSQLGeometry..name: ^layer.name`
+      name: ^layer.name,
       geom:
         as_mvt_geom(
-  * `GeoSQLGeometry..    field(g, ^columns.geometry)`
-  * `GeoSQLGeometry..    MM2.transform(tile_envelope(^z, ^x, ^y)` ^layer.srid)
-  * `GeoSQLGeometry..  )`
-  * `GeoSQLGeometry..id: field(g, ^columns.id)`
-  * `GeoSQLGeometry..tags: field(g` ^columns.tags)
+          field(g, ^columns.geometry),
+          MM2.transform(
+            tile_envelope(^z, ^x, ^y),
+            type(^layer.srid, Int4)
+          )
+        ),
+      id: field(g, ^columns.id),
+      tags: field(g, ^columns.tags)
     }
   )
   ```
@@ -169,7 +169,7 @@ uses a number of standard and Postgis-specific features together:
 Sometimes queries will require casting to the database's native geometry type. This typically
 occurs when, for example, a query passes a geography type to a geometry function in PostGIS.
 
-Such casting can be backend-specific, and so the provided `GeoSQL.Common.cast_as_geometry/2`
+Such casting can be backend-specific, and so the provided `GeoSQL.Common.cast_to_geometry/2`
 function exists
 
 ### Queries returning binary blobs instead of geometries
@@ -221,10 +221,9 @@ pulls in their suite of features and introduces helpful aliases with one line in
   use GeoSQL.MM3
 
   def query() do
-    from(
-  * `GeoSQLGeometry..features in MyApp.FeatureLayer`
+    from(features in MyApp.Feature
       select: %{
-  * `GeoSQLGeometry..  area_2d: MM2.area(features.geometry)`
+        area_2d: MM2.area(features.geometry)`
         area_3d: MM3.ThreeD.area(features.geometry)
       }
     )
@@ -242,25 +241,23 @@ The `PostGIS.VectorTiles.generate/5` function takes a layer definition in the fo
 `PostGIS.VectorTiles.Layer` structs along with the tile coordinates and an `Ecto.Repo`:
 
   ```elixir
-    use GeoSQL.PostGIS
-
-    def tile(zoom, x, y) do
-      layers = [
-        %PostGIS.VectorTiles.Layer{
-  * `GeoSQLGeometry..    name: "pois"`
-  * `GeoSQLGeometry..    source: "nodes"`
-  * `GeoSQLGeometry..    columns: %{geometry: :geom, id: :node_id` tags: :tags}
-  * `GeoSQLGeometry..  }`
-        %PostGIS.VectorTiles.Layer{
-  * `GeoSQLGeometry..    name: "buildings"`
-  * `GeoSQLGeometry..    source: "buildings"`
-  * `GeoSQLGeometry..    columns: %{geometry: :footprint, id: :id` tags: :tags}
-        }
-      ]
+  def tile(zoom, x, y) do
+    layers = [
+      %PostGIS.VectorTiles.Layer{
+        name: "pois",
+        source: "nodes",
+        columns: %{geometry: :geom, id: :node_id, tags: :tags}
+      },
+      %PostGIS.VectorTiles.Layer{
+        name: "buildings",
+        source: "buildings",
+        columns: %{geometry: :footprint, id: :id, tags: :tags}
+      }
+    ]
 
 
-  * `GeoSQLGeometry..PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y` layers)
-    end
+    PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y, layers)
+  end
   ```
 
 The resulting data can be loaded directly into map renderers such as `MapLibre` or `OpenLayers`
@@ -304,7 +301,7 @@ Exampple:
 
   ```shell
   # Run only the PostGIS tests.
-  GEOSQL_TEST_BACKENDS=pgsql mix test test/ecto_test.exs  
+  GEOSQL_TEST_BACKENDS=pgsql mix test test/ecto_test.exs
   ```
 
 Current the following backends are recognized:

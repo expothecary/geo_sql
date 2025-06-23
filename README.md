@@ -253,6 +253,22 @@ This allows the tests to access the database in a known state each run.
 
 Tests may be run continuously with `mix test.watch`.
 
+### Running tests for a subset of backends
+
+To limit which backends the tests are run against, set the `GEOSQL_TEST_BACKENDS` environment variable before running tests to a comma-separated list of backends.
+
+Exampple:
+
+  ```shell
+  # Run only the PostGIS tests.
+  GEOSQL_TEST_BACKENDS=pgsql mix test test/ecto_test.exs  
+  ```
+
+Current the following backends are recognized:
+
+  * `pgsql`
+  * `sqlite3`
+
 ## Contributing
 
 If you would like to contribute support for more functions (PostGIS and

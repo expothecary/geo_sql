@@ -144,3 +144,40 @@ defmodule GeoSQL.Geometry do
 
   def equal?(a, b), do: a == b
 end
+
+for type <- [
+      Point,
+      PointZ,
+      PointM,
+      PointZM,
+      LineString,
+      LineStringZ,
+      LineStringZM,
+      Polygon,
+      PolygonZ,
+      MultiPoint,
+      MultiPointZ,
+      MultiLineString,
+      MultiLineStringZ,
+      MultiLineStringZM,
+      MultiPolygon,
+      MultiPolygonZ
+    ] do
+  defmodule Module.concat(GeoSQL.Geometry, type) do
+    @type t :: Geo.geometry()
+    use Ecto.Type
+
+    def type, do: unquote(String.to_atom("geo_#{type}"))
+
+    def blank?(_), do: false
+
+    def load(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+    def load(_data), do: :error
+
+    def dump(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+    def dump(_data), do: :error
+
+    def cast({:ok, value}), do: cast(value)
+    def cast(%unquote(Module.concat(Geo, type)){} = geom), do: {:ok, geom}
+  end
+end

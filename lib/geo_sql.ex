@@ -160,7 +160,7 @@ defmodule GeoSQL do
     if not Code.ensure_loaded?(types_module) do
       Postgrex.Types.define(
         types_module,
-        [GeoSQL.PostGIS.Extension] ++ Ecto.Adapters.Postgres.extensions(),
+        GeoSQL.PostGIS.Extension.extensions() ++ Ecto.Adapters.Postgres.extensions(),
         opts
       )
     end

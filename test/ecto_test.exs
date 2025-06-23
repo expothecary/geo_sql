@@ -3,9 +3,40 @@ defmodule GeoSQL.Ecto.Test do
   import Ecto.Query
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti}
+  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti, GeoTypes, WrongGeoTypes}
 
   describe "Basic geometry queries" do
+    test "GeoSQL.Geometry.Point" do
+      point = %Geo.Point{coordinates: {30, -90}, srid: 4326}
+      linestring = %Geo.LineString{coordinates: [{30, -90}, {30, -91}], srid: 4326}
+
+      {:ok, _} =
+        Ecto.Adapters.SQL.query(
+          PostGISRepo.get_dynamic_repo(),
+          "INSERT INTO specified_columns (id, t, point, linestring) VALUES ($1, $2, $3, $4)",
+          [
+            42,
+            "test",
+            point,
+            linestring
+          ]
+        )
+
+      assert match?(
+               [
+                 %GeoTypes{
+                   id: 42,
+                   t: "test",
+                   point: %Geo.Point{srid: 4326},
+                   linestring: %Geo.LineString{srid: 4326}
+                 }
+               ],
+               PostGISRepo.all(GeoTypes)
+             )
+
+      assert_raise(ArgumentError, fn -> PostGISRepo.all(WrongGeoTypes) end)
+    end
+
     test "query multipoint" do
       geom = Geo.WKB.decode!(Fixtures.multipoint_wkb())
 

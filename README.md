@@ -36,31 +36,73 @@ Run the usual `mix deps.get`!
 
 Full documentation can be generated locally with `mix docs`.
 
+### Ecto Schemas
+
+Ecto Schemas can have fields with the following values:
+
+  * `GeoSQL.Geometry`: this supports *all* geometry and geography types. It does no typechecking
+    beyond confirming it is a `Geo`-compatible type, making it a perfect "catch-all" generic
+    type for use in schemas.
+  * `GeoSQL.Geometry.Point`
+  * `GeoSQLGeometry..PointZ`
+  * `GeoSQLGeometry..PointM`
+  * `GeoSQLGeometry..PointZM`
+  * `GeoSQLGeometry..LineString`
+  * `GeoSQLGeometry..LineStringZ`
+  * `GeoSQLGeometry..LineStringZM`
+  * `GeoSQLGeometry..Polygon`
+  * `GeoSQLGeometry..PolygonZ`
+  * `GeoSQLGeometry..MultiPoint`
+  * `GeoSQLGeometry..MultiPointZ`
+  * `GeoSQLGeometry..MultiLineString`
+  * `GeoSQLGeometry..MultiLineStringZ`
+  * `GeoSQLGeometry..MultiLineStringZM`
+  * `GeoSQLGeometry..MultiPolygon`
+  * `GeoSQLGeometry..MultiPolygonZ`
+
+Example:
+
+  ```elixir
+  defmodule MyApp.GeoTable do
+    use Ecto.Schema
+
+    schema "specified_columns" do
+      field(:name, :string)
+      field(:geometry, GeoSQL.Geometry) # will match any Geo type
+      field(:point, GeoSQL.Geometry.Point) # will reject any non-Point data
+      field(:linestring, GeoSQL.Geometry.LineStringZ) # will reject any non-LineStringZ data
+    end
+  end
+  ```
+
 ### Readying the Repo with `GeoSQL.init/1`
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling
-`GeoSQL.init/1`. This can be done once the repo has been started by implementing
-the `init/2` callback in your repo module like this:
+`GeoSQL.init/2`. This can be done once the repo has been started by implementing
+the `init/2` callback in your repo module like this once the repository has been
+started (usually under a supervisor such as `MyApp.Application`):
 
   ```elixir
   defmodule MyApp.Repo do
     use Ecto.Repo,
-      otp_app: :my_app,
+  * `GeoSQLGeometry..otp_app: :my_app`
       adapter: Ecto.Adapters.Postgres
 
     @impl true
     def init(:supervisor, config) do
-      GeoSQL.init(__MODULE__, json: Jason)
-      {:ok, config}
+  * `GeoSQLGeometry..GeoSQL.init(__MODULE__` json: Jason)
+  * `GeoSQLGeometry..{:ok` config}
     end
 
     def init(:runtime, config), do: {:ok, config}
   end
   ```
 
-once the repository has been started (usually under a supervisor such as in
-`MyApp.Application`). If migrations are failing, place a `GeoSQL.init/1` call
-in the top-level of the file the Repo is defined in:
+For PostGIS, types are automatically added by `GeoSQL.init/2`. For this reason, call
+`GeoSQL.init/2` *after* any other custom types are registered. The type extensions included
+in `GeoSQL` are available via the `GeoSQL.PostGIS.Extension.extensions/0` function.
+
+If migrations are failing, place a `GeoSQL.init/1` call in the top-level of the file the Repo is defined in:
 
   ```
   defmodule MyApp.Repo do
@@ -105,18 +147,18 @@ uses a number of standard and Postgis-specific features together:
     prefix: ^layer.prefix,
     where:
       bbox_intersects?(
-        field(g, ^columns.geometry),
-        MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
-      ),
+  * `GeoSQLGeometry..  field(g, ^columns.geometry)`
+  * `GeoSQLGeometry..  MM2.transform(tile_envelope(^z, ^x, ^y)` ^layer.srid)
+  * `GeoSQLGeometry..)`
     select: %{
-      name: ^layer.name,
+  * `GeoSQLGeometry..name: ^layer.name`
       geom:
         as_mvt_geom(
-          field(g, ^columns.geometry),
-          MM2.transform(tile_envelope(^z, ^x, ^y), ^layer.srid)
-        ),
-      id: field(g, ^columns.id),
-      tags: field(g, ^columns.tags)
+  * `GeoSQLGeometry..    field(g, ^columns.geometry)`
+  * `GeoSQLGeometry..    MM2.transform(tile_envelope(^z, ^x, ^y)` ^layer.srid)
+  * `GeoSQLGeometry..  )`
+  * `GeoSQLGeometry..id: field(g, ^columns.id)`
+  * `GeoSQLGeometry..tags: field(g` ^columns.tags)
     }
   )
   ```
@@ -179,9 +221,9 @@ pulls in their suite of features and introduces helpful aliases with one line in
 
   def query() do
     from(
-      features in MyApp.FeatureLayer,
+  * `GeoSQLGeometry..features in MyApp.FeatureLayer`
       select: %{
-        area_2d: MM2.area(features.geometry),
+  * `GeoSQLGeometry..  area_2d: MM2.area(features.geometry)`
         area_3d: MM3.ThreeD.area(features.geometry)
       }
     )
@@ -204,19 +246,19 @@ The `PostGIS.VectorTiles.generate/5` function takes a layer definition in the fo
     def tile(zoom, x, y) do
       layers = [
         %PostGIS.VectorTiles.Layer{
-          name: "pois",
-          source: "nodes",
-          columns: %{geometry: :geom, id: :node_id, tags: :tags}
-        },
+  * `GeoSQLGeometry..    name: "pois"`
+  * `GeoSQLGeometry..    source: "nodes"`
+  * `GeoSQLGeometry..    columns: %{geometry: :geom, id: :node_id` tags: :tags}
+  * `GeoSQLGeometry..  }`
         %PostGIS.VectorTiles.Layer{
-          name: "buildings",
-          source: "buildings",
-          columns: %{geometry: :footprint, id: :id, tags: :tags}
+  * `GeoSQLGeometry..    name: "buildings"`
+  * `GeoSQLGeometry..    source: "buildings"`
+  * `GeoSQLGeometry..    columns: %{geometry: :footprint, id: :id` tags: :tags}
         }
       ]
 
 
-      PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y, layers)
+  * `GeoSQLGeometry..PostGIS.VectorTiles.generate(MyApp.Repo, zoom, x, y` layers)
     end
   ```
 

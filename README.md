@@ -44,21 +44,22 @@ Ecto Schemas can have fields with the following values:
     beyond confirming it is a `Geo`-compatible type, making it a perfect "catch-all" generic
     type for use in schemas.
   * `GeoSQL.Geometry.Point`
-  * `GeoSQLGeometry..PointZ`
-  * `GeoSQLGeometry..PointM`
-  * `GeoSQLGeometry..PointZM`
-  * `GeoSQLGeometry..LineString`
-  * `GeoSQLGeometry..LineStringZ`
-  * `GeoSQLGeometry..LineStringZM`
-  * `GeoSQLGeometry..Polygon`
-  * `GeoSQLGeometry..PolygonZ`
-  * `GeoSQLGeometry..MultiPoint`
-  * `GeoSQLGeometry..MultiPointZ`
-  * `GeoSQLGeometry..MultiLineString`
-  * `GeoSQLGeometry..MultiLineStringZ`
-  * `GeoSQLGeometry..MultiLineStringZM`
-  * `GeoSQLGeometry..MultiPolygon`
-  * `GeoSQLGeometry..MultiPolygonZ`
+  * `GeoSQLGeometry.PointZ`
+  * `GeoSQLGeometry.PointM`
+  * `GeoSQLGeometry.PointZM`
+  * `GeoSQLGeometry.LineString`
+  * `GeoSQLGeometry.LineStringZ`
+  * `GeoSQLGeometry.LineStringZM`
+  * `GeoSQLGeometry.Polygon`
+  * `GeoSQLGeometry.PolygonZ`
+  * `GeoSQLGeometry.MultiPoint`
+  * `GeoSQLGeometry.MultiPointZ`
+  * `GeoSQLGeometry.MultiLineString`
+  * `GeoSQLGeometry.MultiLineStringZ`
+  * `GeoSQLGeometry.MultiLineStringZM`
+  * `GeoSQLGeometry.MultiPolygon`
+  * `GeoSQLGeometry.MultiPolygonZ`
+  * `GeoSQLGeometry.GeometryCollection`
 
 Example:
 

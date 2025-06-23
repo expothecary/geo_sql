@@ -73,6 +73,24 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec add_point(
+          line :: GeoSQL.geometry_input(),
+          point :: GeoSQL.geometry_input(),
+          position :: integer
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro add_point(line, point, position \\ -1) do
+    quote do
+      fragment(
+        "ST_AddPoint(?,?,?)",
+        unquote(line),
+        unquote(point),
+        unquote(position)
+      )
+    end
+  end
+
   @doc group: "Measurement"
   defmacro azimuth(originGeometry, targetGeometry) do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))

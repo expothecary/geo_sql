@@ -8,9 +8,61 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.Test.Helper
   alias GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, LocationMulti}
+  alias GeoSQL.Test.Schema.{Location, LocationMulti, GeoType}
 
   for repo <- Helper.repos() do
+    describe "add_point (#{repo})" do
+      test "adds a point to a line" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType, select: Common.add_point(location.linestring, location.point))
+
+        assert [%Geo.LineString{coordinates: coordinates}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert length(coordinates) == Enum.count(line.coordinates) + 1
+      end
+
+      test "-1 adds a point to the end of a line" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType, select: Common.add_point(location.linestring, location.point))
+
+        assert [%Geo.LineString{coordinates: coordinates}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert length(coordinates) == Enum.count(line.coordinates) + 1
+        assert Enum.at(coordinates, 2) == point.coordinates
+      end
+
+      test "0 prepends a point to the line" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType, select: Common.add_point(location.linestring, location.point))
+
+        assert [%Geo.LineString{coordinates: coordinates}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert length(coordinates) == Enum.count(line.coordinates) + 1
+        assert Enum.at(coordinates, 0) == point.coordinates
+      end
+    end
+
     describe "extent (#{repo})" do
       test "extent" do
         geom = Geo.WKB.decode!(Fixtures.multipoint_wkb())

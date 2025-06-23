@@ -297,7 +297,7 @@ Tests may be run continuously with `mix test.watch`.
 
 To limit which backends the tests are run against, set the `GEOSQL_TEST_BACKENDS` environment variable before running tests to a comma-separated list of backends.
 
-Exampple:
+Example:
 
   ```shell
   # Run only the PostGIS tests.

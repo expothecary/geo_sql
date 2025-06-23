@@ -275,5 +275,5 @@ SQL/MM specification and non-standard functions keeps the codebase lean.
 This library came into being to scratch the author's itch for a GIS library
 that isn't constrainted by legacy commitments, can be used with other databases such
 as SQLite, and which provides high-level features such as easy generation of
-Mapbox vector tiles. The path there can be traced through the `geo-postgix`
+Mapbox vector tiles. The path there can be traced through the `geo-postgis`
 codebase, however, and that deserves acknowledgement and gratitude.

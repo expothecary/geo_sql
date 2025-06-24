@@ -33,7 +33,7 @@ defmodule GeoSQL.Mixfile do
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},
       {:exqlite, "~> 0.32", override: true},
-      {:ecto_sqlite3, github: "aseigo/ecto_sqlite3", branch: "feature/type-extensions"},
+      {:ecto_sqlite3, "~> 0.21"},
       {:jason, "~> 1.0"},
 
       # dev

@@ -280,8 +280,8 @@ defmodule GeoSQL.PostGIS do
   end
 
   @spec line_crossing_direction(
-          linestringA :: Geo.LineString.t() | GeoSQL.geometry_input(),
-          linestringB :: Geo.LineString.t() | GeoSQL.geometry_input()
+          linestringA :: Geometry.LineString.t() | GeoSQL.geometry_input(),
+          linestringB :: Geometry.LineString.t() | GeoSQL.geometry_input()
         ) ::
           GeoSQL.fragment()
   @doc group: "Topology Relationships"

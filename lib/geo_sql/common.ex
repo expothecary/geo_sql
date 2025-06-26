@@ -820,6 +820,19 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_SetPoint(?, ?, ?)", unquote(geometry), unquote(index), unquote(point))
   end
 
+  @spec set_srid(geometry :: GeoSQL.geometry_input(), srid :: pos_integer, repo :: Ecto.Repo.t()) ::
+          GeoSQL.fragment()
+  @doc group: "Spatial Reference Systems"
+  defmacro set_srid(geometry, srid, repo) do
+    case(RepoUtils.adapter(repo)) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("SetSRID(?, ?)", unquote(geometry), unquote(srid))
+    end
+  end
+
   @doc group: "Geometry Processing"
   defmacro shared_paths(geometryA, geometryB) do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))

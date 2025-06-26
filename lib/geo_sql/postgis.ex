@@ -496,13 +496,6 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Scroll(?, ?)", unquote(linestring), unquote(point))
   end
 
-  @spec set_srid(geometry :: GeoSQL.geometry_input(), srid :: pos_integer) ::
-          GeoSQL.fragment()
-  @doc group: "Spatial Reference Systems"
-  defmacro set_srid(geometry, srid) do
-    quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
-  end
-
   @doc group: "Geometry Accessors"
   defmacro summary(geometry) do
     quote do: fragment("ST_Summary(?)", unquote(geometry))

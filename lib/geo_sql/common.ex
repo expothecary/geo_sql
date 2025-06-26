@@ -270,7 +270,7 @@ defmodule GeoSQL.Common do
 
   @spec is_valid_detail(geometry :: GeoSQL.geometry_input(), esri_compat? :: boolean) ::
           GeoSQL.fragment()
-  @doc group: "Geometry Editors"
+  @doc group: "Geometry Validation"
   defmacro is_valid_detail(geometry, esri_compat? \\ false) do
     flags = if esri_compat?, do: 1, else: 0
     quote do: fragment("ST_IsValidDetail(?,?)", unquote(geometry), unquote(flags))

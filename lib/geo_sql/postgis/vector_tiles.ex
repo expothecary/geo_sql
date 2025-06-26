@@ -2,8 +2,9 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   import Ecto.Query
   use GeoSQL.MM2
   require GeoSQL.PostGIS
-  import GeoSQL.PostGIS.Operators
+  require GeoSQL.PostGIS.Operators
   alias GeoSQL.PostGIS
+  alias GeoSQL.QueryUtils
 
   @moduledoc """
   In addition to support for functions related to Mapbox vector tiles, this module also
@@ -48,7 +49,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     allowed = [:name, :extent, :geom_name, :feature_id_name]
 
     {param_string, params} =
-      PostGIS.Utils.as_positional_params(options, allowed)
+      QueryUtils.as_positional_params(options, allowed)
 
     template = "ST_AsMVT(? #{param_string})"
 
@@ -69,7 +70,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   @doc group: "SQL Functions"
   defmacro as_mvt_geom(geometry, bounds, options) do
     allowed = [:extent, :buffer, :clip_geom]
-    {param_string, params} = PostGIS.Utils.as_positional_params(options, allowed)
+    {param_string, params} = QueryUtils.as_positional_params(options, allowed)
     template = "ST_AsMVTGeom(?, ? #{param_string})"
 
     quote do
@@ -146,7 +147,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
       from(g in layer.source,
         prefix: ^layer.prefix,
         where:
-          bbox_intersects?(
+          PostGIS.Operators.bbox_intersects?(
             field(g, ^columns.geometry),
             MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, Int4))
           ),

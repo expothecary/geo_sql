@@ -1,4 +1,4 @@
-defmodule GeoSQL.PostGIS.Utils do
+defmodule GeoSQL.QueryUtils do
   @moduledoc false
 
   @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::

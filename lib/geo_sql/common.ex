@@ -112,6 +112,22 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec collection_extract(
+          collection :: GeoSQL.geometry_input(),
+          type :: :point | :line_string | :polygon
+        ) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro collection_extract(collection, type) do
+    type_value =
+      case type do
+        :point -> 1
+        :linestring -> 2
+        :polygon -> 3
+      end
+
+    quote do: fragment("ST_CollectionExtract(?,?)", unquote(collection), unquote(type_value))
+  end
+
   @spec concave_hull(GeoSQL.geometry_input(), precision :: number(), allow_holes? :: boolean) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
@@ -250,6 +266,14 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Accessors"
   defmacro is_polygon_counter_clockwise(geometry) do
     quote do: fragment("ST_IsPolygonCCW(?)", unquote(geometry))
+  end
+
+  @spec is_valid_detail(geometry :: GeoSQL.geometry_input(), esri_compat? :: boolean) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro is_valid_detail(geometry, esri_compat? \\ false) do
+    flags = if esri_compat?, do: 1, else: 0
+    quote do: fragment("ST_IsValidDetail(?,?)", unquote(geometry), unquote(flags))
   end
 
   @spec largest_empty_circle(GeoSQL.geometry_input(), tolerance :: number(), Ecto.Repo.t() | nil) ::
@@ -637,6 +661,12 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec multi(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro multi(collection) do
+    quote do: fragment("ST_Multi(?)", unquote(collection))
+  end
+
   @doc group: "Overlays"
   defmacro node(geometry) do
     quote do: fragment("ST_Node(?)", unquote(geometry))
@@ -677,14 +707,41 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Polygonize(?)", unquote(geometry))
   end
 
-  @doc group: "Topology Relationships"
-  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
-    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
+  @spec project(geometry :: GeoSQL.geometry_input(), distance :: number, azimuth :: number) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro project(geometry, distance, azimuth) do
+    quote do
+      fragment(
+        "ST_Project(?, ?, ?)",
+        unquote(geometry),
+        unquote(distance),
+        unquote(azimuth)
+      )
+    end
   end
 
   @doc group: "Geometry Processing"
   defmacro reduce_precision(geometry, grid_size) when is_number(grid_size) do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
+  end
+
+  @spec remove_point(line :: GeoSQL.geometry_input(), offset :: integer) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro remove_point(line, offset) do
+    quote do
+      fragment(
+        "ST_RemovePoint(?, ?, ?)",
+        unquote(line),
+        unquote(offset)
+      )
+    end
+  end
+
+  @doc group: "Topology Relationships"
+  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
+    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
   @spec remove_repeated_points(GeoSQL.geometry_input(), tolerance :: number, Ecto.Repo.t() | nil) ::
@@ -701,6 +758,12 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec reverse(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro reverse(geometry) do
+    quote do: fragment("ST_Reverse(?)", unquote(geometry))
+  end
+
   @doc group: "Affine Transformations"
   defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
@@ -710,6 +773,13 @@ defmodule GeoSQL.Common do
     else
       quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
     end
+  end
+
+  @spec segmentize(geometry :: GeoSQL.geometry_input(), max_segement_length :: number) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro segmentize(geometry, max_segement_length) do
+    quote do: fragment("ST_Segmentize(?, ?)", unquote(geometry), unquote(max_segement_length))
   end
 
   @spec scale(GeoSQL.geometry_input(), scale_x :: number, scale_y :: number, Ecto.Repo.t() | nil) ::
@@ -731,13 +801,24 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec set_point(
+          geometry :: GeoSQL.geometry_input(),
+          index :: integer,
+          point :: GeoSQL.geometry_input()
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro set_point(geometry, index, point) do
+    quote do: fragment("ST_SetPoint(?, ?, ?)", unquote(geometry), unquote(index), unquote(point))
+  end
+
   @doc group: "Geometry Processing"
   defmacro shared_paths(geometryA, geometryB) do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @doc group: "Geometry Mutations"
   @spec shift_longitude(GeoSQL.geometry_input(), Ecto.Repo.t()) :: GeoSQL.fragment()
+  @doc group: "Geometry Mutations"
   defmacro shift_longitude(geometry, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
@@ -769,6 +850,87 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Processing"
   defmacro simplify_preserve_topology(geometry, tolerance) when is_number(tolerance) do
     quote do: fragment("ST_SimplifyPreserveTopology(?, ?)", unquote(geometry), unquote(tolerance))
+  end
+
+  @spec snap_to_grid(
+          GeoSQL.geometry_input(),
+          reference :: GeoSQL.geometry_input(),
+          precision :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro snap(geometry, reference, precision) do
+    quote do
+      fragment(
+        "ST_SnapToGrid(?,?)",
+        unquote(geometry),
+        unquote(reference),
+        unquote(precision)
+      )
+    end
+  end
+
+  @spec snap_to_grid(GeoSQL.geometry_input(), size :: number) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro snap_to_grid(geometry, size) do
+    quote do: fragment("ST_SnapToGrid(?,?)", unquote(geometry), unquote(size))
+  end
+
+  @spec snap_to_grid(GeoSQL.geometry_input(), size_x :: number, size_y :: number) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro snap_to_grid(geometry, size_x, size_y) do
+    quote do
+      fragment(
+        "ST_SnapToGrid(?,?,?)",
+        unquote(geometry),
+        unquote(size_x),
+        unquote(size_y)
+      )
+    end
+  end
+
+  @spec snap_to_grid(
+          GeoSQL.geometry_input(),
+          origin_x :: number,
+          origin_y :: number,
+          size_x :: number,
+          size_y :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro snap_to_grid(geometry, origin_x, origin_y, size_x, size_y) do
+    quote do
+      fragment(
+        "ST_SnapToGrid(?,?,?,?,?)",
+        unquote(geometry),
+        unquote(origin_x),
+        unquote(origin_y),
+        unquote(size_x),
+        unquote(size_y)
+      )
+    end
+  end
+
+  @spec snap_to_grid(
+          GeoSQL.geometry_input(),
+          point :: GeoSQL.geometry_input(),
+          size_x :: number,
+          size_y :: number,
+          size_z :: number,
+          size_m :: number
+        ) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro snap_to_grid(geometry, point, size_x, size_y, size_z, size_m) do
+    quote do
+      fragment(
+        "ST_SnapToGrid(?,?,?,?,?,?)",
+        unquote(geometry),
+        unquote(point),
+        unquote(size_x),
+        unquote(size_y),
+        unquote(size_z),
+        unquote(size_m)
+      )
+    end
   end
 
   @doc group: "Overlays"

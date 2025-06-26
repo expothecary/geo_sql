@@ -90,6 +90,14 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_BoundingDiagonal(?,?)", unquote(geometry), unquote(best_fit?))
   end
 
+  CollectionHomogenize
+
+  @spec collection_homogenize(collection :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro collection_homogenize(collection) do
+    quote do: fragment("ST_CollectionHomogenize(?)", unquote(collection))
+  end
+
   @spec contains_properly(
           GeoSQL.geometry_input(),
           GeoSQL.geometry_input(),
@@ -255,8 +263,8 @@ defmodule GeoSQL.PostGIS do
   end
 
   @spec line_crossing_direction(
-          linestringA :: Geo.LineString.t() | GeoSQL.fragment(),
-          linestringB :: Geo.LineString.t() | GeoSQL.fragment()
+          linestringA :: Geo.LineString.t() | GeoSQL.geometry_input(),
+          linestringB :: Geo.LineString.t() | GeoSQL.geometry_input()
         ) ::
           GeoSQL.fragment()
   @doc group: "Topology Relationships"
@@ -264,6 +272,12 @@ defmodule GeoSQL.PostGIS do
     quote do
       fragment("ST_LineCrossingDirection(?, ?)", unquote(linestringA), unquote(linestringB))
     end
+  end
+
+  @spec line_to_curve(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro line_to_curve(geometry) do
+    quote do: fragment("ST_LineToCurve(?)", unquote(geometry))
   end
 
   @doc group: "Linear Referencing"
@@ -338,19 +352,84 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_MemSize(?)", unquote(geometry))
   end
 
+  @spec normalize(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro normalize(geometry) do
+    quote do: fragment("ST_Normalize(?)", unquote(geometry))
+  end
+
   @spec points(GeoSQL.Geometry.t()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro points(geometry) do
     quote do: fragment("ST_Points(?)", unquote(geometry))
   end
 
+  @type quantize_coordinate :: :x | :y | :z | :m
+  @type quantize_precision :: [{quantize_coordinate, number}]
+  @spec quantize_coordinates(geometry :: GeoSQL.geometry_input(), quantize_precision) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro quantize_coordinates(geometry, precisions) do
+    x = Keyword.get(precisions, :x, 0)
+    y = Keyword.get(precisions, :y, x)
+    z = Keyword.get(precisions, :z, x)
+    m = Keyword.get(precisions, :m, x)
+
+    quote do
+      fragment(
+        "ST_QuantizeCoordinates(?,?,?,?,?)",
+        unquote(geometry),
+        unquote(x),
+        unquote(y),
+        unquote(z),
+        unquote(m)
+      )
+    end
+  end
+
+  @spec remove_irrelevant_points_for_view(
+          geometry :: GeoSQL.geometry_input(),
+          bbox_bounds :: GeoSQL.geometry_input(),
+          cartesian? :: boolean
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro remove_irrelevant_points_for_view(geometry, bbox_bounds, cartesian? \\ false) do
+    quote do
+      fragment(
+        "ST_RemoveIrrelevantPointsForView(?, ?, ?)",
+        unquote(geometry),
+        unquote(bbox_bounds),
+        unquote(cartesian?)
+      )
+    end
+  end
+
+  @spec remove_small_parts(
+          geometry :: GeoSQL.geometry_input(),
+          minSizeX :: number,
+          minSizeY :: number
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro remove_small_parts(geometry, minSizeX, minSizeY \\ false) do
+    quote do
+      fragment(
+        "ST_RemoveSmallParts(?, ?, ?)",
+        unquote(geometry),
+        unquote(minSizeX),
+        unquote(minSizeY)
+      )
+    end
+  end
+
   @doc group: "Affine Transformations"
-  defmacro rotate(geometry, rotate_radians) when is_number(rotate_radians) do
+  defmacro rotate(geometry, rotate_radians) do
     quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate(geometry, rotate_radians, origin_point) when is_number(rotate_radians) do
+  defmacro rotate(geometry, rotate_radians, origin_point) do
     quote do
       fragment(
         "ST_Rotate(?, ?, ?)",
@@ -362,17 +441,17 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_x(geometry, rotate_radians) when is_number(rotate_radians) do
+  defmacro rotate_x(geometry, rotate_radians) do
     quote do: fragment("ST_RotateX(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_y(geometry, rotate_radians) when is_number(rotate_radians) do
+  defmacro rotate_y(geometry, rotate_radians) do
     quote do: fragment("ST_RotateY(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate_z(geometry, rotate_radians) when is_number(rotate_radians) do
+  defmacro rotate_z(geometry, rotate_radians) do
     quote do: fragment("ST_RotateZ(?, ?)", unquote(geometry), unquote(rotate_radians))
   end
 
@@ -410,6 +489,15 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @spec scroll(linestring :: GeoSQL.geometry_input(), point :: GeoSQL.geometry_input()) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro scroll(linestring, point) do
+    quote do: fragment("ST_Scroll(?, ?)", unquote(linestring), unquote(point))
+  end
+
+  @spec set_srid(geometry :: GeoSQL.geometry_input(), srid :: pos_integer) ::
+          GeoSQL.fragment()
   @doc group: "Spatial Reference Systems"
   defmacro set_srid(geometry, srid) do
     quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
@@ -421,7 +509,7 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Geometry Editors"
-  defmacro swap_ordinates(geometry, ordinates) when is_binary(ordinates) do
+  defmacro swap_ordinates(geometry, ordinates) do
     quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
   end
 
@@ -449,6 +537,13 @@ defmodule GeoSQL.PostGIS do
         unquote(scale_y)
       )
     end
+  end
+
+  @spec wrap_x(geometry :: GeoSQL.geometry_input(), wrap :: number, move :: number) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro wrap_x(geometry, wrap, move) do
+    quote do: fragment("ST_WrapX(?,?,?)", unquote(geometry), unquote(wrap), unquote(move))
   end
 
   @doc group: "Geometry Accessors"

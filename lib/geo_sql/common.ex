@@ -43,7 +43,7 @@ defmodule GeoSQL.Common do
   Used to cast data to geometries in a backend-neutral fashion. This can be necessary
   when, for example, passing geogrpahy types to geometry functions in PostGIS.
   """
-  defmacro cast_to_geometry(geo, repo) do
+  defmacro cast_to_geometry(geo, repo \\ nil) do
     case GeoSQL.RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("CAST(? AS geometry)", unquote(geo))
@@ -88,6 +88,92 @@ defmodule GeoSQL.Common do
         unquote(point),
         unquote(position)
       )
+    end
+  end
+
+  @spec as_ewkb(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Well-Known Binary (WKB)"
+  defmacro as_ewkb(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_AsEWKB(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("AsEWKB(?)", unquote(geometry))
+    end
+  end
+
+  @spec as_ewkt(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Well-Known Text (WKT)"
+  defmacro as_ewkt(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_AsEWKT(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("AsEWKT(?)", unquote(geometry))
+    end
+  end
+
+  @spec as_geojson(geometry :: GeoSQL.geometry_input(), Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  defmacro as_geojson(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_AsGeoJSON(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("AsGeoJSON(?)", unquote(geometry))
+    end
+  end
+
+  @spec as_gml(
+          geometry :: GeoSQL.geometry_input(),
+          gml_version :: 2 | 3,
+          precision :: pos_integer,
+          Ecto.Repo.t()
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  defmacro as_gml(geometry, gml_version, precision, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_AsGML(?,?,?)",
+            unquote(gml_version),
+            unquote(geometry),
+            unquote(precision)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment("AsGML(?,?,?)", unquote(gml_version), unquote(geometry), unquote(precision))
+        end
+    end
+  end
+
+  @spec as_kml(
+          geometry :: GeoSQL.geometry_input(),
+          precision :: pos_integer,
+          name :: String.t(),
+          Ecto.Repo.t() | nil
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  defmacro as_kml(geometry, precision, name \\ "", repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment("ST_AsKML(?,?,?)", unquote(geometry), unquote(precision, unquote(name)))
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment("AsKML(?,'',?,?)", unquote(name), unquote(geometry), unquote(precision))
+        end
     end
   end
 
@@ -239,10 +325,82 @@ defmodule GeoSQL.Common do
 
   @spec flip_coordinates(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Mutations"
-  defmacro flip_coordinates(geometry, repo) do
+  defmacro flip_coordinates(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
       Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
+    end
+  end
+
+  @spec geom_from_ewkb(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Well-Known Binary (WKB)"
+  defmacro geom_from_ewkb(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_GeomFromEWKB(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromEWKB(?)", unquote(geometry))
+    end
+  end
+
+  @spec geom_from_ewkt(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Well-Known Text (WKT)"
+  defmacro geom_from_ewkt(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_GeomFromEWKT(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromEWKT(?)", unquote(geometry))
+    end
+  end
+
+  @spec geom_from_geojson(geojson :: GeoSQL.geometry_input() | String.t(), Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  defmacro geom_from_geojson(geojson, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_GeomFromGeoJSON(?)", unquote(geojson))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromGeoJSON(?)", unquote(geojson))
+    end
+  end
+
+  @spec geom_from_gml(
+          gml :: GeoSQL.geometry_input() | String.t(),
+          srid :: non_neg_integer,
+          Ecto.Repo.t() | nil
+        ) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  @doc "Passing an srid of 0 (the default) will not set an srid on the results. It is ignored for Spatialite in all cases."
+  defmacro geom_from_gml(gml, srid \\ 0, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        if srid > 0 do
+          quote do: fragment("ST_GeomFromGML(?,?)", unquote(gml), unquote(srid))
+        else
+          quote do: fragment("ST_GeomFromGML(?)", unquote(gml))
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromGML(?)", unquote(gml))
+    end
+  end
+
+  @spec geom_from_kml(kml :: GeoSQL.geometry_input() | String.t(), Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
+  @doc group: "Data Formats"
+  defmacro geom_from_kml(kml, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_GeomFromKML(?)", unquote(kml))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromKML(?)", unquote(kml))
     end
   end
 
@@ -301,30 +459,16 @@ defmodule GeoSQL.Common do
   @spec line_interpolate_point(
           line :: GeoSQL.geometry_input(),
           fraction :: number,
-          Ecto.Repo.t() | nil
-        ) ::
-          GeoSQL.fragment()
-  @doc group: "Linear Referencing"
-  defmacro line_interpolate_point(line, fraction, repo) when is_fraction(fraction) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_LineInterpolatePoint(?,?)", unquote(line), unquote(fraction))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do: fragment("ST_Line_Interpolate_Point(?,?)", unquote(line), unquote(fraction))
-    end
-  end
-
-  @spec line_interpolate_point(
-          line :: GeoSQL.geometry_input(),
-          fraction :: number,
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_interpolate_point(line, fraction, use_spheroid?, repo)
-           when is_fraction(fraction) do
+  @doc """
+  Spatialite does not support spheroid calculations, and therefore `use_spheroid?` is ignored
+  on that platform.
+  """
+  defmacro line_interpolate_point(line, fraction, use_spheroid? \\ false, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
@@ -372,8 +516,7 @@ defmodule GeoSQL.Common do
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_interpolate_points(line, fraction, use_spheroid?, repo)
-           when is_fraction(fraction) do
+  defmacro line_interpolate_points(line, fraction, use_spheroid?, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
@@ -399,29 +542,16 @@ defmodule GeoSQL.Common do
   @spec line_locate_point(
           line :: GeoSQL.geometry_input(),
           point :: GeoSQL.geometry_input(),
-          Ecto.Repo.t() | nil
-        ) ::
-          GeoSQL.fragment()
-  @doc group: "Linear Referencing"
-  defmacro line_locate_point(line, point, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_LineLocatePoint(?,?)", unquote(line), unquote(point))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do: fragment("ST_Line_Locate_Point(?,?)", unquote(line), unquote(point))
-    end
-  end
-
-  @spec line_locate_point(
-          line :: GeoSQL.geometry_input(),
-          point :: GeoSQL.geometry_input(),
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_locate_point(line, point, use_spheroid?, repo) do
+  @doc """
+  Spatialite does not support spheroid calculations, and therefore `use_spheroid?` is ignored
+  on that platform.
+  """
+  defmacro line_locate_point(line, point, use_spheroid? \\ false, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
@@ -446,8 +576,7 @@ defmodule GeoSQL.Common do
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_substring(line, start_fraction, end_fraction, repo)
-           when is_fraction(start_fraction) and is_fraction(end_fraction) do
+  defmacro line_substring(line, start_fraction, end_fraction, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
@@ -508,85 +637,29 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_MakeValid(?)", unquote(geometry))
   end
 
+  @spec make_point(
+          coordinates :: [Geometry.fragment()] | [number],
+          Ecto.Repo.t() | nil
+        ) :: Geometry.fragment()
   @doc group: "Geometry Constructors"
-  defmacro make_point(x, y, repo) do
+  defmacro make_point(coordinates, repo \\ nil) do
+    param_string = List.duplicate("?", Enum.count(coordinates)) |> Enum.join(",")
+
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_MakePoint(?, ?)", unquote(x), unquote(y))
+        quote do:
+                fragment(unquote("ST_MakePoint(#{param_string})"), unquote_splicing(coordinates))
 
       Ecto.Adapters.SQLite3 ->
-        quote do: fragment("MakePoint(?, ?)", unquote(x), unquote(y))
-    end
-  end
-
-  @doc group: "Geometry Constructors"
-  defmacro make_point(x, y, z, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_MakePoint(?, ?, ?)", unquote(x), unquote(y), unquote(z))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do: fragment("MakePoint(?, ?, ?)", unquote(x), unquote(y), unquote(z))
-    end
-  end
-
-  @doc group: "Geometry Constructors"
-  defmacro make_point(x, y, z, m, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do
-          quote(
-            do:
-              fragment(
-                "ST_MakePoint(?, ?, ?, ?)",
-                unquote(x),
-                unquote(y),
-                unquote(z),
-                unquote(m)
-              )
-          )
-        end
-
-      Ecto.Adapters.SQLite3 ->
-        quote do
-          fragment(
-            "MakePointZM(?, ?, ?, ?)",
-            unquote(x),
-            unquote(y),
-            unquote(z),
-            unquote(m)
-          )
-        end
-    end
-  end
-
-  @spec min_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
-          GeoSQL.fragment()
-  @doc group: "Bounding Boxes"
-  defmacro min_coord(geometry, :x, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_MinX(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_XMin(?)", unquote(geometry))
-    end
-  end
-
-  defmacro min_coord(geometry, :y, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_YMin(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_MinY(?)", unquote(geometry))
-    end
-  end
-
-  defmacro min_coord(geometry, :z, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_ZMin(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_MinZ(?)", unquote(geometry))
+        quote do: fragment(unquote("MakePoint(#{param_string})"), unquote_splicing(coordinates))
     end
   end
 
   @spec max_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Bounding Boxes"
+  defmacro max_coord(geometry, axis, repo \\ nil)
+
   defmacro max_coord(geometry, :x, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_XMax(?)", unquote(geometry))
@@ -626,6 +699,32 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec min_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
+          GeoSQL.fragment()
+  @doc group: "Bounding Boxes"
+  defmacro min_coord(geometry, axis, repo \\ nil)
+
+  defmacro min_coord(geometry, :x, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_MinX(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_XMin(?)", unquote(geometry))
+    end
+  end
+
+  defmacro min_coord(geometry, :y, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_YMin(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_MinY(?)", unquote(geometry))
+    end
+  end
+
+  defmacro min_coord(geometry, :z, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_ZMin(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_MinZ(?)", unquote(geometry))
+    end
+  end
+
   @spec minimum_bounding_circle(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro minimum_bounding_circle(geometry, repo \\ nil) do
@@ -651,7 +750,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Measurement"
-  defmacro minimum_clearance(geometry, repo) do
+  defmacro minimum_clearance(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_MinimumClearance(?)", unquote(geometry))
       Ecto.Adapters.SQLite3 -> quote do: fragment("GEOSMinimumClearance(?)", unquote(geometry))
@@ -659,7 +758,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Measurement"
-  defmacro minimum_clearance_line(geometry, repo) do
+  defmacro minimum_clearance_line(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_MinimumClearanceLine(?)", unquote(geometry))
@@ -755,8 +854,7 @@ defmodule GeoSQL.Common do
   @spec remove_repeated_points(GeoSQL.geometry_input(), tolerance :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Editors"
-  defmacro remove_repeated_points(geometry, tolerance \\ 0, repo \\ nil)
-           when is_number(tolerance) do
+  defmacro remove_repeated_points(geometry, tolerance \\ 0, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_RemoveRepeatedPoints(?,?)", unquote(geometry), unquote(tolerance))
@@ -820,11 +918,15 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_SetPoint(?, ?, ?)", unquote(geometry), unquote(index), unquote(point))
   end
 
-  @spec set_srid(geometry :: GeoSQL.geometry_input(), srid :: pos_integer, repo :: Ecto.Repo.t()) ::
+  @spec set_srid(
+          geometry :: GeoSQL.geometry_input(),
+          srid :: pos_integer,
+          repo :: Ecto.Repo.t() | nil
+        ) ::
           GeoSQL.fragment()
   @doc group: "Spatial Reference Systems"
-  defmacro set_srid(geometry, srid, repo) do
-    case(RepoUtils.adapter(repo)) do
+  defmacro set_srid(geometry, srid, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_SetSRID(?, ?)", unquote(geometry), unquote(srid))
 
@@ -838,9 +940,9 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_SharedPaths(?, ?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec shift_longitude(GeoSQL.geometry_input(), Ecto.Repo.t()) :: GeoSQL.fragment()
+  @spec shift_longitude(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Mutations"
-  defmacro shift_longitude(geometry, repo) do
+  defmacro shift_longitude(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres -> quote do: fragment("ST_ShiftLongitude(?)", unquote(geometry))
       Ecto.Adapters.SQLite3 -> quote do: fragment("ST_Shift_Longitude(?)", unquote(geometry))

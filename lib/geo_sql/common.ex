@@ -276,6 +276,14 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_IsValidDetail(?,?)", unquote(geometry), unquote(flags))
   end
 
+  @spec is_valid_reason(geometry :: GeoSQL.geometry_input(), esri_compat? :: boolean) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Validation"
+  defmacro is_valid_reason(geometry, esri_compat? \\ false) do
+    flags = if esri_compat?, do: 1, else: 0
+    quote do: fragment("ST_IsValidReason(?,?)", unquote(geometry), unquote(flags))
+  end
+
   @spec largest_empty_circle(GeoSQL.geometry_input(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"

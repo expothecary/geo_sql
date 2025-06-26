@@ -977,13 +977,46 @@ defmodule GeoSQL.Common do
     end
   end
 
+  @spec transform_pipeline(
+          GeoSQL.geometry_input(),
+          pipeline :: String.t(),
+          srid :: pos_integer,
+          Ecto.Repo.t() | nil
+        ) :: GeoSQL.fragment()
+  @doc group: "Spatial Reference Systems"
+  defmacro transform_pipeline(geometry, pipeline, srid, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment(
+            "ST_TransformPipeline(?,?,?)",
+            unquote(geometry),
+            unquote(pipeline),
+            unquote(srid)
+          )
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment(
+            "ST_Transform(?,?,NULL,?)",
+            unquote(geometry),
+            unquote(srid),
+            unquote(pipeline)
+          )
+        end
+    end
+  end
+
   @spec triangulate_polygon(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro triangulate_polygon(geometry, repo \\ nil) do
-    if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
-      quote do: fragment("ConstrainedDelaunayTriangulation(?)", unquote(geometry))
-    else
-      quote do: fragment("ST_TriangulatePolygon()", unquote(geometry))
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_TriangulatePolygon(?)", unquote(geometry))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ConstrainedDelaunayTriangulation(?)", unquote(geometry))
     end
   end
 

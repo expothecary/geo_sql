@@ -262,6 +262,23 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_IsCollection(?)", unquote(geometry))
   end
 
+  @spec inverse_transform_pipeline(
+          GeoSQL.geometry_input(),
+          pipeline :: String.t(),
+          srid :: pos_integer
+        ) :: GeoSQL.fragment()
+  @doc group: "Spatial Reference Systems"
+  defmacro inverse_transform_pipeline(geometry, pipeline, srid) do
+    quote do
+      fragment(
+        "ST_InverseTransformPipeline(?,?,?)",
+        unquote(geometry),
+        unquote(pipeline),
+        unquote(srid)
+      )
+    end
+  end
+
   @spec line_crossing_direction(
           linestringA :: Geo.LineString.t() | GeoSQL.geometry_input(),
           linestringB :: Geo.LineString.t() | GeoSQL.geometry_input()

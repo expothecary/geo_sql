@@ -666,7 +666,7 @@ defmodule GeoSQL.Common do
         quote do: fragment("ST_MakePoint(?,?,?)", unquote(x), unquote(y), unquote(z))
 
       Ecto.Adapters.SQLite3 ->
-        quote do: fragment("MakePoint(?,?,?)", unquote(x), unquote(y), unquote(z))
+        quote do: fragment("MakePointZ(?,?,?)", unquote(x), unquote(y), unquote(z))
     end
   end
 
@@ -687,8 +687,25 @@ defmodule GeoSQL.Common do
 
       Ecto.Adapters.SQLite3 ->
         quote do
-          fragment("MakePoint(?,?,?,?)", unquote(x), unquote(y), unquote(z), unquote(m))
+          fragment("MakePointZM(?,?,?,?)", unquote(x), unquote(y), unquote(z), unquote(m))
         end
+    end
+  end
+
+  @spec make_point_m(
+          x :: [Geometry.fragment()] | [number],
+          y :: [Geometry.fragment()] | [number],
+          z :: [Geometry.fragment()] | [number],
+          Ecto.Repo.t() | nil
+        ) :: Geometry.fragment()
+  @doc group: "Geometry Constructors"
+  defmacro make_point_m(x, y, z, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_MakePointM(?,?,?)", unquote(x), unquote(y), unquote(z))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("MakePointM(?,?,?)", unquote(x), unquote(y), unquote(z))
     end
   end
 

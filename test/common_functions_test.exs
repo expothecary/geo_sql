@@ -252,5 +252,59 @@ defmodule GeoSQL.CommonFunctions.Test do
                ]
       end
     end
+
+    describe "makepoint (#{repo})" do
+      test "makes a 2D point" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query = from(location in GeoType, select: Common.make_point(1, 2, unquote(repo)))
+
+        assert [%Geo.Point{coordinates: {1.0, 2.0}}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+      end
+
+      test "makes a 3D point" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query = from(location in GeoType, select: Common.make_point(1, 2, 3, unquote(repo)))
+
+        assert [%Geo.PointZ{coordinates: {1.0, 2.0, 3.0}}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+      end
+
+      test "makes a 2D point with a measure" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query = from(location in GeoType, select: Common.make_point_m(1, 2, 3, unquote(repo)))
+
+        assert [%Geo.PointM{coordinates: {1.0, 2.0, 3.0}}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+      end
+
+      test "makes a 3D point with a measure" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query = from(location in GeoType, select: Common.make_point(1, 2, 3, 4, unquote(repo)))
+
+        assert [%Geo.PointZM{coordinates: {1.0, 2.0, 3.0, 4.0}}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+      end
+    end
   end
 end

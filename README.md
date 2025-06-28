@@ -127,7 +127,12 @@ Once initialized, the wide array of macros can be used with `Ecto` queries:
 
 Some macros, such as `GeoSQL.Common.extent`, take an optional `Ecto.Repo` parameter.
 This allows those macros to generate the correct SQL statements for the backend being used.
-If no rep is passed to those functions, they assume PostGIS compatibility.
+If no repo is passed to those functions, they assume PostGIS compatibility by default, though
+this can be configured by adding this to `config.ex`:
+
+  ```elixir
+  config :geo_sql, default_adapter: Ecto.Adapters.<PreferredAdapter>
+  ```
 
 Note that the value passed must be the literal repo module name. Passing in a variable
 to which the repo was assigned will usually fail unless wrapped in a macro context, as

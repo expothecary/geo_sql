@@ -45,11 +45,15 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   """
 
   @doc group: "SQL Functions"
+  defmacro as_mvt(rows) do
+    quote do: fragment("ST_AsMVT(?)", unquote(rows))
+  end
+
+  @doc group: "SQL Functions"
   defmacro as_mvt(rows, options) do
     allowed = [:name, :extent, :geom_name, :feature_id_name]
 
-    {param_string, params} =
-      QueryUtils.as_positional_params(options, allowed)
+    {param_string, params} = QueryUtils.as_positional_params(options, allowed)
 
     template = "ST_AsMVT(? #{param_string})"
 
@@ -93,11 +97,6 @@ defmodule GeoSQL.PostGIS.VectorTiles do
         unquote(y)
       )
     end
-  end
-
-  @doc group: "SQL Functions"
-  defmacro as_mvt(rows) do
-    quote do: fragment("ST_AsMVT(?)", unquote(rows))
   end
 
   @doc group: "SQL Functions"

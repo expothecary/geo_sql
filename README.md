@@ -29,7 +29,7 @@ This library is currently not available on `hex.pm`. Until it is, you may add
 it to your project by adding the following to the `deps` section in `mix.exs`:
 
   ```
-  {:geo_sql, github: "aseigo/geo_sql"}
+  {:geo_sql, github: "expothecary/geo_sql"}
   ```
 
 Run the usual `mix deps.get`!

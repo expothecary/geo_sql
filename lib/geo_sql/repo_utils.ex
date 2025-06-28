@@ -4,10 +4,15 @@ defmodule GeoSQL.RepoUtils do
 
   defmacro adapter(repo) do
     quote do
-      if unquote(repo) == nil do
-        unquote(@default_adapter)
-      else
-        Macro.expand(unquote(repo), __CALLER__).__adapter__()
+      case unquote(repo) do
+        {_, _, nil} ->
+          unquote(@default_adapter)
+
+        nil ->
+          unquote(@default_adapter)
+
+        _ ->
+          Macro.expand(unquote(repo), __CALLER__).__adapter__()
       end
     end
   end

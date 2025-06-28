@@ -50,18 +50,42 @@ defmodule GeoSQL.PostGIS.VectorTiles do
   end
 
   @doc group: "SQL Functions"
-  defmacro as_mvt(rows, options) do
-    allowed = [:name, :extent, :geom_name, :feature_id_name]
+  defmacro as_mvt(rows, name) do
+    quote do
+      fragment("ST_AsMVT(?,?)", unquote(rows), unquote(name))
+    end
+  end
 
-    {param_string, params} = QueryUtils.as_positional_params(options, allowed)
+  @doc group: "SQL Functions"
+  defmacro as_mvt(rows, name, extent) do
+    quote do
+      fragment("ST_AsMVT(?,?,?)", unquote(rows), unquote(name), unquote(extent))
+    end
+  end
 
-    template = "ST_AsMVT(? #{param_string})"
-
+  @doc group: "SQL Functions"
+  defmacro as_mvt(rows, name, extent, geom_name) do
     quote do
       fragment(
-        unquote(template),
+        "ST_AsMVT(?,?,?,?)",
         unquote(rows),
-        unquote_splicing(params)
+        unquote(name),
+        unquote(extent),
+        unquote(geom_name)
+      )
+    end
+  end
+
+  @doc group: "SQL Functions"
+  defmacro as_mvt(rows, name, extent, geom_name, feature_id_name) do
+    quote do
+      fragment(
+        "ST_AsMVT(?,?,?,?,?)",
+        unquote(rows),
+        unquote(name),
+        unquote(extent),
+        unquote(geom_name),
+        unquote(feature_id_name)
       )
     end
   end
@@ -130,7 +154,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
     geometry = geom_query(zoom, x, y, layers)
 
     from(g in subquery(geometry, prefix: db_prefix),
-      select: as_mvt(g, name: g.name)
+      select: as_mvt(g, g.name)
     )
     |> repo.one()
   end

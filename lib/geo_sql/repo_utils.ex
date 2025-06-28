@@ -1,6 +1,7 @@
 defmodule GeoSQL.RepoUtils do
   @moduledoc false
-  @default_adapter Ecto.Adapters.Postgres
+
+  @default_adapter Application.compile_env(:geo_sql, :default_adapter, Ecto.Adapters.Postgres)
 
   defmacro adapter(repo) do
     quote do

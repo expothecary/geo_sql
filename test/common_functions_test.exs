@@ -273,7 +273,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
 
-        query = from(location in GeoType, select: Common.make_point(1, 2, 3, unquote(repo)))
+        query = from(location in GeoType, select: Common.make_point_z(1, 2, 3, unquote(repo)))
 
         assert [%Geo.PointZ{coordinates: {1.0, 2.0, 3.0}}] =
                  unquote(repo).all(query)
@@ -299,7 +299,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
 
-        query = from(location in GeoType, select: Common.make_point(1, 2, 3, 4, unquote(repo)))
+        query = from(location in GeoType, select: Common.make_point_zm(1, 2, 3, 4, unquote(repo)))
 
         assert [%Geo.PointZM{coordinates: {1.0, 2.0, 3.0, 4.0}}] =
                  unquote(repo).all(query)

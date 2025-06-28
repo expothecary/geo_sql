@@ -638,20 +638,57 @@ defmodule GeoSQL.Common do
   end
 
   @spec make_point(
-          coordinates :: [Geometry.fragment()] | [number],
+          x :: [Geometry.fragment()] | [number],
+          y :: [Geometry.fragment()] | [number],
           Ecto.Repo.t() | nil
         ) :: Geometry.fragment()
   @doc group: "Geometry Constructors"
-  defmacro make_point(coordinates, repo \\ nil) do
-    param_string = List.duplicate("?", Enum.count(coordinates)) |> Enum.join(",")
-
+  defmacro make_point(x, y, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
-        quote do:
-                fragment(unquote("ST_MakePoint(#{param_string})"), unquote_splicing(coordinates))
+        quote do: fragment("ST_MakePoint(?,?)", unquote(x), unquote(y))
 
       Ecto.Adapters.SQLite3 ->
-        quote do: fragment(unquote("MakePoint(#{param_string})"), unquote_splicing(coordinates))
+        quote do: fragment("MakePoint(?,?)", unquote(x), unquote(y))
+    end
+  end
+
+  @spec make_point(
+          x :: [Geometry.fragment()] | [number],
+          y :: [Geometry.fragment()] | [number],
+          z :: [Geometry.fragment()] | [number],
+          Ecto.Repo.t() | nil
+        ) :: Geometry.fragment()
+  @doc group: "Geometry Constructors"
+  defmacro make_point(x, y, z, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_MakePoint(?,?,?)", unquote(x), unquote(y), unquote(z))
+
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("MakePoint(?,?,?)", unquote(x), unquote(y), unquote(z))
+    end
+  end
+
+  @spec make_point(
+          x :: [Geometry.fragment()] | [number],
+          y :: [Geometry.fragment()] | [number],
+          z :: [Geometry.fragment()] | [number],
+          m :: [Geometry.fragment()] | [number],
+          Ecto.Repo.t() | nil
+        ) :: Geometry.fragment()
+  @doc group: "Geometry Constructors"
+  defmacro make_point(x, y, z, m, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do
+          fragment("ST_MakePoint(?,?,?,?)", unquote(x), unquote(y), unquote(z), unquote(m))
+        end
+
+      Ecto.Adapters.SQLite3 ->
+        quote do
+          fragment("MakePoint(?,?,?,?)", unquote(x), unquote(y), unquote(z), unquote(m))
+        end
     end
   end
 

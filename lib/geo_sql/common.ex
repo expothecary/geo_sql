@@ -83,7 +83,7 @@ defmodule GeoSQL.Common do
         quote do: fragment("ST_AsEWKB(?)", unquote(geometry))
 
       Ecto.Adapters.SQLite3 ->
-        quote do: fragment("AsEWKB(?)", unquote(geometry))
+        quote do: fragment("unhex(AsEWKB(?))", unquote(geometry))
     end
   end
 

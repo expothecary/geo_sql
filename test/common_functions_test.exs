@@ -63,6 +63,19 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "as_ewkb (#{repo})" do
+      test "returns correct binary data" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query = from(location in Location, select: Common.as_ewkb(location.geom, unquote(repo)))
+
+        assert [^ewkb] = unquote(repo).all(query)
+      end
+    end
+
     describe "extent (#{repo})" do
       test "extent" do
         geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())

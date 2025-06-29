@@ -151,7 +151,7 @@ defmodule GeoSQL.Common do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do
-          fragment("ST_AsKML(?,?,?)", unquote(geometry), unquote(precision, unquote(name)))
+          fragment("ST_AsKML(?,?,?)", unquote(geometry), unquote(precision), unquote(name))
         end
 
       Ecto.Adapters.SQLite3 ->

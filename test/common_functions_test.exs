@@ -11,6 +11,23 @@ defmodule GeoSQL.CommonFunctions.Test do
   alias GeoSQL.Test.Schema.{Location, LocationMulti, GeoType}
 
   for repo <- Helper.repos() do
+    describe "add_measure (#{repo})" do
+      test "adds measure values to a line" do
+        line = Fixtures.linestring()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType, select: Common.add_measure(location.linestring, 0, 100))
+
+        assert [%Geometry.LineStringM{path: path}] =
+                 unquote(repo).all(query)
+                 |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert match?([[_, _, 0.0], [_, _, 100.0]], path)
+      end
+    end
+
     describe "add_point (#{repo})" do
       test "adds a point to a line" do
         line = Fixtures.linestring()

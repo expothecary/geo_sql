@@ -117,15 +117,47 @@ defmodule GeoSQL.CommonFunctions.Test do
         query =
           from(location in Location, select: Common.as_geojson(location.geom, unquote(repo)))
 
-        [geojson_text] = unquote(repo).all(query)
+        [geojson] = unquote(repo).all(query)
 
         hydrated =
-          geojson_text
+          geojson
           |> Jason.decode!()
           |> Geometry.from_geo_json!()
 
         assert 4326 = hydrated.srid
         assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
+      end
+    end
+
+    describe "as_gml (#{repo})" do
+      test "returns correct v3 gml" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.as_gml(location.geom, 3, 4, unquote(repo)))
+
+        [gml] = unquote(repo).all(query)
+
+        assert String.starts_with?(gml, "<gml:MultiSurface")
+        assert Regex.run(~r/srsName=".*EPSG:4326"/, gml) != nil
+        assert String.contains?(gml, ~s|srsDimension="2"|)
+      end
+
+      test "returns correct v2 gml" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.as_gml(location.geom, 2, 4, unquote(repo)))
+
+        [gml] = unquote(repo).all(query)
+
+        assert String.starts_with?(gml, "<gml:MultiPolygon")
+        assert Regex.run(~r/srsName=".*EPSG:4326"/, gml) != nil
+        assert not String.contains?(gml, ~s|srsDimension="2"|)
       end
     end
 

@@ -127,16 +127,21 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   def decode_geometry(data) do
     # it is retrieved in SpatialLite's format, so translate it to WKB
     conn = InMemorySqlite.conn()
-    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT AsEWKB(?1)")
+
+    # prepare the statement; note the use of unhex to get a binary blob out
+    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT unhex(AsEWKB(?1))")
+
+    # bind the blob via a :blob tuple
     :ok = Exqlite.Sqlite3.bind(statement, [{:blob, data}])
 
-    {:row, [base16_wkb]} = Exqlite.Sqlite3.step(conn, statement)
+    # get the response back
+    {:row, [ewkb]} = Exqlite.Sqlite3.step(conn, statement)
 
+    # release our resources
     :ok = Exqlite.Sqlite3.release(conn, statement)
 
-    {:ok, wkb} = Base.decode16(base16_wkb)
     # decode the WKB to a Geo struct
-    case Geometry.from_ewkb(wkb) do
+    case Geometry.from_ewkb(ewkb) do
       {:ok, data} -> {:ok, data}
       {:error, _reason} -> :error
     end

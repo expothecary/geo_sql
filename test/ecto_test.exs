@@ -7,6 +7,27 @@ defmodule GeoSQL.Ecto.Test do
 
   for repo <- Helper.repos() do
     describe "Basic geometry queries #{repo}" do
+      test "geometry equality" do
+        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+
+        geom_comparison =
+          Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+
+        unquote(repo).insert(%Location{name: "Smallville", geom: geom})
+
+        results =
+          from(location in Location,
+            limit: 1,
+            select: %{
+              raw_different: location.geom == ^geom_comparison,
+              raw_same: location.geom == ^geom
+            }
+          )
+          |> unquote(repo).one()
+
+        assert match?(%{raw_same: true, raw_different: false}, results)
+      end
+
       test "GeoSQL.Geometry.Point" do
         point = %Geometry.Point{coordinates: [30, -90], srid: 4326}
         linestring = %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}

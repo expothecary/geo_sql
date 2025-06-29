@@ -108,6 +108,27 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "as_geojson (#{repo})" do
+      test "returns correct binary data" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.as_geojson(location.geom, unquote(repo)))
+
+        [geojson_text] = unquote(repo).all(query)
+
+        hydrated =
+          geojson_text
+          |> Jason.decode!()
+          |> Geometry.from_geo_json!()
+
+        assert 4326 = hydrated.srid
+        assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
+      end
+    end
+
     describe "extent (#{repo})" do
       test "extent" do
         geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())

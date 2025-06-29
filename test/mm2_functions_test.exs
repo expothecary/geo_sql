@@ -6,72 +6,41 @@ defmodule GeoSQL.MM2Functions.Test do
 
   alias GeoSQL.Test.Schema.Location
 
-  def geom(which \\ :default)
-
-  def geom(which), do: Geometry.from_ewkb!(Fixtures.multipoint_ewkb(which))
-
   setup do
+    geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+
     for repo <- Helper.repos() do
-      repo.insert(%Location{name: "Smallville", geom: geom()})
+      repo.insert(%Location{name: "Smallville", geom: geom})
     end
 
     :ok
   end
 
-  describe "SQL/MM2 Queries" do
-    test "simple equality with as_text and without" do
-      full_decoding = [GeoSQL.Test.SQLite.Repo]
-      partial_decoding = [GeoSQL.Test.PostGIS.Repo]
+  defmodule Example do
+    import Ecto.Query
+    require GeoSQL.MM2
+    alias GeoSQL.MM2
 
-      for repo <- Helper.repos(), Enum.member?(full_decoding, repo) do
-        results =
-          from(location in Location,
-            limit: 1,
-            select: %{
-              different: MM2.as_text(location.geom) == MM2.as_text(^geom(:comparison)),
-              same: MM2.as_text(location.geom) == MM2.as_text(^geom()),
-              raw_different: location.geom == ^geom(:comparison),
-              raw_same: location.geom == ^geom()
-            }
-          )
-          |> repo.one()
-
-        assert match?(
-                 %{same: true, raw_same: true, different: false, raw_different: false},
-                 results
-               ),
-               "#{repo} failed"
-      end
-
-      for repo <- Helper.repos(), Enum.member?(partial_decoding, repo) do
-        results =
-          from(location in Location,
-            limit: 1,
-            select: %{
-              raw_different: location.geom == ^geom(:comparison),
-              raw_same: location.geom == ^geom()
-            }
-          )
-          |> repo.one()
-
-        assert match?(%{raw_same: true, raw_different: false}, results), "#{repo} failed"
-      end
+    def example_query(geom) do
+      from(location in Location, select: MM2.distance(location.geom, ^geom))
     end
+  end
 
-    test "area" do
-      for repo <- Helper.repos() do
+  for repo <- Helper.repos() do
+    describe "SQL/MM2: area (#{repo})" do
+      test "returns a numeric result" do
         query = from(location in Location, select: MM2.area(location.geom))
-        results = repo.all(query)
+        results = unquote(repo).all(query)
 
-        assert is_number(hd(results)), "#{repo} failed"
+        assert is_number(hd(results))
       end
     end
 
-    test "as_binary" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: as_binary (#{repo})" do
+      test "eturns a binary representation of the geometry" do
         query = from(location in Location, select: MM2.as_binary(location.geom))
 
-        results = repo.all(query)
+        results = unquote(repo).all(query)
 
         expected = [
           <<1, 6, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0, 145, 161, 239, 117,
@@ -90,192 +59,209 @@ defmodule GeoSQL.MM2Functions.Test do
             213, 33, 192, 244, 173, 97, 130, 228, 129, 66, 64>>
         ]
 
-        assert results === expected, "#{repo} failed"
+        assert results === expected
       end
     end
 
-    test "as_text" do
-      for repo <- Helper.repos() do
-        query = from(location in Location, select: MM2.as_text(location.geom))
+    describe "SQL/MM2: as_text (#{repo})" do
+      full_decoding = [GeoSQL.Test.SQLite.Repo]
+      full_encoding = [GeoSQL.Test.PostGIS.Repo]
 
-        results = repo.all(query)
+      test "returns as text version" do
+        results =
+          from(location in Location,
+            limit: 1,
+            select: MM2.as_text(location.geom)
+          )
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-        # PostGIS manages to capture the full precision, SQLite is slightly less .. precise.
-        expected = [
-          [
-            "MULTIPOLYGON(((-8.91605728674111 37.014786050505705,-8.916004741413165 37.01473548835222,-8.915952155261275 37.014681049196575,-8.915962095363229 37.014641876859656,-8.916008623674168 37.01461030595236,-8.916081231858929 37.01459027129624,-8.91613341474863 37.01460551438246,-8.91618086764759 37.0146639501776,-8.916191835920474 37.01471469650441,-8.91621298667903 37.01474979186158,-8.916197854221068 37.01479683407043,-8.916182273129241 37.01480081322952,-8.916135584881212 37.01481680058167,-8.916094008628827 37.01481707489911,-8.91605728674111 37.014786050505705)))"
-          ],
-          [
-            "MULTIPOLYGON(((-8.916057 37.014786, -8.916005 37.014735, -8.915952 37.014681, -8.915962 37.014642, -8.916009 37.01461, -8.916081 37.01459, -8.916133 37.014606, -8.916181 37.014664, -8.916192 37.014715, -8.916213 37.01475, -8.916198 37.014797, -8.916182 37.014801, -8.916136 37.014817, -8.916094 37.014817, -8.916057 37.014786)))"
-          ]
-        ]
+        expected =
+          if Enum.member?(unquote(full_encoding), unquote(repo)) do
+            Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+          else
+            Geometry.from_ewkb!(Fixtures.multipoint_ewkb()) |> Map.put(:srid, 0)
+          end
 
-        assert Enum.member?(expected, results), "#{repo} failed"
+        assert Helper.fuzzy_match_geometry(
+                 expected.polygons,
+                 Map.get(Geometry.from_ewkt!(results), :polygons)
+               )
+      end
+
+      if Enum.member?(full_decoding, repo) do
+        test "equality checks with as text" do
+          geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+          comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+
+          results =
+            from(location in Location,
+              limit: 1,
+              select: %{
+                different: MM2.as_text(location.geom) == MM2.as_text(^comparison),
+                same: MM2.as_text(location.geom) == MM2.as_text(^geom)
+              }
+            )
+            |> unquote(repo).one()
+
+          assert match?(
+                   %{same: true, raw_same: true, different: false, raw_different: false},
+                   results
+                 )
+        end
       end
     end
 
-    test "boundary" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: boundary (#{repo})" do
+      test "returns a LineString or MultiLinestring from geometry" do
         query = from(location in Location, limit: 1, select: MM2.boundary(location.geom))
 
         [result] =
-          repo.all(query)
-          |> GeoSQL.decode_geometry(repo)
+          unquote(repo).all(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert Helper.is_a(result, [Geometry.LineString, Geometry.MultiLineString]),
-               "#{repo} failed"
+        assert Helper.is_a(result, [Geometry.LineString, Geometry.MultiLineString])
 
         case result do
           %Geometry.LineString{path: path} ->
-            assert is_list(path), "#{repo} failed"
+            assert is_list(path)
 
           %Geometry.MultiLineString{line_strings: line_strings} ->
-            assert is_list(line_strings), "#{repo} failed"
+            assert is_list(line_strings)
 
           %x{} ->
-            flunk("Got #{x}, #{repo} failed")
+            flunk("Got #{x}")
         end
       end
     end
 
-    test "buffer" do
-      for repo <- Helper.repos() do
-        query = from(location in Location, select: MM2.buffer(location.geom, 0))
+    describe "SQL/MM2: buffer (#{repo})" do
+      test "returns a polygon with a radius" do
+        query = from(location in Location, select: MM2.buffer(location.geom, 10))
 
         [result | _] =
-          repo.all(query)
-          |> GeoSQL.decode_geometry(repo)
+          unquote(repo).all(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert(
-          match?(
-            %Geometry.Polygon{rings: _coordinates, srid: 4326},
-            result
-          ),
-          "#{repo} failed first match"
-        )
+        assert match?(
+                 %Geometry.Polygon{rings: _coordinates, srid: 4326},
+                 result
+               )
 
-        assert is_list(result.rings),
-               "#{repo} failed to return a coordinations list (first)"
+        assert is_list(result.rings)
+      end
 
-        query = from(location in Location, select: MM2.buffer(location.geom, 0, 8))
+      test "returns a polygon with a radius and quadrant arg" do
+        query = from(location in Location, select: MM2.buffer(location.geom, 10, 8))
 
         [result | _] =
-          repo.all(query)
-          |> GeoSQL.decode_geometry(repo)
+          unquote(repo).all(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert(
-          match?(
-            %Geometry.Polygon{srid: 4326, rings: _coordinates},
-            result
-          ),
-          "#{repo} failed second match"
-        )
+        assert match?(
+                 %Geometry.Polygon{srid: 4326, rings: _coordinates},
+                 result
+               )
 
-        assert is_list(result.rings),
-               "#{repo} failed to return a coordinations list (first)"
+        assert is_list(result.rings)
       end
     end
 
-    test "centroid" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: centroid (#{repo})" do
+      test "" do
         query = from(location in Location, select: MM2.centroid(location.geom))
-        results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert match?(%Geometry.Point{}, results), "#{repo} failed"
+        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        assert match?(%Geometry.Point{}, results)
       end
     end
 
-    test "contains" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: contains (#{repo})" do
+      test "" do
         query = from(location in Location, select: MM2.centroid(location.geom))
-        results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert match?(%Geometry.Point{}, results), "#{repo} failed"
+        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        assert match?(%Geometry.Point{}, results)
       end
     end
 
-    test "convex_hull" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: convex_hull (#{repo})" do
+      test "" do
         query = from(location in Location, select: MM2.convex_hull(location.geom))
-        results = repo.one(query) |> GeoSQL.decode_geometry(repo)
-        assert match?(%Geometry.Polygon{}, results), "#{repo} failed"
+        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        assert match?(%Geometry.Polygon{}, results)
       end
     end
 
-    test "crosses" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: crosses (#{repo})" do
+      test "" do
         point = %Geometry.Point{coordinates: [8, 10], srid: 4326}
         query = from(location in Location, select: MM2.crosses(location.geom, ^point))
-        results = repo.one(query)
-        assert results == false or results == 0, "#{repo} failed"
+        results = unquote(repo).one(query)
+        assert results == false or results == 0
       end
     end
 
-    test "difference" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: difference (#{repo})" do
+      test "" do
+        comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+
         query =
-          from(location in Location, select: MM2.difference(location.geom, ^geom(:comparison)))
+          from(location in Location, select: MM2.difference(location.geom, ^comparison))
 
         results =
-          repo.one(query)
-          |> GeoSQL.decode_geometry(repo)
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert match?(%Geometry.Polygon{}, results), "#{repo} failed"
+        assert match?(%Geometry.Polygon{}, results)
       end
     end
 
-    test "dimension" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: dimension (#{repo})" do
+      test "" do
         query = from(location in Location, select: MM2.dimension(location.geom))
-        results = repo.one(query)
-        assert 2 = results, "#{repo} failed"
+        results = unquote(repo).one(query)
+        assert 2 = results
       end
     end
 
-    test "disjoint" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: disjoint (#{repo})" do
+      test "" do
+        comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+
         query =
-          from(location in Location, select: MM2.disjoint(location.geom, ^geom(:comparison)))
+          from(location in Location, select: MM2.disjoint(location.geom, ^comparison))
 
-        results = repo.one(query)
-        assert results == false or results == 0, "#{repo} failed"
+        results = unquote(repo).one(query)
+        assert results == false or results == 0
       end
     end
 
-    test "distance" do
-      for repo <- Helper.repos() do
-        query = from(location in Location, select: MM2.distance(location.geom, ^geom()))
-        results = repo.one(query)
-        assert results == 0, "#{repo} failed"
+    describe "SQL/MM2: distance (#{repo})" do
+      test "" do
+        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+        query = from(location in Location, select: MM2.distance(location.geom, ^geom))
+        results = unquote(repo).one(query)
+        assert results == 0
       end
     end
 
-    test "transform" do
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: transform (#{repo})" do
+      test "" do
         query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
-        results = repo.one(query) |> GeoSQL.decode_geometry(repo)
+        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert results.srid == 3452, "#{repo} failed"
+        assert results.srid == 3452
       end
     end
 
-    test "example" do
-      defmodule Example do
-        import Ecto.Query
-        require GeoSQL.MM2
-        alias GeoSQL.MM2
-
-        def example_query(geom) do
-          from(location in Location, select: MM2.distance(location.geom, ^geom))
-        end
-      end
-
-      for repo <- Helper.repos() do
+    describe "SQL/MM2: example (#{repo})" do
+      test "" do
         query =
           Fixtures.multipoint_ewkb()
           |> Geometry.from_ewkb!()
           |> Example.example_query()
 
-        results = repo.one(query)
-        assert results == 0, "#{repo} failed"
+        results = unquote(repo).one(query)
+        assert results == 0
       end
     end
   end

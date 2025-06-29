@@ -8,6 +8,37 @@ defmodule GeoSQL.Test.Helper do
   def is_a(%x{}, which), do: Enum.member?(which, x)
   def is_a(_, _), do: false
 
+  def fuzzy_match_geometry([left], [right]) when is_list(left) and is_list(right) do
+    fuzzy_match_geometry(left, right)
+  end
+
+  def fuzzy_match_geometry(left, right) when is_list(left) and is_list(right) do
+    Enum.zip(left, right)
+    |> Enum.reduce_while(
+      true,
+      fn {l, r}, _acc ->
+        cond do
+          is_list(l) and is_list(r) ->
+            result =
+              Enum.zip(l, r)
+              |> Enum.reduce(true, fn {l, r}, acc ->
+                acc and Float.round(l, 5) == Float.round(r, 5)
+              end)
+
+            if result, do: {:cont, true}, else: {:halt, false}
+
+          is_number(l) and is_number(r) and Float.round(l, 5) == Float.round(r, 5) ->
+            {:cont, true}
+
+          true ->
+            {:halt, false}
+        end
+      end
+    )
+  end
+
+  def fuzzy_match_geometry(_l, _r), do: false
+
   defmacro __using__(options \\ []) do
     setup_funs = Keyword.get(options, :setup_funs, [])
 

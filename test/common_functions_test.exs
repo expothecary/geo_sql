@@ -18,13 +18,13 @@ defmodule GeoSQL.CommonFunctions.Test do
         unquote(repo).insert(%GeoType{t: "hello", linestring: line})
 
         query =
-          from(location in GeoType, select: Common.add_measure(location.linestring, 0, 100))
+          from(location in GeoType, select: Common.add_measure(location.linestring, 1, 100))
 
         assert [%Geometry.LineStringM{path: path}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert match?([[_, _, 0.0], [_, _, 100.0]], path)
+        assert match?([[_, _, 1.0], [_, _, 100.0]], path)
       end
     end
 
@@ -90,6 +90,21 @@ defmodule GeoSQL.CommonFunctions.Test do
         query = from(location in Location, select: Common.as_ewkb(location.geom, unquote(repo)))
 
         assert [^ewkb] = unquote(repo).all(query)
+      end
+    end
+
+    describe "as_ewkt (#{repo})" do
+      test "returns correct binary data" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query = from(location in Location, select: Common.as_ewkt(location.geom, unquote(repo)))
+        [ewkt] = unquote(repo).all(query)
+        hydrated = Geometry.from_ewkt!(ewkt)
+        assert geom.srid == hydrated.srid
+        assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
       end
     end
 

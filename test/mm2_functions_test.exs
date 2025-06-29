@@ -30,9 +30,9 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: area (#{repo})" do
       test "returns a numeric result" do
         query = from(location in Location, select: MM2.area(location.geom))
-        results = unquote(repo).all(query)
+        result = unquote(repo).all(query)
 
-        assert is_number(hd(results))
+        assert is_number(hd(result))
       end
     end
 
@@ -40,7 +40,7 @@ defmodule GeoSQL.MM2Functions.Test do
       test "eturns a binary representation of the geometry" do
         query = from(location in Location, select: MM2.as_binary(location.geom))
 
-        results = unquote(repo).all(query)
+        result = unquote(repo).all(query)
 
         expected = [
           <<1, 6, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 0, 0, 1, 0, 0, 0, 15, 0, 0, 0, 145, 161, 239, 117,
@@ -59,7 +59,7 @@ defmodule GeoSQL.MM2Functions.Test do
             213, 33, 192, 244, 173, 97, 130, 228, 129, 66, 64>>
         ]
 
-        assert results === expected
+        assert result === expected
       end
     end
 
@@ -68,7 +68,7 @@ defmodule GeoSQL.MM2Functions.Test do
       full_encoding = [GeoSQL.Test.PostGIS.Repo]
 
       test "returns as text version" do
-        results =
+        result =
           from(location in Location,
             limit: 1,
             select: MM2.as_text(location.geom)
@@ -85,7 +85,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         assert Helper.fuzzy_match_geometry(
                  expected.polygons,
-                 Map.get(Geometry.from_ewkt!(results), :polygons)
+                 Map.get(Geometry.from_ewkt!(result), :polygons)
                )
       end
 
@@ -94,7 +94,7 @@ defmodule GeoSQL.MM2Functions.Test do
           geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
           comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
 
-          results =
+          result =
             from(location in Location,
               limit: 1,
               select: %{
@@ -106,7 +106,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
           assert match?(
                    %{same: true, raw_same: true, different: false, raw_different: false},
-                   results
+                   result
                  )
         end
       end
@@ -168,100 +168,110 @@ defmodule GeoSQL.MM2Functions.Test do
     end
 
     describe "SQL/MM2: centroid (#{repo})" do
-      test "" do
+      test "returns a centroid point" do
         query = from(location in Location, select: MM2.centroid(location.geom))
-        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
-        assert match?(%Geometry.Point{}, results)
+        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        assert match?(%Geometry.Point{}, result)
       end
     end
 
     describe "SQL/MM2: contains (#{repo})" do
-      test "" do
-        query = from(location in Location, select: MM2.centroid(location.geom))
-        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
-        assert match?(%Geometry.Point{}, results)
+      test "returns true" do
+        point = Fixtures.point()
+        query = from(location in Location, select: MM2.contains(location.geom, ^point))
+        result = unquote(repo).one(query)
+        refute unquote(repo).to_boolean(result)
       end
     end
 
     describe "SQL/MM2: convex_hull (#{repo})" do
-      test "" do
+      test "returns a polygon" do
         query = from(location in Location, select: MM2.convex_hull(location.geom))
-        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
-        assert match?(%Geometry.Polygon{}, results)
+        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        assert match?(%Geometry.Polygon{}, result)
       end
     end
 
     describe "SQL/MM2: crosses (#{repo})" do
-      test "" do
+      test "detects crossing" do
         point = %Geometry.Point{coordinates: [8, 10], srid: 4326}
         query = from(location in Location, select: MM2.crosses(location.geom, ^point))
-        results = unquote(repo).one(query)
-        assert results == false or results == 0
+        result = unquote(repo).one(query)
+        refute unquote(repo).to_boolean(result)
       end
     end
 
     describe "SQL/MM2: difference (#{repo})" do
-      test "" do
+      test "return a polygon" do
         comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
 
         query =
           from(location in Location, select: MM2.difference(location.geom, ^comparison))
 
-        results =
+        result =
           unquote(repo).one(query)
           |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert match?(%Geometry.Polygon{}, results)
+        assert match?(%Geometry.Polygon{}, result)
       end
     end
 
     describe "SQL/MM2: dimension (#{repo})" do
-      test "" do
+      test "returns the correct dimensionality of a geometry" do
         query = from(location in Location, select: MM2.dimension(location.geom))
-        results = unquote(repo).one(query)
-        assert 2 = results
+        result = unquote(repo).one(query)
+        assert 2 = result
       end
     end
 
     describe "SQL/MM2: disjoint (#{repo})" do
-      test "" do
+      test "determines if two geometries are disjoint" do
         comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
 
         query =
           from(location in Location, select: MM2.disjoint(location.geom, ^comparison))
 
-        results = unquote(repo).one(query)
-        assert results == false or results == 0
+        result = unquote(repo).one(query)
+        refute unquote(repo).to_boolean(result)
       end
     end
 
     describe "SQL/MM2: distance (#{repo})" do
-      test "" do
+      test "determines distaince between two geometries" do
         geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
         query = from(location in Location, select: MM2.distance(location.geom, ^geom))
-        results = unquote(repo).one(query)
-        assert results == 0
+        result = unquote(repo).one(query)
+        assert result == 0
+      end
+    end
+
+    describe "SQL/MM2: equals (#{repo})" do
+      test "determines equality between two geometries" do
+        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+        query = from(location in Location, select: MM2.distance(location.geom, ^geom))
+        result = unquote(repo).one(query)
+        assert result == 0
       end
     end
 
     describe "SQL/MM2: transform (#{repo})" do
-      test "" do
+      test "changes the srid of a geometry" do
         query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
-        results = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert results.srid == 3452
+        assert result.srid == 3452
       end
     end
 
-    describe "SQL/MM2: example (#{repo})" do
-      test "" do
+    describe "SQL/MM2: in functions(#{repo})" do
+      test "works via a module function " do
         query =
           Fixtures.multipoint_ewkb()
           |> Geometry.from_ewkb!()
           |> Example.example_query()
 
-        results = unquote(repo).one(query)
-        assert results == 0
+        result = unquote(repo).one(query)
+        assert result == 0
       end
     end
   end

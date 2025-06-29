@@ -161,6 +161,43 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "as_kml (#{repo})" do
+      test "returns correct kml with precision 1" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.as_kml(location.geom, 1, "TestKML", unquote(repo))
+          )
+
+        [kml] = unquote(repo).all(query)
+
+        assert String.contains?(kml, "MultiGeometry>")
+        assert String.contains?(kml, "TestKML")
+        assert String.contains?(kml, ~s|coordinates>-8.9,37|)
+      end
+
+      test "returns correct kml with higher precision" do
+        ewkb = Fixtures.multipoint_ewkb()
+        geom = Geometry.from_ewkb!(ewkb)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.as_kml(location.geom, 5, "TestKML", unquote(repo))
+          )
+
+        [kml] =
+          unquote(repo).all(query)
+
+        assert String.contains?(kml, "MultiGeometry>")
+        assert String.contains?(kml, "TestKML")
+        assert String.contains?(kml, ~s|coordinates>-8.91606,37.01479|)
+      end
+    end
+
     describe "extent (#{repo})" do
       test "extent" do
         geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())

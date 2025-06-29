@@ -1,5 +1,27 @@
 defmodule GeoSQL.QueryUtils do
   @moduledoc false
+  defmacro __using__(_) do
+    quote do
+      require GeoSQL.QueryUtils
+      alias GeoSQL.QueryUtils
+    end
+  end
+
+  require GeoSQL.RepoUtils
+
+  @doc """
+  Used to cast data to geometries in a backend-neutral fashion. This can be necessary
+  when, for example, passing geogrpahy types to geometry functions in PostGIS.
+  """
+  defmacro cast_to_geometry(geo, repo \\ nil) do
+    case GeoSQL.RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("CAST(? AS geometry)", unquote(geo))
+
+      _ ->
+        quote do: unquote(geo)
+    end
+  end
 
   @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
           {param_string :: String.t(), params :: list}

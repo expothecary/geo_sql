@@ -3,6 +3,7 @@ defmodule GeoSQL.MM3Functions.Test do
   import Ecto.Query
   use GeoSQL.MM3
   use GeoSQL.Common
+  use GeoSQL.QueryUtils
   use GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{LocationMulti, Geographies}
@@ -25,8 +26,8 @@ defmodule GeoSQL.MM3Functions.Test do
             select: location,
             order_by:
               MM3.ThreeD.distance(
-                Common.cast_to_geometry(location.geom, unquote(repo)),
-                Common.cast_to_geometry(^geom1, unquote(repo))
+                QueryUtils.cast_to_geometry(location.geom, unquote(repo)),
+                QueryUtils.cast_to_geometry(^geom1, unquote(repo))
               )
           )
 

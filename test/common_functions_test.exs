@@ -198,6 +198,21 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "azimuth (#{repo})" do
+      test "returns a useful value" do
+        db_point = Fixtures.point()
+        client_point = Fixtures.point(:comparison)
+
+        unquote(repo).insert(%GeoType{t: "hello", point: db_point})
+
+        query =
+          from(location in GeoType, select: Common.azimuth(location.point, ^client_point))
+
+        assert [value] = unquote(repo).all(query)
+        assert is_number(value)
+      end
+    end
+
     describe "extent (#{repo})" do
       test "extent" do
         geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())

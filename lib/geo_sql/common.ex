@@ -53,8 +53,6 @@ defmodule GeoSQL.Common do
     end
   end
 
-  defguard is_fraction(value) when is_number(value) and value >= 0 and value <= 1
-
   @spec add_measure(
           line :: GeoSQL.geometry_input(),
           measure_start :: number,
@@ -217,8 +215,7 @@ defmodule GeoSQL.Common do
   @spec concave_hull(GeoSQL.geometry_input(), precision :: number(), allow_holes? :: boolean) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
-  defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false)
-           when is_fraction(precision) do
+  defmacro concave_hull(geometry, precision \\ 1, allow_holes? \\ false) do
     quote do
       fragment(
         "ST_ConcaveHull(?,?,?)",
@@ -445,8 +442,7 @@ defmodule GeoSQL.Common do
   @spec largest_empty_circle(GeoSQL.geometry_input(), tolerance :: number(), Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Geometry Processing"
-  defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil)
-           when is_fraction(tolerance) do
+  defmacro largest_empty_circle(geometry, tolerance \\ 0.0, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_LargestEmptyCircle(?,?)", unquote(geometry), unquote(tolerance))
@@ -492,7 +488,7 @@ defmodule GeoSQL.Common do
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_interpolate_points(line, fraction, repo) when is_fraction(fraction) do
+  defmacro line_interpolate_points(line, fraction, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do: fragment("ST_LineInterpolatePoints(?,?,true)", unquote(line), unquote(fraction))

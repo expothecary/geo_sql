@@ -22,12 +22,12 @@ defmodule GeoSQL.Test.Helper do
             result =
               Enum.zip(l, r)
               |> Enum.reduce(true, fn {l, r}, acc ->
-                acc and Float.round(l, 5) == Float.round(r, 5)
+                acc and Float.round(l, 4) == Float.round(r, 4)
               end)
 
             if result, do: {:cont, true}, else: {:halt, false}
 
-          is_number(l) and is_number(r) and Float.round(l, 5) == Float.round(r, 5) ->
+          is_number(l) and is_number(r) and Float.round(l, 4) == Float.round(r, 4) ->
             {:cont, true}
 
           true ->

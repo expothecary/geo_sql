@@ -38,11 +38,11 @@ defmodule GeoSQL.CommonFunctions.Test do
         query =
           from(location in GeoType, select: Common.add_point(location.linestring, location.point))
 
-        assert [%Geometry.LineString{coordinates: coordinates}] =
+        assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert length(coordinates) == Enum.count(line.coordinates) + 1
+        assert length(path) == Enum.count(line.path) + 1
       end
 
       test "-1 adds a point to the end of a line" do
@@ -54,12 +54,12 @@ defmodule GeoSQL.CommonFunctions.Test do
         query =
           from(location in GeoType, select: Common.add_point(location.linestring, location.point))
 
-        assert [%Geometry.LineString{coordinates: coordinates}] =
+        assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert length(coordinates) == Enum.count(line.coordinates) + 1
-        assert Enum.at(coordinates, 2) == point.coordinates
+        assert length(path) == Enum.count(line.path) + 1
+        assert Enum.at(path, 2) == point.coordinates
       end
 
       test "0 prepends a point to the line" do
@@ -71,12 +71,12 @@ defmodule GeoSQL.CommonFunctions.Test do
         query =
           from(location in GeoType, select: Common.add_point(location.linestring, location.point))
 
-        assert [%Geometry.LineString{coordinates: coordinates}] =
+        assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert length(coordinates) == Enum.count(line.coordinates) + 1
-        assert Enum.at(coordinates, 0) == point.coordinates
+        assert length(path) == Enum.count(line.path) + 1
+        assert Enum.at(path, 0) == point.coordinates
       end
     end
 
@@ -101,11 +101,11 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         query = from(location in Location, select: Common.extent(location.geom, unquote(repo)))
 
-        assert [%Geometry.Polygon{rings: [coordinates]}] =
+        assert [%Geometry.Polygon{rings: [ring]}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert length(coordinates) == 5
+        assert length(ring) == 5
       end
     end
 
@@ -117,7 +117,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         # Create a self-intersecting linestring (crossing at point [1, 1, 1])
         linestring = %Geometry.LineStringZ{
-          coordinates: coordinates,
+          path: coordinates,
           srid: 4326
         }
 
@@ -135,7 +135,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert %Geometry.LineStringZ{} = result
 
-        assert result.coordinates == coordinates
+        assert result.path == coordinates
       end
 
       if Enum.member?(supports_self_intersection, repo) do
@@ -145,7 +145,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
           # Create a self-intersecting linestring (crossing at point [1, 1, 1])
           linestring = %Geometry.LineStringZ{
-            coordinates: coordinates,
+            path: coordinates,
             srid: 4326
           }
 
@@ -274,7 +274,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert %Geometry.LineString{} = result
 
-        assert result.coordinates == [
+        assert result.path == [
                  [180, 30],
                  [120, 50],
                  [60, 30],

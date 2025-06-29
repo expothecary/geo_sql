@@ -78,7 +78,7 @@ defmodule GeoSQL.Test do
     end
 
     test "insert linestring (#{repo})" do
-      geo = %Geometry.LineString{srid: 4326, coordinates: [[30, 10], [10, 30], [40, 40]]}
+      geo = %Geometry.LineString{path: [[30, 10], [10, 30], [40, 40]], srid: 4326}
 
       {:ok, _} =
         Ecto.Adapters.SQL.query(
@@ -100,8 +100,8 @@ defmodule GeoSQL.Test do
 
     test "insert LineStringZ (#{repo})" do
       geo = %Geometry.LineStringZ{
-        srid: 4326,
-        coordinates: [[30, 10, 20], [10, 30, 2], [40, 40, 50]]
+        path: [[30, 10, 20], [10, 30, 2], [40, 40, 50]],
+        srid: 4326
       }
 
       {:ok, _} =
@@ -124,8 +124,8 @@ defmodule GeoSQL.Test do
 
     test "insert LineStringZM (#{repo})" do
       geo = %Geometry.LineStringZM{
-        srid: 4326,
-        coordinates: [[30, 10, 20, 40], [10, 30, 2, -10], [40, 40, 50, 100]]
+        path: [[30, 10, 20, 40], [10, 30, 2, -10], [40, 40, 50, 100]],
+        srid: 4326
       }
 
       {:ok, _} =
@@ -174,7 +174,7 @@ defmodule GeoSQL.Test do
     end
 
     test "insert multipoint (#{repo})" do
-      geo = %Geometry.MultiPoint{coordinates: [[0, 0], [20, 20], [60, 60]], srid: 4326}
+      geo = %Geometry.MultiPoint{points: [[0, 0], [20, 20], [60, 60]], srid: 4326}
 
       {:ok, _} =
         Ecto.Adapters.SQL.query(

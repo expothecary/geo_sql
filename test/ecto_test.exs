@@ -9,7 +9,7 @@ defmodule GeoSQL.Ecto.Test do
     describe "Basic geometry queries #{repo}" do
       test "GeoSQL.Geometry.Point" do
         point = %Geometry.Point{coordinates: [30, -90], srid: 4326}
-        linestring = %Geometry.LineString{coordinates: [[30, -90], [30, -91]], srid: 4326}
+        linestring = %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}
 
         {:ok, _} =
           Ecto.Adapters.SQL.query(
@@ -102,7 +102,7 @@ defmodule GeoSQL.Ecto.Test do
     describe "Basic mutations #{repo}" do
       test "insert multiple geometry types" do
         geom1 = %Geometry.Point{coordinates: [30, -90], srid: 4326}
-        geom2 = %Geometry.LineString{coordinates: [[30, -90], [30, -91]], srid: 4326}
+        geom2 = %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}
 
         unquote(repo).insert(%LocationMulti{name: "hello point", geom: geom1})
         unquote(repo).insert(%LocationMulti{name: "hello line", geom: geom2})

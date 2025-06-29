@@ -126,8 +126,8 @@ defmodule GeoSQL.MM2Functions.Test do
                "#{repo} failed"
 
         case result do
-          %Geometry.LineString{coordinates: coordinates} ->
-            assert is_list(coordinates), "#{repo} failed"
+          %Geometry.LineString{path: path} ->
+            assert is_list(path), "#{repo} failed"
 
           %Geometry.MultiLineString{line_strings: line_strings} ->
             assert is_list(line_strings), "#{repo} failed"

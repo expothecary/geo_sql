@@ -16,6 +16,6 @@ defmodule GeoSQL.Test.Fixtures do
   end
 
   def linestring do
-    %Geometry.LineString{coordinates: [[30, -90], [30, -91]], srid: 4326}
+    %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}
   end
 end

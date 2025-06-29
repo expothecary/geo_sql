@@ -27,7 +27,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
       collection = %Geometry.GeometryCollection{
         geometries: [
           %Geometry.Point{coordinates: [0, 0], srid: 4326},
-          %Geometry.LineString{coordinates: [[0, 0], [1, 1]], srid: 4326}
+          %Geometry.LineString{path: [[0, 0], [1, 1]], srid: 4326}
         ],
         srid: 4326
       }
@@ -46,7 +46,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
     test "returns true for a multi-geometry" do
       multi_point = %Geometry.MultiPoint{
-        coordinates: [[0, 0], [1, 1], [2, 2]],
+        points: [[0, 0], [1, 1], [2, 2]],
         srid: 4326
       }
 
@@ -79,12 +79,9 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   describe "PostGIS.points/1" do
     test "returns multipoint from a linestring" do
-      line_coords = [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
+      path = [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
 
-      line = %Geometry.LineString{
-        coordinates: line_coords,
-        srid: 4326
-      }
+      line = %Geometry.LineString{path: path, srid: 4326}
 
       PostGISRepo.insert(%LocationMulti{name: "line_for_points", geom: line})
 
@@ -98,9 +95,9 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
       assert %Geometry.MultiPoint{} = result
 
-      assert length(result.coordinates) == 3
+      assert length(result.points) == 3
 
-      assert MapSet.new(line_coords) == MapSet.new(result.coordinates)
+      assert MapSet.new(path) == MapSet.new(result.points)
     end
 
     test "returns multipoint from a polygon" do
@@ -123,11 +120,11 @@ defmodule GeoSQL.PostGISFunctions.Test do
       assert %Geometry.MultiPoint{} = result
 
       # 5 coordinates expected including the equivalent overlapping start/end points
-      assert length(result.coordinates) == 5
+      assert length(result.points) == 5
       [overlapping_vertex | _rest] = polygon_coords
 
-      assert Enum.count(result.coordinates, fn coord -> coord == overlapping_vertex end) == 2
-      assert MapSet.new(polygon_coords) == MapSet.new(result.coordinates)
+      assert Enum.count(result.points, fn point -> point == overlapping_vertex end) == 2
+      assert MapSet.new(polygon_coords) == MapSet.new(result.points)
     end
   end
 

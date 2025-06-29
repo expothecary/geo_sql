@@ -470,35 +470,13 @@ defmodule GeoSQL.Common do
   @spec line_interpolate_points(
           line :: GeoSQL.geometry_input(),
           fraction :: number,
-          Ecto.Repo.t() | nil
-        ) ::
-          GeoSQL.fragment()
-  @doc group: "Linear Referencing"
-  defmacro line_interpolate_points(line, fraction, repo) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_LineInterpolatePoints(?,?,true)", unquote(line), unquote(fraction))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do
-          fragment(
-            "ST_Line_Interpolate_Equidistant_Points(?,?)",
-            unquote(line),
-            unquote(fraction)
-          )
-        end
-    end
-  end
-
-  @spec line_interpolate_points(
-          line :: GeoSQL.geometry_input(),
-          fraction :: number,
           use_spheroid? :: boolean,
           Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro line_interpolate_points(line, fraction, use_spheroid?, repo \\ nil) do
+  @doc "Note that Spatialite does not support spheroid calculations."
+  defmacro line_interpolate_points(line, fraction, use_spheroid? \\ true, repo \\ nil) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
         quote do

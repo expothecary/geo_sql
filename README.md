@@ -25,11 +25,10 @@ Non-goals include:
 
 ## Usage
 
-This library is currently not available on `hex.pm`. Until it is, you may add
-it to your project by adding the following to the `deps` section in `mix.exs`:
+Add `GeoSQL` to your project by adding the following to the `deps` section in `mix.exs` (or equivalent):
 
   ```
-  {:geo_sql, github: "expothecary/geo_sql"}
+  {:geo_sql, "~> 0.1"}
   ```
 
 Run the usual `mix deps.get`!
@@ -324,17 +323,5 @@ will review and merge in a timely fashion.
 ## Acknowledgements
 
 This library began as a fork of the excellent `geo_postgis`, which the author
-has used for many years. A big thank-you to felt.com for maintaining that
-library.
-
-Unfortunately, `geo-postgis` is both PostGIS-specific (as the name correctly
-implies), supports functions found in older versions (e.g. pre v3), and is incomplete
-in its coverage of GIS functions. All of this makes sense within the context
-of that project, where backwards compatibility and pragmatic coverage of the
-SQL/MM specification and non-standard functions keeps the codebase lean.
-
-This library came into being to scratch the author's itch for a GIS library
-that isn't constrainted by legacy commitments, can be used with other databases such
-as SQLite, and which provides high-level features such as easy generation of
-Mapbox vector tiles. The path there can be traced through the `geo-postgis`
-codebase, however, and that deserves acknowledgement and gratitude.
+has used for many years, before growing into something rather larger. A big thank-you to felt.com for maintaining that
+library over the course of many years.

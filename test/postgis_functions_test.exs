@@ -10,7 +10,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
   alias GeoSQL.Test.Schema.{Location, LocationMulti}
 
   test "query sphere distance" do
-    geom = Fixtures.multipoint()
+    geom = Fixtures.multipolygon()
 
     PostGISRepo.insert(%Location{name: "hello", geom: geom})
 

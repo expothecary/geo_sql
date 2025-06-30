@@ -82,8 +82,8 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_ewkb (#{repo})" do
       test "returns correct binary data" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Fixtures.multipoint()
+        ewkb = Fixtures.multipolygon_ewkb()
+        geom = Fixtures.multipolygon()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
@@ -95,7 +95,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_ewkt (#{repo})" do
       test "returns correct binary data" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
@@ -109,7 +109,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_geojson (#{repo})" do
       test "returns correct binary data" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -129,7 +129,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_gml (#{repo})" do
       test "returns correct v3 gml" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -143,7 +143,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
 
       test "returns correct v2 gml" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -159,7 +159,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_kml (#{repo})" do
       test "returns correct kml with precision 1" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -175,7 +175,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
 
       test "returns correct kml with higher precision" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -209,7 +209,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "extent (#{repo})" do
       test "extent" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 

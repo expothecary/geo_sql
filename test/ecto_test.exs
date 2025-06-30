@@ -8,10 +8,10 @@ defmodule GeoSQL.Ecto.Test do
   for repo <- Helper.repos() do
     describe "Basic geometry queries #{repo}" do
       test "geometry equality" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
 
         geom_comparison =
-          Fixtures.multipoint(:comparison)
+          Fixtures.multipolygon(:comparison)
 
         unquote(repo).insert(%Location{name: "Smallville", geom: geom})
 
@@ -60,7 +60,7 @@ defmodule GeoSQL.Ecto.Test do
       end
 
       test "query multipoint" do
-        geom = Fixtures.multipoint()
+        geom = Fixtures.multipolygon()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
         query = from(location in Location, limit: 5, select: location)

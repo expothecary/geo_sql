@@ -328,6 +328,20 @@ defmodule GeoSQL.MM2Functions.Test do
       end
     end
 
+    describe "SQL/MM2: interior_ring_n (#{repo})" do
+      test "returns location.geom's inner ring" do
+        polygon = Fixtures.polygon(:donut)
+        #         IO.puts(Geometry.to_ewkt(polygon))
+        query = from(location in Location, select: MM2.interior_ring_n(^polygon, 1))
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
+      end
+    end
+
     describe "SQL/MM2: in functions(#{repo})" do
       test "works via a module function " do
         query =

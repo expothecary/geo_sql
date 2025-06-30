@@ -275,7 +275,6 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           unquote(repo).one(query)
           |> GeoSQL.decode_geometry(unquote(repo))
-          |> IO.inspect(label: "END POINT")
 
         assert result == expected
       end

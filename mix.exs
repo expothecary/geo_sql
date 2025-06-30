@@ -28,7 +28,7 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      {:geometry, github: "aseigo/geometry", branch: "refactor/coordinates-naming"},
+      {:geometry, "~> 1.0"},
       {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},

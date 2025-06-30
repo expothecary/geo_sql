@@ -267,7 +267,13 @@ defmodule GeoSQL.Test.Fixtures do
     %Geometry.Point{coordinates: [30.5, -86.2], srid: 4326}
   end
 
-  def linestring do
+  def linestring(which \\ :default)
+
+  def linestring(:default) do
     %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}
+  end
+
+  def linestring(:intersects) do
+    %Geometry.LineString{path: [[29, -90], [31, -91]], srid: 4326}
   end
 end

@@ -83,7 +83,7 @@ defmodule GeoSQL.CommonFunctions.Test do
     describe "as_ewkb (#{repo})" do
       test "returns correct binary data" do
         ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
@@ -95,8 +95,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_ewkt (#{repo})" do
       test "returns correct binary data" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
@@ -110,8 +109,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_geojson (#{repo})" do
       test "returns correct binary data" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -131,8 +129,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_gml (#{repo})" do
       test "returns correct v3 gml" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -146,8 +143,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
 
       test "returns correct v2 gml" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -163,8 +159,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "as_kml (#{repo})" do
       test "returns correct kml with precision 1" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -180,8 +175,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
 
       test "returns correct kml with higher precision" do
-        ewkb = Fixtures.multipoint_ewkb()
-        geom = Geometry.from_ewkb!(ewkb)
+        geom = Fixtures.multipoint()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 
         query =
@@ -215,7 +209,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "extent (#{repo})" do
       test "extent" do
-        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+        geom = Fixtures.multipoint()
 
         unquote(repo).insert(%Location{name: "hello", geom: geom})
 

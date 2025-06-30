@@ -7,7 +7,7 @@ defmodule GeoSQL.MM2Functions.Test do
   alias GeoSQL.Test.Schema.Location
 
   setup do
-    geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+    geom = Fixtures.multipoint()
 
     for repo <- Helper.repos() do
       repo.insert(%Location{name: "Smallville", geom: geom})
@@ -78,9 +78,9 @@ defmodule GeoSQL.MM2Functions.Test do
 
         expected =
           if Enum.member?(unquote(full_encoding), unquote(repo)) do
-            Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+            Fixtures.multipoint()
           else
-            Geometry.from_ewkb!(Fixtures.multipoint_ewkb()) |> Map.put(:srid, 0)
+            Fixtures.multipoint() |> Map.put(:srid, 0)
           end
 
         assert Helper.fuzzy_match_geometry(
@@ -91,8 +91,8 @@ defmodule GeoSQL.MM2Functions.Test do
 
       if Enum.member?(full_decoding, repo) do
         test "equality checks with as text" do
-          geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
-          comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+          geom = Fixtures.multipoint()
+          comparison = Fixtures.multipoint(:comparison)
 
           result =
             from(location in Location,
@@ -203,7 +203,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
     describe "SQL/MM2: difference (#{repo})" do
       test "return a polygon" do
-        comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+        comparison = Fixtures.multipoint(:comparison)
 
         query =
           from(location in Location, select: MM2.difference(location.geom, ^comparison))
@@ -226,7 +226,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
     describe "SQL/MM2: disjoint (#{repo})" do
       test "determines if two geometries are disjoint" do
-        comparison = Geometry.from_ewkb!(Fixtures.multipoint_ewkb(:comparison))
+        comparison = Fixtures.multipoint(:comparison)
 
         query =
           from(location in Location, select: MM2.disjoint(location.geom, ^comparison))
@@ -237,8 +237,8 @@ defmodule GeoSQL.MM2Functions.Test do
     end
 
     describe "SQL/MM2: distance (#{repo})" do
-      test "determines distaince between two geometries" do
-        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+      test "determines the distaince between two geometries" do
+        geom = Fixtures.multipoint()
         query = from(location in Location, select: MM2.distance(location.geom, ^geom))
         result = unquote(repo).one(query)
         assert result == 0
@@ -247,7 +247,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
     describe "SQL/MM2: equals (#{repo})" do
       test "determines equality between two geometries" do
-        geom = Geometry.from_ewkb!(Fixtures.multipoint_ewkb())
+        geom = Fixtures.multipoint()
         query = from(location in Location, select: MM2.distance(location.geom, ^geom))
         result = unquote(repo).one(query)
         assert result == 0
@@ -266,8 +266,7 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: in functions(#{repo})" do
       test "works via a module function " do
         query =
-          Fixtures.multipoint_ewkb()
-          |> Geometry.from_ewkb!()
+          Fixtures.multipoint()
           |> Example.example_query()
 
         result = unquote(repo).one(query)

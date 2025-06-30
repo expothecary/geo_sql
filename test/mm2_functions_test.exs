@@ -4,7 +4,7 @@ defmodule GeoSQL.MM2Functions.Test do
   use GeoSQL.MM2
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.Location
+  alias GeoSQL.Test.Schema.{Location, GeoType}
 
   setup do
     geom = Fixtures.multipoint()
@@ -260,6 +260,24 @@ defmodule GeoSQL.MM2Functions.Test do
         result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
 
         assert result.srid == 3452
+      end
+    end
+
+    describe "SQL/MM2: end_point (#{repo})" do
+      test "returns the last point of a line" do
+        line = Fixtures.linestring()
+        expected = %Geometry.Point{coordinates: Enum.at(line.path, -1), srid: line.srid}
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType, select: MM2.end_point(location.linestring))
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+          |> IO.inspect(label: "END POINT")
+
+        assert result == expected
       end
     end
 

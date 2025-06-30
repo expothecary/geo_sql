@@ -259,7 +259,7 @@ for type <- GeoSQL.Geometry.all_types() do
     @type t :: %unquote(type){}
     use Ecto.Type
 
-    def type, do: unquote(String.to_atom("geo_#{type}"))
+    def type, do: :geometry
 
     def blank?(_), do: false
 

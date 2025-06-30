@@ -128,6 +128,24 @@ defmodule GeoSQL.Geometry do
 
   use Ecto.Type
 
+  @spec from_db_type(db_type :: String.t()) :: t()
+  @doc """
+  Returns the matching Geometry type for a geometry type returned from the database
+  """
+  def from_db_type("ST_" <> type), do: from_db_type(type)
+
+  def from_db_type(db_type) when is_binary(db_type) do
+    case String.downcase(db_type) do
+      "point" <> _rest -> Point
+      "linestring" <> _rest -> LineString
+      "polygon" <> _rest -> Polygon
+      "multipoint" <> _rest -> MultiPoint
+      "multilinestring" <> _rest -> MultiLineString
+      "multipolygon" <> _rest -> MultiPolygon
+      "geometrycollection" <> _rest -> GeometryCollection
+    end
+  end
+
   @doc false
   def geometry_modules do
     Enum.map(

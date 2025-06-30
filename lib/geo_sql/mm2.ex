@@ -147,12 +147,6 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_Envelope(?)", unquote(geometry))
   end
 
-  @spec geom_from_text(text :: String.t(), srid :: integer) :: GeoSQL.fragment()
-  @doc group: "Well-Known Text (WKT)"
-  defmacro geom_from_text(text, srid \\ -1) do
-    quote do: fragment("ST_GeomFromText(?, ?)", unquote(text), unquote(srid))
-  end
-
   @spec geometry_n(GeoSQL.geometry_input(), index :: pos_integer) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro geometry_n(geometry, index) do

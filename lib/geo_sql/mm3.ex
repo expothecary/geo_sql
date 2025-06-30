@@ -45,12 +45,8 @@ defmodule GeoSQL.MM3 do
     quote do: fragment("ST_GMLToSQL(?, ?)", unquote(geomgml), unquote(srid))
   end
 
-  defmacro geometry_from_text(text) do
-    quote do: fragment("ST_GeometryFromText(?)", unquote(text))
-  end
-
-  defmacro geometry_from_text(text, srid) do
-    quote do: fragment("ST_GeometryFromText(?)", unquote(text), unquote(srid))
+  defmacro geo_from_text(text, srid \\ 0) do
+    quote do: fragment("ST_GeometryFromText(?,?)", unquote(text), unquote(srid))
   end
 
   defmacro is_empty(geometry) do

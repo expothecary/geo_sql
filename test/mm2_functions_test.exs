@@ -280,6 +280,54 @@ defmodule GeoSQL.MM2Functions.Test do
       end
     end
 
+    describe "SQL/MM2: envelope (#{repo})" do
+      test "returns the enveloper around a geometry" do
+        query = from(location in Location, select: MM2.envelope(location.geom))
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
+      end
+    end
+
+    describe "SQL/MM2: geometry_n (#{repo})" do
+      test "returns the 2nd point of a multpolygon" do
+        query =
+          from(location in Location, select: MM2.geometry_n(location.geom, 1))
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        multipolygon = Fixtures.multipolygon()
+        assert result.rings == Enum.at(multipolygon.polygons, 0)
+      end
+
+      test "returns nil when requesting a non-extant geometry" do
+        query =
+          from(location in Location, select: MM2.geometry_n(location.geom, 2))
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert result == nil
+      end
+    end
+
+    describe "SQL/MM2: geometry_type (#{repo})" do
+      test "tells us the the location geom is a multipolygon" do
+        query = from(location in Location, select: MM2.geometry_type(location.geom))
+
+        result =
+          unquote(repo).one(query)
+
+        assert GeoSQL.Geometry.from_db_type(result) == Geometry.MultiPolygon
+      end
+    end
+
     describe "SQL/MM2: in functions(#{repo})" do
       test "works via a module function " do
         query =

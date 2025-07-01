@@ -3,6 +3,7 @@ defmodule GeoSQL.MM2Functions.Test do
   import Ecto.Query
   use GeoSQL.MM2
   use GeoSQL.Test.Helper
+  use GeoSQL.QueryUtils
 
   alias GeoSQL.Test.Schema.{Location, GeoType}
 
@@ -339,6 +340,26 @@ defmodule GeoSQL.MM2Functions.Test do
           |> GeoSQL.decode_geometry(unquote(repo))
 
         assert %Geometry.LineString{} = result
+      end
+    end
+
+    describe "SQL/MM2: intersection (#{repo})" do
+      test "returns intersecton point" do
+        lineA = Fixtures.linestring()
+        lineB = Fixtures.linestring(:intersects)
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+
+        query =
+          from(location in GeoType,
+            select: MM2.intersection(location.linestring, ^lineB)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 

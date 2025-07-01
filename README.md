@@ -200,6 +200,22 @@ Casting one of the two type is usually enough to resolve this:
 Note that using Ecto Schemas or referencing columns from a table avoids these issues, as the
 database adapters can determine what the correct types are from that information.
 
+### Queries Taking WKB data
+
+Some functions take WKB-encoded data. If passing WKB blobs from the client-side to the backend,
+wrap them using the `QueryUtils.wrap_wkb/2` macro, passing in the Ecto repo as the second parameter.
+
+When used in a query, the return of this macro will need to be pinned (`^`) as it returns a value.
+
+Example:
+
+
+  ```elixir
+  from(g in GeoType,
+    select: g.linestring == MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo), ^line.srid)
+  )
+  ```
+
 ### Queries returning binary blobs instead of geometries
 
 With certain backends (e.g. SQLite3), it is possible to craft queries that will return

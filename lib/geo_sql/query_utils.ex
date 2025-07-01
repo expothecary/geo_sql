@@ -23,6 +23,15 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
+  @doc """
+  Used to wrap WKB literals in a portable fashion. When used in an ecto query, 
+  the return value will need to be pinned in the query.
+
+  Example:
+
+      from(g in GeoType,
+          select: g.linestring == MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo))
+  """
   @spec wrap_wkb(wkb :: binary, Ecto.Repo.t()) :: GeoSQL.Geometry.WKB.t()
   defmacro wrap_wkb(wkb, repo) do
     case GeoSQL.RepoUtils.adapter(repo) do

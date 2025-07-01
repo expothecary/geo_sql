@@ -1,5 +1,7 @@
 defmodule GeoSQL.MM3Functions.Test do
   use ExUnit.Case, async: true
+  @moduletag :mm3
+
   import Ecto.Query
   use GeoSQL.MM3
   use GeoSQL.Common

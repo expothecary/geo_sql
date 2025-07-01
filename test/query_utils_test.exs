@@ -1,5 +1,7 @@
 defmodule GeoSQL.QueryUtils.Test do
   use ExUnit.Case, async: true
+  @moduletag :query_utils
+
   import Ecto.Query
   use GeoSQL.QueryUtils
   use GeoSQL.Common

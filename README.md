@@ -170,11 +170,35 @@ uses a number of standard and PostGIS-specific features together:
 
 #### Queries needing geometry type casting
 
-Sometimes queries will require casting to the database's native geometry type. This typically
-occurs when, for example, a query passes a geography type to a geometry function in PostGIS.
+Sometimes queries will require casting to the database's native geometry type. Such casting is backend-specific, and so the `GeoSQL.QueryUtils.cast_to_geometry/2`
+function which takes an `Ecto.Repo` is provided for portability.
 
-Such casting can be backend-specific, and so the provided `GeoSQL.Common.cast_to_geometry/2`
-function exists
+The need to use it  occurs when, for example, a query passes a geography type to a geometry
+function in PostGIS, or the adapter (e.g. `postgrex`) can not automatically determine the type.
+A common symptom of the latter case are errors noting that a binary was expected, and
+the geometry struct provided was not serialized.
+
+For example this query, where `lineA` and `lineB` are `Geometry.LineString` structs:
+
+  ```elixir
+  from(location in Locations, select: MM2.intersection(^lineA, ^lineB))
+  ```
+
+may produce this error:
+
+  ```
+  Postgrex expected a binary, got %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}. Please make sure the value you are passing matches the definition in your table or in your query or convert the value accordingly.
+  ```
+
+Casting one of the two type is usually enough to resolve this:
+
+
+  ```elixir
+  from(location in Locations, select: MM2.intersection(QueryUtils.cast_to_geometry(^lineA, MyApp.Repo), ^lineB))
+  ```
+
+Note that using Ecto Schemas or referencing columns from a table avoids these issues, as the
+database adapters can determine what the correct types are from that information.
 
 ### Queries returning binary blobs instead of geometries
 

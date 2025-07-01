@@ -209,20 +209,14 @@ defmodule GeoSQL.MM2 do
 
   @spec line_from_text(text :: String.t(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro line_from_text(text, srid \\ -1) do
-    quote do: fragment("ST_LineFromText(?, ?)", unquote(text), unquote(srid))
-  end
-
-  @spec line_from_wkb(text :: binary(), srid :: integer) :: GeoSQL.fragment()
-  @doc group: "Well-Known Binary (WKB)"
-  defmacro line_from_wkb(bytea, srid \\ -1) do
-    quote do: fragment("ST_LineFromWKB(?, ?)", unquote(bytea), unquote(srid))
+  defmacro line_from_text(text, srid \\ 0) do
+    quote do: fragment("ST_LineFromText(?,?)", unquote(text), unquote(srid))
   end
 
   @spec line_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Binary (WKB)"
-  defmacro linestring_from_wkb(bytea, srid \\ -1) do
-    quote do: fragment("ST_LinestringFromWKB(?, ?)", unquote(bytea), unquote(srid))
+  defmacro linestring_from_wkb(wkb, srid \\ 0) do
+    quote do: fragment("ST_LineStringFromWKB(?,?)", unquote(wkb), unquote(srid))
   end
 
   @spec m(GeoSQL.geometry_input()) :: GeoSQL.fragment()
@@ -233,31 +227,31 @@ defmodule GeoSQL.MM2 do
 
   @spec m_point_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro m_point_from_text(text, srid \\ -1) do
+  defmacro m_point_from_text(text, srid \\ 0) do
     quote do: fragment("ST_MPointFromText(?, ?)", unquote(text), unquote(srid))
   end
 
   @spec m_line_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro m_line_from_text(text, srid \\ -1) do
+  defmacro m_line_from_text(text, srid \\ 0) do
     quote do: fragment("ST_MLineFromText(?, ?)", unquote(text), unquote(srid))
   end
 
   @spec m_poly_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro m_poly_from_text(text, srid \\ -1) do
+  defmacro m_poly_from_text(text, srid \\ 0) do
     quote do: fragment("ST_MPolyFromText(?, ?)", unquote(text), unquote(srid))
   end
 
   @spec geom_collection_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro geom_collection_from_text(text, srid \\ -1) do
+  defmacro geom_collection_from_text(text, srid \\ 0) do
     quote do: fragment("ST_GeomCollFromText(?, ?)", unquote(text), unquote(srid))
   end
 
   @spec geom_from_wkb(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Binary (WKB)"
-  defmacro geom_from_wkb(bytea, srid \\ -1) do
+  defmacro geom_from_wkb(bytea, srid \\ 0) do
     quote do: fragment("ST_GeomFromWKB(?, ?)", unquote(bytea), unquote(srid))
   end
 
@@ -293,13 +287,13 @@ defmodule GeoSQL.MM2 do
 
   @spec point_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro point_from_text(text, srid \\ -1) do
+  defmacro point_from_text(text, srid \\ 0) do
     quote do: fragment("ST_PointFromText(?, ?)", unquote(text), unquote(srid))
   end
 
   @spec point_from_wkb(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Binary (WKB)"
-  defmacro point_from_wkb(bytea, srid \\ -1) do
+  defmacro point_from_wkb(bytea, srid \\ 0) do
     quote do: fragment("ST_PointFromWKB(?, ?)", unquote(bytea), unquote(srid))
   end
 
@@ -317,7 +311,7 @@ defmodule GeoSQL.MM2 do
 
   @spec polygon_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
-  defmacro polygon_from_text(text, srid \\ -1) do
+  defmacro polygon_from_text(text, srid \\ 0) do
     quote do: fragment("ST_PolygonFromText(?, ?)", unquote(text), unquote(srid))
   end
 

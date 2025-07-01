@@ -23,8 +23,16 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
-  @spec wrap_wkb(wkb :: binary) :: GeoSQL.Geometry.WKB.t()
-  def wrap_wkb(wkb), do: %GeoSQL.Geometry.WKB{data: wkb}
+  @spec wrap_wkb(wkb :: binary, Ecto.Repo.t()) :: GeoSQL.Geometry.WKB.t()
+  defmacro wrap_wkb(wkb, repo) do
+    case GeoSQL.RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: %GeoSQL.Geometry.WKB{data: unquote(wkb)}
+
+      _ ->
+        quote do: unquote(wkb)
+    end
+  end
 
   @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
           {param_string :: String.t(), params :: list}

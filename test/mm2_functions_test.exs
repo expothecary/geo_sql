@@ -42,7 +42,7 @@ defmodule GeoSQL.MM2Functions.Test do
     end
 
     describe "SQL/MM2: as_binary (#{repo})" do
-      test "eturns a binary representation of the geometry" do
+      test "returns a binary representation of the geometry" do
         query = from(location in Location, select: MM2.as_binary(location.geom))
 
         result = unquote(repo).all(query)
@@ -542,7 +542,7 @@ defmodule GeoSQL.MM2Functions.Test do
           from(location in GeoType,
             select:
               location.linestring ==
-                MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb), ^line.srid)
+                MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^line.srid)
           )
 
         result =

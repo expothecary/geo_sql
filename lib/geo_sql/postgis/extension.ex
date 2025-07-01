@@ -26,9 +26,6 @@ defmodule GeoSQL.PostGIS.Extension do
       %x{} = geom when x in unquote(all_types) ->
         data = Geometry.to_ewkb(geom)
         [<<IO.iodata_length(data)::integer-size(32)>> | data]
-
-      %GeoSQL.Geometry.WKB{data: data} ->
-        [<<IO.iodata_length(data)::integer-size(32)>> | data]
     end
   end
 

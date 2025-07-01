@@ -99,6 +99,10 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
     {:ok, convert_geometry(geometry)}
   end
 
+  def convert(%GeoSQL.Geometry.WKB{data: data}) do
+    {:ok, {:blob, data}}
+  end
+
   def convert(_), do: nil
 
   def encode_geometry(%x{} = geometry) when x in @geo_types do

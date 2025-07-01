@@ -23,6 +23,9 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
+  @spec wrap_wkb(wkb :: binary) :: GeoSQL.Geometry.WKB.t()
+  def wrap_wkb(wkb), do: %GeoSQL.Geometry.WKB{data: wkb}
+
   @spec as_positional_params(options :: Keyword.t(), allowed_keys :: [:atom]) ::
           {param_string :: String.t(), params :: list}
   @doc """

@@ -203,7 +203,7 @@ defmodule GeoSQL.Test.Fixtures do
           [21, 20]
         ]
       ],
-      srid: 0
+      srid: 4326
     }
   end
 
@@ -272,10 +272,20 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
+  def multipoint(which \\ :default)
+
+  def multipoint(:default) do
+    %Geometry.MultiPoint{points: [[30, -90], [4, 10], [5, 20]], srid: 4326}
+  end
+
   def point(which \\ :default)
 
   def point(:default) do
     %Geometry.Point{coordinates: [30, -90], srid: 4326}
+  end
+
+  def point(:m) do
+    %Geometry.PointM{coordinates: [30, -90, 10], srid: 4326}
   end
 
   def point(:comparison) do
@@ -301,6 +311,36 @@ defmodule GeoSQL.Test.Fixtures do
         [1, 3],
         [1, 2],
         [2, 1]
+      ],
+      srid: 4326
+    }
+  end
+
+  def multilinestring(which \\ :default)
+
+  def multilinestring(:default) do
+    %Geometry.MultiLineString{
+      line_strings: [
+        [
+          [29, -90],
+          [31, -91]
+        ],
+        [
+          [30, -90],
+          [30, -91]
+        ]
+      ],
+      srid: 4326
+    }
+  end
+
+  def geometrycollection(which \\ :default)
+
+  def geometrycollection(:default) do
+    %Geometry.GeometryCollection{
+      geometries: [
+        %Geometry.Point{coordinates: [30.5, -86.2], srid: 4326},
+        %Geometry.LineString{path: [[29.0, -90.0], [31.0, -91.0]], srid: 4326}
       ],
       srid: 4326
     }

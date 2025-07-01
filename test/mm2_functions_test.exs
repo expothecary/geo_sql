@@ -552,6 +552,158 @@ defmodule GeoSQL.MM2Functions.Test do
       end
     end
 
+    describe "SQL/MM2: m (#{repo})" do
+      test "returns the m value from a geometry" do
+        point = Fixtures.point(:m)
+
+        result =
+          from(location in Location, select: MM2.m(^point))
+          |> unquote(repo).one()
+
+        assert result == 10
+      end
+    end
+
+    describe "SQL/MM2: m_point_from_text (#{repo})" do
+      test "creates a multipoint" do
+        geom = Fixtures.multipoint()
+
+        wkt = Geometry.to_wkt(geom)
+
+        result =
+          from(location in Location, select: MM2.m_point_from_text(^wkt, ^geom.srid))
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert result == geom
+      end
+    end
+
+    describe "SQL/MM2: m_line_from_text (#{repo})" do
+      test "creates a multiline" do
+        geom = Fixtures.multilinestring()
+
+        wkt = Geometry.to_wkt(geom)
+
+        result =
+          from(location in Location, select: MM2.m_line_from_text(^wkt, ^geom.srid))
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert result == geom
+      end
+    end
+
+    describe "SQL/MM2: m_poly_from_text (#{repo})" do
+      test "creates a multipolygon" do
+        geom = Fixtures.multipolygon()
+
+        wkt = Geometry.to_wkt(geom)
+
+        result =
+          from(location in Location, select: MM2.m_poly_from_text(^wkt, ^geom.srid))
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert result == geom
+      end
+    end
+
+    describe "SQL/MM2: geom_collection_from_text (#{repo})" do
+      test "creates a geometry collection" do
+        geom = Fixtures.geometrycollection()
+
+        wkt = Geometry.to_wkt(geom)
+
+        result =
+          from(location in Location, select: MM2.geom_collection_from_text(^wkt, ^geom.srid))
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert match?(^result, geom)
+      end
+    end
+
+    describe "SQL/MM2: geom_from_wkb (#{repo})" do
+      test "creates a geometry" do
+        geom = Fixtures.multipolygon()
+        wkb = Geometry.to_wkb(geom)
+
+        result =
+          from(location in Location,
+            select: MM2.geom_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^geom.srid)
+          )
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert match?(^result, geom)
+      end
+    end
+
+    describe "SQL/MM2: num_geometries (#{repo})" do
+      test "returns a count" do
+        result =
+          from(location in Location, select: MM2.num_geometries(location.geom))
+          |> unquote(repo).one()
+
+        assert result == 1
+      end
+    end
+
+    describe "SQL/MM2: num_interior_rings (#{repo})" do
+      test "returns a count" do
+        polygon = Fixtures.polygon(:donut)
+        unquote(repo).insert(%GeoType{t: "hello", polygon: polygon})
+
+        result =
+          from(g in GeoType, select: MM2.num_interior_rings(g.polygon))
+          |> unquote(repo).one()
+
+        assert result == 2
+      end
+    end
+
+    describe "SQL/MM2: num_points (#{repo})" do
+      test "returns a count" do
+        linestring = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: linestring})
+
+        result =
+          from(g in GeoType, select: MM2.num_points(g.linestring))
+          |> unquote(repo).one()
+
+        assert result == 2
+      end
+    end
+
+    describe "SQL/MM2: overlaps (#{repo})" do
+      test "calculates overlap" do
+        linestring = Fixtures.linestring()
+        polygon = Fixtures.polygon(:donut)
+        unquote(repo).insert(%GeoType{t: "hello", linestring: linestring, polygon: polygon})
+
+        result =
+          from(g in GeoType, select: MM2.overlaps(g.linestring, g.polygon))
+          |> unquote(repo).one()
+
+        refute unquote(repo).to_boolean(result)
+      end
+    end
+
+    describe "SQL/MM2: point (#{repo})" do
+      test "makes a point from coordinates" do
+        point = Fixtures.point()
+        [x, y] = point.coordinates
+
+        result =
+          from(location in Location, select: MM2.point(^x, ^y))
+          |> unquote(repo).one()
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert result.coordinates == point.coordinates
+      end
+    end
+
     describe "SQL/MM2: in functions(#{repo})" do
       test "works via a module function " do
         query =

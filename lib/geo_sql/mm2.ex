@@ -195,16 +195,16 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_IsSimple(?)", unquote(geometry))
   end
 
-  @spec length(GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Measurement"
-  defmacro length(geometry) do
-    quote do: fragment("ST_Length(?)", unquote(geometry))
-  end
-
   @spec is_valid(GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Validation"
   defmacro is_valid(geometry) do
     quote do: fragment("ST_IsValid(?)", unquote(geometry))
+  end
+
+  @spec length(GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Measurement"
+  defmacro length(geometry) do
+    quote do: fragment("ST_Length(?)", unquote(geometry))
   end
 
   @spec line_from_text(text :: String.t(), srid :: integer) :: GeoSQL.fragment()

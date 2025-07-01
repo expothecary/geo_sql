@@ -264,7 +264,7 @@ defmodule GeoSQL.MM2 do
   @spec num_interior_rings(GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro num_interior_rings(geometry) do
-    quote do: fragment("ST_NumInteriorRings(?)", unquote(geometry))
+    quote do: fragment("ST_NumInteriorRing(?)", unquote(geometry))
   end
 
   @spec num_points(GeoSQL.geometry_input()) :: GeoSQL.fragment()

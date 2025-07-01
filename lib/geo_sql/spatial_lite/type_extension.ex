@@ -140,7 +140,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   defp convert_geometry(geometry) do
     data =
       Geometry.to_ewkt(geometry)
-      |> remove_zm_labels()
+      |> sanitize_zm_labels()
 
     # translate it to SpatialLite's format
     conn = InMemorySqlite.conn()
@@ -158,8 +158,11 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   # SpatialLite does not like Z/ZM suffixes on the primitive types.
   # e.g. POINTZ will error, while a POINT with 3-dimensional will work.
   # HOWEVER ... POINTM is a thing. *sigh*
-  defp remove_zm_labels(wkt_encoded_string) do
+  # Also, Spatialite does not like spaces about the geometry type,
+  # despite that being fine by the standard.
+  defp sanitize_zm_labels(wkt_encoded_string) do
     wkt_encoded_string
-    |> String.replace(~r/ZM?([( ])/, "\\1")
+    |> String.replace(~r/\s*ZM?\s*([( ])/, "\\1")
+    |> String.replace(~r/\s*([ZM]*)\s*\(/, "\\1(")
   end
 end

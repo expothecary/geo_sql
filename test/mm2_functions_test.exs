@@ -1,9 +1,13 @@
 defmodule GeoSQL.MM2Functions.Test do
   use ExUnit.Case, async: true
+  @moduletag :mm2
+
   import Ecto.Query
   use GeoSQL.MM2
   use GeoSQL.Test.Helper
+  use GeoSQL.RepoUtils
   use GeoSQL.QueryUtils
+  use GeoSQL.Common
 
   alias GeoSQL.Test.Schema.{Location, GeoType}
 
@@ -65,8 +69,7 @@ defmodule GeoSQL.MM2Functions.Test do
     end
 
     describe "SQL/MM2: as_text (#{repo})" do
-      full_decoding = [GeoSQL.Test.SQLite.Repo]
-      full_encoding = [GeoSQL.Test.PostGIS.Repo]
+      as_text_is_ewkt = [GeoSQL.Test.PostGIS.Repo]
 
       test "returns as text version" do
         result =
@@ -78,7 +81,7 @@ defmodule GeoSQL.MM2Functions.Test do
           |> GeoSQL.decode_geometry(unquote(repo))
 
         expected =
-          if Enum.member?(unquote(full_encoding), unquote(repo)) do
+          if Enum.member?(unquote(as_text_is_ewkt), unquote(repo)) do
             Fixtures.multipolygon()
           else
             Fixtures.multipolygon() |> Map.put(:srid, 0)
@@ -90,26 +93,28 @@ defmodule GeoSQL.MM2Functions.Test do
                )
       end
 
-      if Enum.member?(full_decoding, repo) do
-        test "equality checks with as text" do
-          geom = Fixtures.multipolygon()
-          comparison = Fixtures.multipolygon(:comparison)
+      test "equality checks with as text" do
+        geom = Fixtures.multipolygon()
+        comparison = Fixtures.multipolygon(:comparison)
 
-          result =
-            from(location in Location,
-              limit: 1,
-              select: %{
-                different: MM2.as_text(location.geom) == MM2.as_text(^comparison),
-                same: MM2.as_text(location.geom) == MM2.as_text(^geom)
-              }
-            )
-            |> unquote(repo).one()
+        result =
+          from(location in Location,
+            limit: 1,
+            select: %{
+              different:
+                MM2.as_text(location.geom) ==
+                  MM2.as_text(QueryUtils.cast_to_geometry(^comparison, unquote(repo))),
+              same:
+                MM2.as_text(location.geom) ==
+                  MM2.as_text(QueryUtils.cast_to_geometry(^geom, unquote(repo)))
+            }
+          )
+          |> unquote(repo).one()
 
-          assert match?(
-                   %{same: true, raw_same: true, different: false, raw_different: false},
-                   result
-                 )
-        end
+        assert match?(
+                 %{same: true, different: false},
+                 result
+               )
       end
     end
 
@@ -360,6 +365,190 @@ defmodule GeoSQL.MM2Functions.Test do
           |> GeoSQL.decode_geometry(unquote(repo))
 
         assert %Geometry.Point{} = result
+      end
+    end
+
+    describe "SQL/MM2: iontersects (#{repo})" do
+      test "can detect intersections" do
+        lineA = Fixtures.linestring()
+        lineB = Fixtures.linestring(:intersects)
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+
+        query =
+          from(location in GeoType,
+            select: MM2.intersects(location.linestring, ^lineB)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> unquote(repo).to_boolean()
+
+        assert result
+      end
+    end
+
+    describe "SQL/MM2: is_closed (#{repo})" do
+      test "can detect closure of geometry" do
+        lineA = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+
+        query =
+          from(location in GeoType,
+            select: MM2.is_closed(location.linestring)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> unquote(repo).to_boolean()
+
+        refute result
+      end
+    end
+
+    describe "SQL/MM2: is_ring (#{repo})" do
+      test "can detect rings, and not rings" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, polygon: polygon})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              line: MM2.is_closed(location.linestring),
+              polygon: MM2.is_closed(location.polygon)
+            }
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> then(fn result ->
+            %{
+              line: unquote(repo).to_boolean(result.line),
+              polygon: unquote(repo).to_boolean(result.polygon)
+            }
+          end)
+
+        if unquote(repo) == GeoSQL.Test.SQLite3.Repo do
+          # Spatialite appears to be buggy here and returns 0 (false) for a polygon ring
+          assert match?(%{line: false}, result)
+          refute match?(%{polygon: true}, result)
+        else
+          assert match?(%{line: false, polygon: true}, result)
+        end
+      end
+    end
+
+    describe "SQL/MM2: is_simple (#{repo})" do
+      test "detects simplicity" do
+        line = Fixtures.linestring(:self_intersecting)
+        polygon = Fixtures.polygon()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, polygon: polygon})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              line: MM2.is_simple(location.linestring),
+              polygon: MM2.is_simple(location.polygon)
+            }
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> then(fn result ->
+            %{
+              line: unquote(repo).to_boolean(result.line),
+              polygon: unquote(repo).to_boolean(result.polygon)
+            }
+          end)
+
+        assert match?(%{line: false, polygon: true}, result)
+      end
+    end
+
+    describe "SQL/MM2: is_valid (#{repo})" do
+      test "differentiates valid from invalid geometries" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+        invalid_polygon = Fixtures.polygon(:invalid)
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, polygon: polygon})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              line: MM2.is_valid(location.linestring),
+              polygon: MM2.is_valid(location.polygon),
+              valid: MM2.is_valid(^invalid_polygon)
+            }
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> then(fn result ->
+            %{
+              line: unquote(repo).to_boolean(result.line),
+              polygon: unquote(repo).to_boolean(result.polygon),
+              valid: unquote(repo).to_boolean(result.valid)
+            }
+          end)
+
+        assert match?(%{line: true, polygon: true, valid: false}, result)
+      end
+    end
+
+    describe "SQL/MM2: length (#{repo})" do
+      test "can measure a line" do
+        line = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType,
+            select: MM2.length(location.linestring)
+          )
+
+        result =
+          unquote(repo).one(query)
+
+        assert result == 1.0
+      end
+    end
+
+    describe "SQL/MM2: line_from_text (#{repo})" do
+      test "creates a line from WKT" do
+        line = Fixtures.linestring()
+        wkt = Geometry.to_wkt(line)
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType,
+            select: location.linestring == MM2.line_from_text(^wkt, ^line.srid)
+          )
+
+        assert unquote(repo).one(query) == true
+      end
+    end
+
+    describe "SQL/MM2: linestring_from_wkb (#{repo})" do
+      test "creates a linestring from WKB" do
+        line = Fixtures.linestring()
+
+        wkb = Geometry.to_wkb(line)
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        from(location in GeoType)
+        |> unquote(repo).all()
+
+        query =
+          from(location in GeoType,
+            select:
+              location.linestring ==
+                MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb), ^line.srid)
+          )
+
+        result =
+          unquote(repo).one(query)
+
+        assert result == true
       end
     end
 

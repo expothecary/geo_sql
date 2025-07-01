@@ -38,6 +38,22 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
+  def polygon(:piece) do
+    %Geometry.Polygon{
+      rings: [
+        [
+          [29.96917333733128, 10.784590957278462],
+          [29.96917333733128, 9.215409042721559],
+          [29.84605674328266, 7.651064392319251],
+          [29.600582609928146, 13.89879828896135],
+          [29.846056743282656, 12.348935607680774],
+          [29.96917333733128, 10.784590957278462]
+        ]
+      ],
+      srid: 4326
+    }
+  end
+
   def polygon(:donut) do
     %Geometry.Polygon{
       rings: [
@@ -286,6 +302,10 @@ defmodule GeoSQL.Test.Fixtures do
 
   def point(:m) do
     %Geometry.PointM{coordinates: [30, -90, 10], srid: 4326}
+  end
+
+  def point(:z) do
+    %Geometry.PointZ{coordinates: [30, -90, 10], srid: 4326}
   end
 
   def point(:comparison) do

@@ -31,6 +31,7 @@ defmodule GeoSQL.Test.Schema.GeoType do
   schema "specified_columns" do
     field(:t, :string)
     field(:point, GeoSQL.Geometry.Point)
+    field(:pointz, GeoSQL.Geometry.PointZ)
     field(:linestring, GeoSQL.Geometry.LineString)
     field(:multipoint, GeoSQL.Geometry.MultiPoint)
     field(:polygon, GeoSQL.Geometry.Polygon)

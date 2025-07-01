@@ -108,6 +108,8 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
       {:error, exception}
   end
 
+  def decode_geometry(nil), do: {:ok, nil}
+
   def decode_geometry(data) do
     # it is retrieved in SpatialLite's format, so translate it to WKB
     conn = InMemorySqlite.conn()

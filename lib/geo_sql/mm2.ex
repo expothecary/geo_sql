@@ -382,10 +382,10 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_Touches(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec transform(wkt :: String.t(), srid :: pos_integer()) :: GeoSQL.fragment()
+  @spec transform(geometry :: GeoSQL.geometry_input(), srid :: pos_integer()) :: GeoSQL.fragment()
   @doc group: "Affine Transforms"
-  defmacro transform(wkt, srid) do
-    quote do: fragment("ST_Transform(?, ?)", unquote(wkt), unquote(srid))
+  defmacro transform(geometry, srid) do
+    quote do: fragment("ST_Transform(?, ?)", unquote(geometry), unquote(srid))
   end
 
   @spec union(geometryList :: GeoSQL.geometry_input()) :: GeoSQL.fragment()

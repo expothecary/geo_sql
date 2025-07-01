@@ -207,6 +207,21 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
+  def polygon(:invalid) do
+    %Geometry.Polygon{
+      rings: [
+        [
+          [0, 0],
+          [1, 1],
+          [1, 2],
+          [1, 1],
+          [0, 0]
+        ]
+      ],
+      srid: 4326
+    }
+  end
+
   def multipolygon(which \\ :default)
 
   def multipolygon(:default) do
@@ -275,5 +290,19 @@ defmodule GeoSQL.Test.Fixtures do
 
   def linestring(:intersects) do
     %Geometry.LineString{path: [[29, -90], [31, -91]], srid: 4326}
+  end
+
+  def linestring(:self_intersecting) do
+    %Geometry.LineString{
+      path: [
+        [1, 1],
+        [2, 2],
+        [2, 3.5],
+        [1, 3],
+        [1, 2],
+        [2, 1]
+      ],
+      srid: 4326
+    }
   end
 end

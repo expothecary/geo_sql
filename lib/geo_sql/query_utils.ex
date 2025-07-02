@@ -7,6 +7,11 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
+  defmodule WKB do
+    defstruct data: <<>>
+    @type t :: %__MODULE__{}
+  end
+
   require GeoSQL.RepoUtils
 
   @doc """
@@ -24,7 +29,7 @@ defmodule GeoSQL.QueryUtils do
   end
 
   @doc """
-  Used to wrap WKB literals in a portable fashion. When used in an ecto query, 
+  Used to wrap WKB literals in a portable fashion. When used in an ecto query,
   the return value will need to be pinned in the query.
 
   Example:
@@ -32,11 +37,11 @@ defmodule GeoSQL.QueryUtils do
       from(g in GeoType,
           select: g.linestring == MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo))
   """
-  @spec wrap_wkb(wkb :: binary, Ecto.Repo.t()) :: GeoSQL.Geometry.WKB.t()
+  @spec wrap_wkb(wkb :: binary, Ecto.Repo.t()) :: GeoSQL.QueryUtils.WKB.t()
   defmacro wrap_wkb(wkb, repo) do
     case GeoSQL.RepoUtils.adapter(repo) do
       Ecto.Adapters.SQLite3 ->
-        quote do: %GeoSQL.Geometry.WKB{data: unquote(wkb)}
+        quote do: %GeoSQL.QueryUtils.WKB{data: unquote(wkb)}
 
       _ ->
         quote do: unquote(wkb)

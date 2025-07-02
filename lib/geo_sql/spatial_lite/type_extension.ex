@@ -99,7 +99,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
     {:ok, convert_geometry(geometry)}
   end
 
-  def convert(%GeoSQL.Geometry.WKB{data: data}) do
+  def convert(%GeoSQL.QueryUtils.WKB{data: data}) do
     {:ok, {:blob, data}}
   end
 

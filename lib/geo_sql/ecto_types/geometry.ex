@@ -35,11 +35,6 @@ defmodule GeoSQL.Geometry do
       end
   """
 
-  defmodule WKB do
-    defstruct data: <<>>
-    @type t :: %__MODULE__{}
-  end
-
   alias Geometry.{
     Point,
     PointZ,

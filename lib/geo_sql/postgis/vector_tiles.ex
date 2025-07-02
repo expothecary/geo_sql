@@ -172,7 +172,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
         where:
           PostGIS.Operators.bbox_intersects?(
             field(g, ^columns.geometry),
-            MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, Int4))
+            MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, GeoSQL.Int4))
           ),
         select: %{
           name: ^layer.name,
@@ -181,7 +181,7 @@ defmodule GeoSQL.PostGIS.VectorTiles do
               field(g, ^columns.geometry),
               MM2.transform(
                 tile_envelope(^z, ^x, ^y),
-                type(^layer.srid, Int4)
+                type(^layer.srid, GeoSQL.Int4)
               )
             ),
           id: field(g, ^columns.id),

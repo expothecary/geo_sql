@@ -46,7 +46,7 @@ defmodule GeoSQL.Mixfile do
 
   defp package do
     [
-      description: "Spatial databases with GIS functions",
+      description: "Spatial databases and GIS SQL functions",
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md"],
       maintainers: ["Aaron Seigo"],
       licenses: ["MIT"],

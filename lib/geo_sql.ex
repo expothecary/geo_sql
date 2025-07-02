@@ -23,9 +23,16 @@ defmodule GeoSQL do
 
   @type fragment :: term
   @type geometry_input :: GeoSQL.Geometry.t() | fragment
-  @type init_option :: {:json, atom} | {:decode_binary, :copy | :reference}
+  @type init_option ::
+          {:json, atom} | {:decode_binary, :copy | :reference} | {:type_extensions, [module()]}
   @type init_options :: [init_option]
 
+  @doc """
+  Performs runtime setup of an Ecto repo for use with GeoSQL. This can be done in the repo's
+  `init/2` callback, or any time after it has been started.  This function is idempotent.
+
+  If using additional type extensions, pass those modules in via the `type_extensions` option.
+  """
   @spec init(Ecto.Repo.t(), init_options) :: :ok
   def init(repo, opts \\ [json: Jason, decode_binary: :copy]) when is_atom(repo) do
     repo.__adapter__()
@@ -53,11 +60,12 @@ defmodule GeoSQL do
       end)
 
     if not Code.ensure_loaded?(types_module) do
-      Postgrex.Types.define(
-        types_module,
-        GeoSQL.PostGIS.Extension.extensions() ++ Ecto.Adapters.Postgres.extensions(),
-        opts
-      )
+      all_extensions =
+        GeoSQL.PostGIS.Extension.extensions() ++
+          Keyword.get(opts, :type_extensions, []) ++
+          Ecto.Adapters.Postgres.extensions()
+
+      Postgrex.Types.define(types_module, all_extensions, opts)
     end
 
     adapter

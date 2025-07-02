@@ -12,16 +12,16 @@ The goals of this library are:
 
  * Ease: fast to get started, hide complexity where possible
  * Portability: currently supports PostGIS and SpatialLite.
- * Completeness: extensive support for GIS SQL functions, not just the obvious ones.
+ * Completeness: extensive support for GIS SQL functions, not just the most common ones.
  * Clarity: Functions organized by their availability and standards compliance
  * Utility: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
    generation is a good example: one call to `GeoSQL.PostGIS.VectorTiles.generate/6`
    is enough to retrieve complete vector tiles based on any table in the database that has a geometry field.
 
-Non-goals include:
+Not-goals include:
 
  * Having the fewest possible dependencies. Ecto adapters are pulled in as necessary,
-   along with other dependencies such as `Jason` needed to ease use.
+   along with other dependencies such as `Jason` in order to ease use.
 
 ## Usage
 
@@ -221,12 +221,19 @@ Example:
 With certain backends (e.g. SQLite3), it is possible to craft queries that will return
 binary blobs instead of decoded `Geo` structs.
 
-In such cases, use `GeoSQL.decode_geometry/3`:
+In such cases, use `GeoSQL.QueryUtils.decode_geometry/2`:
 
   ```elixir
-  from(location in Location, select: MM2.boundary(location.geom))
-  |> Repo.all()
-  |> GeoSQL.decode_geometry(Repo)
+  defmodule MyApp.Plots do
+    use GeoSQL.MM2
+    use GeoSQL.QueryUtils
+
+    def boundaries() do
+      from(location in Location, select: MM2.boundary(location.geom))
+      |> Repo.all()
+      |> QueryUtils.decode_geometry(Repo)
+    end
+  end
   ```
 
 For backends that do not suffer from this (e.g. PostGIS), the call to `GeoSQL.decode_geometry`

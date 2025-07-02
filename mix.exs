@@ -62,10 +62,12 @@ defmodule GeoSQL.Mixfile do
       source_ref: "v#{@version}",
       formatters: ["html"],
       groups_for_modules: [
+        "Ecto Types": [~r/GeoSQL.Geometry.*/, GeoSQL.Int4],
         Standard: [~r/GeoSQL.MM[23].*/],
         "Non-Standard": [~r/GeoSQL.Common.*/],
         PostGIS: [~r/GeoSQL.PostGIS.*/],
-        Spatialite: [~r/GeoSQL.SpatialLite.*/]
+        Spatialite: [~r/GeoSQL.SpatialLite.*/],
+        Utilities: [~r/GeoSQL.*Utils/]
       ]
     ]
   end

@@ -1,9 +1,12 @@
 defmodule GeoSQL.PostGIS.Extension do
   @moduledoc """
   A type extension for PostGIS data in PostgreSQL databases.
+
+  Automatically applied when a PostgreSQL Ecto repo is passed into `GeoSQL.init/2`.
   """
   @behaviour Postgrex.Extension
 
+  @doc "Convenience function to get the extension modules for PostGIS support."
   def extensions do
     [__MODULE__]
   end

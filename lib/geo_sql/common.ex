@@ -310,8 +310,8 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Mutations"
   defmacro flip_coordinates(geometry, repo \\ nil) do
     case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinate(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_SwapCoordinates(?)", unquote(geometry))
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_FlipCoordinates(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("SwapCoordinates(?)", unquote(geometry))
     end
   end
 

@@ -839,7 +839,6 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: sym_difference (#{repo})" do
       test "returns the differences between two geometries" do
         line = Fixtures.linestring()
-        expected = %Geometry.Point{coordinates: Enum.at(line.path, 0), srid: line.srid}
 
         result =
           from(location in Location, select: MM2.sym_difference(location.geom, ^line))

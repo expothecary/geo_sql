@@ -8,10 +8,34 @@ defmodule GeoSQL.MM3Functions.Test do
   use GeoSQL.QueryUtils
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{LocationMulti, Geographies}
+  alias GeoSQL.Test.Schema.{LocationMulti, GeoType, Geographies}
+  alias GeoSQL.Test.Fixtures
 
-  for repo <- Helper.repos() do
-    describe "MM3 Queries (#{repo})" do
+  supports_mm3 = [GeoSQL.Test.PostGIS.Repo]
+
+  for repo <- Helper.repos(), Enum.member?(supports_mm3, repo) do
+    describe "MM3: coord_dim (#{repo})" do
+      test "extracts dimensionality from geometry" do
+        point = Fixtures.point()
+        pointz = Fixtures.point(:z)
+
+        unquote(repo).insert(%GeoType{point: point, pointz: pointz})
+
+        result =
+          from(g in GeoType,
+            select: [
+              MM3.coord_dim(g.point),
+              MM3.coord_dim(g.pointz)
+            ]
+          )
+          |> unquote(repo).one()
+
+        #         assert result == ["XY", "XYZ"]
+        assert result == [2, 3]
+      end
+    end
+
+    describe "MM3: distance (#{repo})" do
       test "order by distance" do
         geom1 = %Geometry.Point{coordinates: [30, -90], srid: 4326}
         geom2 = %Geometry.Point{coordinates: [30, -91], srid: 4326}

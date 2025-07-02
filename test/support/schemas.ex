@@ -35,6 +35,7 @@ defmodule GeoSQL.Test.Schema.GeoType do
     field(:linestring, GeoSQL.Geometry.LineString)
     field(:multipoint, GeoSQL.Geometry.MultiPoint)
     field(:polygon, GeoSQL.Geometry.Polygon)
+    field(:multipolygon, GeoSQL.Geometry.MultiPolygon)
   end
 end
 

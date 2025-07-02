@@ -225,98 +225,19 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "node (#{repo})" do
-      supports_self_intersection = [GeoSQL.Test.PostGIS.Repo]
+    describe "flip_coordinates (#{repo})" do
+      test "inverts x/y coordinates" do
+        point = Fixtures.point()
+        flipped = %Geometry.Point{coordinates: Enum.reverse(point.coordinates), srid: point.srid}
 
-      test "nodes from a linestring" do
-        coordinates = [[0, 0, 0], [1, 1, 1], [2, 2, 2]]
-
-        # Create a self-intersecting linestring (crossing at point [1, 1, 1])
-        linestring = %Geometry.LineStringZ{
-          path: coordinates,
-          srid: 4326
-        }
-
-        unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
-
-        query =
-          from(
-            location in LocationMulti,
-            select: Common.node(location.geom)
-          )
+        unquote(repo).insert(%GeoType{t: "flip_coordinates", point: point})
 
         result =
-          unquote(repo).one(query)
+          from(g in GeoType, select: Common.flip_coordinates(g.point, unquote(repo)))
+          |> unquote(repo).one()
           |> GeoSQL.decode_geometry(unquote(repo))
 
-        assert %Geometry.LineStringZ{} = result
-
-        assert result.path == coordinates
-      end
-
-      if Enum.member?(supports_self_intersection, repo) do
-        test "self-intersecting linestring" do
-          coordinates = [[0, 0, 0], [2, 2, 2], [0, 2, 0], [2, 0, 2]]
-          cross_point = [1, 1, 1]
-
-          # Create a self-intersecting linestring (crossing at point [1, 1, 1])
-          linestring = %Geometry.LineStringZ{
-            path: coordinates,
-            srid: 4326
-          }
-
-          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
-
-          query =
-            from(
-              location in LocationMulti,
-              select: Common.node(location.geom)
-            )
-
-          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
-
-          assert %Geometry.MultiLineStringZ{} = result
-
-          assert result.line_strings == [
-                   [Enum.at(coordinates, 0), cross_point],
-                   [cross_point, Enum.at(coordinates, 1), Enum.at(coordinates, 2), cross_point],
-                   [cross_point, Enum.at(coordinates, 3)]
-                 ]
-        end
-
-        test "intersecting multilinestring" do
-          coordinates1 = [[0, 0, 0], [2, 2, 2]]
-          coordinates2 = [[0, 2, 0], [2, 0, 2]]
-          cross_point = [1, 1, 1]
-
-          # Create a multilinestring that intersects (crossing at point [1, 1, 1])
-          linestring = %Geometry.MultiLineStringZ{
-            line_strings: [
-              coordinates1,
-              coordinates2
-            ],
-            srid: 4326
-          }
-
-          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
-
-          query =
-            from(
-              location in LocationMulti,
-              select: Common.node(location.geom)
-            )
-
-          result = unquote(repo).one(query)
-
-          assert %Geometry.MultiLineStringZ{} = result
-
-          assert result.line_strings == [
-                   [Enum.at(coordinates1, 0), cross_point],
-                   [Enum.at(coordinates2, 0), cross_point],
-                   [cross_point, Enum.at(coordinates1, 1)],
-                   [cross_point, Enum.at(coordinates2, 1)]
-                 ]
-        end
+        assert result == flipped
       end
     end
 
@@ -450,6 +371,101 @@ defmodule GeoSQL.CommonFunctions.Test do
         assert [%Geometry.PointZM{coordinates: [1.0, 2.0, 3.0, 4.0]}] =
                  unquote(repo).all(query)
                  |> GeoSQL.decode_geometry(unquote(repo))
+      end
+    end
+
+    describe "node (#{repo})" do
+      supports_self_intersection = [GeoSQL.Test.PostGIS.Repo]
+
+      test "nodes from a linestring" do
+        coordinates = [[0, 0, 0], [1, 1, 1], [2, 2, 2]]
+
+        # Create a self-intersecting linestring (crossing at point [1, 1, 1])
+        linestring = %Geometry.LineStringZ{
+          path: coordinates,
+          srid: 4326
+        }
+
+        unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+
+        query =
+          from(
+            location in LocationMulti,
+            select: Common.node(location.geom)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> GeoSQL.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineStringZ{} = result
+
+        assert result.path == coordinates
+      end
+
+      if Enum.member?(supports_self_intersection, repo) do
+        test "self-intersecting linestring" do
+          coordinates = [[0, 0, 0], [2, 2, 2], [0, 2, 0], [2, 0, 2]]
+          cross_point = [1, 1, 1]
+
+          # Create a self-intersecting linestring (crossing at point [1, 1, 1])
+          linestring = %Geometry.LineStringZ{
+            path: coordinates,
+            srid: 4326
+          }
+
+          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+
+          query =
+            from(
+              location in LocationMulti,
+              select: Common.node(location.geom)
+            )
+
+          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+
+          assert %Geometry.MultiLineStringZ{} = result
+
+          assert result.line_strings == [
+                   [Enum.at(coordinates, 0), cross_point],
+                   [cross_point, Enum.at(coordinates, 1), Enum.at(coordinates, 2), cross_point],
+                   [cross_point, Enum.at(coordinates, 3)]
+                 ]
+        end
+
+        test "intersecting multilinestring" do
+          coordinates1 = [[0, 0, 0], [2, 2, 2]]
+          coordinates2 = [[0, 2, 0], [2, 0, 2]]
+          cross_point = [1, 1, 1]
+
+          # Create a multilinestring that intersects (crossing at point [1, 1, 1])
+          linestring = %Geometry.MultiLineStringZ{
+            line_strings: [
+              coordinates1,
+              coordinates2
+            ],
+            srid: 4326
+          }
+
+          unquote(repo).insert(%LocationMulti{name: "intersecting lines", geom: linestring})
+
+          query =
+            from(
+              location in LocationMulti,
+              select: Common.node(location.geom)
+            )
+
+          result = unquote(repo).one(query)
+
+          assert %Geometry.MultiLineStringZ{} = result
+
+          assert result.line_strings == [
+                   [Enum.at(coordinates1, 0), cross_point],
+                   [Enum.at(coordinates2, 0), cross_point],
+                   [cross_point, Enum.at(coordinates1, 1)],
+                   [cross_point, Enum.at(coordinates2, 1)]
+                 ]
+        end
       end
     end
   end

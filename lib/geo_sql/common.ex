@@ -36,8 +36,7 @@ defmodule GeoSQL.Common do
 
   require Ecto.Query
 
-  require GeoSQL.RepoUtils
-  alias GeoSQL.RepoUtils
+  use GeoSQL.RepoUtils
 
   @spec add_measure(
           line :: GeoSQL.geometry_input(),

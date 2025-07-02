@@ -597,10 +597,10 @@ defmodule GeoSQL.Common do
   end
 
   @spec make_point(
-          x :: [Geometry.fragment()] | [number],
-          y :: [Geometry.fragment()] | [number],
+          x :: [GeoSQL.fragment()] | [number],
+          y :: [GeoSQL.fragment()] | [number],
           Ecto.Repo.t() | nil
-        ) :: Geometry.fragment()
+        ) :: GeoSQL.fragment()
   @doc group: "Geometry Constructors"
   defmacro make_point(x, y, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -613,11 +613,11 @@ defmodule GeoSQL.Common do
   end
 
   @spec make_point_z(
-          x :: [Geometry.fragment()] | [number],
-          y :: [Geometry.fragment()] | [number],
-          z :: [Geometry.fragment()] | [number],
+          x :: [GeoSQL.fragment()] | [number],
+          y :: [GeoSQL.fragment()] | [number],
+          z :: [GeoSQL.fragment()] | [number],
           Ecto.Repo.t() | nil
-        ) :: Geometry.fragment()
+        ) :: GeoSQL.fragment()
   @doc group: "Geometry Constructors"
   defmacro make_point_z(x, y, z, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -630,12 +630,12 @@ defmodule GeoSQL.Common do
   end
 
   @spec make_point_zm(
-          x :: [Geometry.fragment()] | [number],
-          y :: [Geometry.fragment()] | [number],
-          z :: [Geometry.fragment()] | [number],
-          m :: [Geometry.fragment()] | [number],
+          x :: [GeoSQL.fragment()] | [number],
+          y :: [GeoSQL.fragment()] | [number],
+          z :: [GeoSQL.fragment()] | [number],
+          m :: [GeoSQL.fragment()] | [number],
           Ecto.Repo.t() | nil
-        ) :: Geometry.fragment()
+        ) :: GeoSQL.fragment()
   @doc group: "Geometry Constructors"
   defmacro make_point_zm(x, y, z, m, repo \\ nil) do
     case RepoUtils.adapter(repo) do
@@ -652,11 +652,11 @@ defmodule GeoSQL.Common do
   end
 
   @spec make_point_m(
-          x :: [Geometry.fragment()] | [number],
-          y :: [Geometry.fragment()] | [number],
-          z :: [Geometry.fragment()] | [number],
+          x :: [GeoSQL.fragment()] | [number],
+          y :: [GeoSQL.fragment()] | [number],
+          z :: [GeoSQL.fragment()] | [number],
           Ecto.Repo.t() | nil
-        ) :: Geometry.fragment()
+        ) :: GeoSQL.fragment()
   @doc group: "Geometry Constructors"
   defmacro make_point_m(x, y, z, repo \\ nil) do
     case RepoUtils.adapter(repo) do

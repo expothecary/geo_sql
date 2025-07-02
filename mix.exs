@@ -46,9 +46,9 @@ defmodule GeoSQL.Mixfile do
 
   defp package do
     [
-      description: "GIS functions for Ecto.",
+      description: "Spatial databases with GIS functions",
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md"],
-      maintainers: ["Aaron Seigoh"],
+      maintainers: ["Aaron Seigo"],
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url}
     ]

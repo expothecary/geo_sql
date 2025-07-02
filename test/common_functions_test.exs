@@ -7,6 +7,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.MM3
   use GeoSQL.PostGIS
   use GeoSQL.Common
+  use GeoSQL.QueryUtils
   use GeoSQL.Test.Helper
   alias GeoSQL.Test.Helper
 
@@ -24,7 +25,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.LineStringM{path: path}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?([[_, _, 1.0], [_, _, 100.0]], path)
       end
@@ -42,7 +43,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
 
         assert length(path) == Enum.count(line.path) + 1
       end
@@ -58,7 +59,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
 
         assert length(path) == Enum.count(line.path) + 1
         assert Enum.at(path, 2) == point.coordinates
@@ -75,7 +76,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.LineString{path: path}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
 
         assert length(path) == Enum.count(line.path) + 1
         assert Enum.at(path, 0) == point.coordinates
@@ -219,7 +220,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.Polygon{rings: [ring]}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
 
         assert length(ring) == 5
       end
@@ -235,7 +236,7 @@ defmodule GeoSQL.CommonFunctions.Test do
         result =
           from(g in GeoType, select: Common.flip_coordinates(g.point, unquote(repo)))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == flipped
       end
@@ -264,7 +265,7 @@ defmodule GeoSQL.CommonFunctions.Test do
               select: Common.line_merge(location.geom, true, unquote(repo))
             )
 
-          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+          result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
 
           # Verify the result is still a MultiLineString with only 2 lines merged
 
@@ -307,7 +308,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.LineString{} = result
 
@@ -331,7 +332,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.Point{coordinates: [1.0, 2.0], srid: 0}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
       end
 
       test "makes a 3D point" do
@@ -344,7 +345,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.PointZ{coordinates: [1.0, 2.0, 3.0]}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
       end
 
       test "makes a 2D point with a measure" do
@@ -357,7 +358,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.PointM{coordinates: [1.0, 2.0, 3.0]}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
       end
 
       test "makes a 3D point with a measure" do
@@ -370,7 +371,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         assert [%Geometry.PointZM{coordinates: [1.0, 2.0, 3.0, 4.0]}] =
                  unquote(repo).all(query)
-                 |> GeoSQL.decode_geometry(unquote(repo))
+                 |> QueryUtils.decode_geometry(unquote(repo))
       end
     end
 
@@ -396,7 +397,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.LineStringZ{} = result
 
@@ -422,7 +423,7 @@ defmodule GeoSQL.CommonFunctions.Test do
               select: Common.node(location.geom)
             )
 
-          result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+          result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
 
           assert %Geometry.MultiLineStringZ{} = result
 

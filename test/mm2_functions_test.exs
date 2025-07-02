@@ -78,7 +78,7 @@ defmodule GeoSQL.MM2Functions.Test do
             select: MM2.as_text(location.geom)
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         expected =
           if Enum.member?(unquote(as_text_is_ewkt), unquote(repo)) do
@@ -124,7 +124,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         [result] =
           unquote(repo).all(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert Helper.is_a(result, [Geometry.LineString, Geometry.MultiLineString])
 
@@ -147,7 +147,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         [result | _] =
           unquote(repo).all(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(
                  %Geometry.Polygon{rings: _coordinates, srid: 4326},
@@ -162,7 +162,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         [result | _] =
           unquote(repo).all(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(
                  %Geometry.Polygon{srid: 4326, rings: _coordinates},
@@ -176,7 +176,7 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: centroid (#{repo})" do
       test "returns a centroid point" do
         query = from(location in Location, select: MM2.centroid(location.geom))
-        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
         assert match?(%Geometry.Point{}, result)
       end
     end
@@ -193,7 +193,7 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: convex_hull (#{repo})" do
       test "returns a polygon" do
         query = from(location in Location, select: MM2.convex_hull(location.geom))
-        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
         assert match?(%Geometry.Polygon{}, result)
       end
     end
@@ -216,7 +216,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(%Geometry.Polygon{}, result)
       end
@@ -271,7 +271,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == expected
       end
@@ -283,7 +283,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.Polygon{} = result
       end
@@ -296,7 +296,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         multipolygon = Fixtures.multipolygon()
         assert result.rings == Enum.at(multipolygon.polygons, 0)
@@ -308,7 +308,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == nil
       end
@@ -333,7 +333,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.LineString{} = result
       end
@@ -353,7 +353,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.Point{} = result
       end
@@ -564,7 +564,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.m_point_from_text(^wkt, ^geom.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == geom
       end
@@ -579,7 +579,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.m_line_from_text(^wkt, ^geom.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == geom
       end
@@ -594,7 +594,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.m_poly_from_text(^wkt, ^geom.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == geom
       end
@@ -609,7 +609,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.geom_collection_from_text(^wkt, ^geom.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(^result, geom)
       end
@@ -625,7 +625,7 @@ defmodule GeoSQL.MM2Functions.Test do
             select: MM2.geom_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^geom.srid)
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(^result, geom)
       end
@@ -689,7 +689,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.point(^x, ^y))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result.coordinates == point.coordinates
       end
@@ -703,7 +703,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.point_from_text(^wkt, ^point.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == point
       end
@@ -719,7 +719,7 @@ defmodule GeoSQL.MM2Functions.Test do
             select: MM2.point_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^point.srid)
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == point
       end
@@ -736,7 +736,7 @@ defmodule GeoSQL.MM2Functions.Test do
 
         result =
           unquote(repo).one(query)
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == expected
       end
@@ -749,7 +749,7 @@ defmodule GeoSQL.MM2Functions.Test do
             select: MM2.point_on_surface(location.geom)
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert %Geometry.Point{} = result
       end
@@ -763,7 +763,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.polygon_from_text(^wkt, ^polygon.srid))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == polygon
       end
@@ -777,7 +777,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.relate(^polygonA, ^polygonB))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == "212FF1FF2"
       end
@@ -791,7 +791,7 @@ defmodule GeoSQL.MM2Functions.Test do
             select: MM2.relate(^polygonA, ^polygonB, :multivalent_endpoint)
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == "212FF1FF2"
       end
@@ -830,7 +830,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in GeoType, select: MM2.start_point(location.linestring))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == expected
       end
@@ -843,7 +843,7 @@ defmodule GeoSQL.MM2Functions.Test do
         result =
           from(location in Location, select: MM2.sym_difference(location.geom, ^line))
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(
                  %Geometry.GeometryCollection{
@@ -876,7 +876,7 @@ defmodule GeoSQL.MM2Functions.Test do
     describe "SQL/MM2: transform (#{repo})" do
       test "changes the srid of a geometry" do
         query = from(location in Location, limit: 1, select: MM2.transform(location.geom, 3452))
-        result = unquote(repo).one(query) |> GeoSQL.decode_geometry(unquote(repo))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result.srid == 3452
       end
@@ -901,7 +901,7 @@ defmodule GeoSQL.MM2Functions.Test do
               )
           )
           |> unquote(repo).one()
-          |> GeoSQL.decode_geometry(unquote(repo))
+          |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == expected
       end
@@ -920,7 +920,7 @@ defmodule GeoSQL.MM2Functions.Test do
                 ])
             )
             |> unquote(repo).one()
-            |> GeoSQL.decode_geometry(unquote(repo))
+            |> QueryUtils.decode_geometry(unquote(repo))
 
           assert %Geometry.MultiPolygon{} = result
         end

@@ -1,9 +1,10 @@
 defmodule GeoSQL.Test do
   use ExUnit.Case, async: true
   use GeoSQL.Test.Helper
+  use GeoSQL.QueryUtils
 
   def decode({:ok, %{rows: result}}, repo, fields) do
-    GeoSQL.decode_geometry(result, repo, fields)
+    QueryUtils.decode_geometry(result, repo, fields)
   end
 
   for repo <- Helper.repos() do

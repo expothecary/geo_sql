@@ -87,7 +87,6 @@ defmodule GeoSQL.MM3Functions.Test do
 
     describe "MM3: locate_along (#{repo})" do
       test "returns matching points from a PolygonM" do
-        # wkt does not include the SRID, so set the SRID to 0
         linestringzm = Fixtures.linestring(:zm)
 
         unquote(repo).insert(%GeoType{linestringzm: linestringzm})
@@ -98,14 +97,12 @@ defmodule GeoSQL.MM3Functions.Test do
           )
           |> unquote(repo).one()
           |> QueryUtils.decode_geometry(unquote(repo))
-          |> IO.inspect()
 
         assert %Geometry.MultiPointZM{} = result
         assert Enum.count(result.points) == 3
       end
 
       test "returns matching points from a PolygonM past an offset" do
-        # wkt does not include the SRID, so set the SRID to 0
         linestringzm = Fixtures.linestring(:zm)
 
         unquote(repo).insert(%GeoType{linestringzm: linestringzm})
@@ -119,6 +116,71 @@ defmodule GeoSQL.MM3Functions.Test do
 
         assert %Geometry.MultiPointZM{} = result
         assert Enum.count(result.points) == 5
+      end
+    end
+
+    describe "MM3: locate_between (#{repo})" do
+      test "returns matching points from a PolygonM" do
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM3.locate_between(g.linestringzm, 10, 20)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineStringZM{} = result
+        assert Enum.count(result.line_strings) == 2
+      end
+
+      test "returns matching points from a PolygonM past an offset" do
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM3.locate_between(g.linestringzm, 10, 20, 0.5)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineString{} = result
+        assert Enum.count(result.line_strings) == 2
+      end
+    end
+
+    describe "ordering_equals (#{repo})" do
+      test "returns true with identical geometry" do
+        linestring = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{linestring: linestring})
+
+        query =
+          from(g in GeoType,
+            select: MM3.ordering_equals(g.linestring, ^linestring)
+          )
+
+        result = unquote(repo).one(query)
+
+        assert unquote(repo).to_boolean(result)
+      end
+
+      test "returns false with differing geometry" do
+        linestring = Fixtures.linestring()
+        linestring2 = Fixtures.linestring(:intersects)
+        unquote(repo).insert(%GeoType{linestring: linestring})
+
+        query =
+          from(g in GeoType,
+            select: MM3.ordering_equals(g.linestring, ^linestring2)
+          )
+
+        result = unquote(repo).one(query)
+
+        refute unquote(repo).to_boolean(result)
       end
     end
 

@@ -55,7 +55,7 @@ defmodule GeoSQL.MM3 do
 
   defmacro locate_along(geometry, measure, offset \\ 0) do
     quote do
-      fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure), unquote(offset))
+      fragment("ST_LocateAlong(?,?, ?)", unquote(geometry), unquote(measure), unquote(offset))
     end
   end
 

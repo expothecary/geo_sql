@@ -67,6 +67,61 @@ defmodule GeoSQL.MM3Functions.Test do
       end
     end
 
+    describe "MM3: geom_from_text (#{repo})" do
+      test "returns our point" do
+        # wkt does not include the SRID, so set the SRID to 0
+        point = Fixtures.point() |> Map.put(:srid, 0)
+        wkt = Geometry.to_wkt(point)
+
+        unquote(repo).insert(%GeoType{point: point})
+
+        result =
+          from(g in GeoType,
+            select: MM3.geom_from_text(^wkt)
+          )
+          |> unquote(repo).one()
+
+        assert unquote(repo).to_boolean(result)
+      end
+    end
+
+    describe "MM3: locate_along (#{repo})" do
+      test "returns matching points from a PolygonM" do
+        # wkt does not include the SRID, so set the SRID to 0
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM3.locate_along(g.linestringzm, 10)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+          |> IO.inspect()
+
+        assert %Geometry.MultiPointZM{} = result
+        assert Enum.count(result.points) == 3
+      end
+
+      test "returns matching points from a PolygonM past an offset" do
+        # wkt does not include the SRID, so set the SRID to 0
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM3.locate_along(g.linestringzm, 10, 2)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiPointZM{} = result
+        assert Enum.count(result.points) == 5
+      end
+    end
+
     describe "is_empty/1 (#{repo})" do
       test "returns true for an empty geometry" do
         empty_point = %Geometry.Point{coordinates: [], srid: 4326}

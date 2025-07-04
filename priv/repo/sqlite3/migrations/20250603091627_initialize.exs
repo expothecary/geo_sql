@@ -43,6 +43,9 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
     )
 
     execute("SELECT AddGeometryColumn('specified_columns', 'polygon', 4326, 'POLYGON')", "")
+
+    execute("SELECT AddGeometryColumn('specified_columns', 'polygonm', 4326, 'POLYGON M')", "")
+
     execute("SELECT AddGeometryColumn('specified_columns', 'multipoint', 4326, 'MULTIPOINT')", "")
 
     execute(

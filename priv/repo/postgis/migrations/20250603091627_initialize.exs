@@ -34,6 +34,7 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
           linestringz geometry(LineStringZ, 4326),
           linestringzm geometry(LineStringZM, 4326),
           polygon geometry(Polygon, 4326),
+          polygonm geometry(PolygonM, 4326),
           multipoint geometry(MultiPoint, 4326),
           multilinestring geometry(MultiLinestring, 4326),
           multipolygon geometry(MultiPolygon, 4326)

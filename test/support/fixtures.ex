@@ -238,6 +238,21 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
+  def polygon(:m) do
+    %Geometry.PolygonM{
+      rings: [
+        [
+          [0, 0, 1],
+          [1, 1, 10],
+          [1, 2, 20],
+          [1, 1, 1],
+          [0, 0, 10]
+        ]
+      ],
+      srid: 4326
+    }
+  end
+
   def multipolygon(which \\ :default)
 
   def multipolygon(:default) do
@@ -331,6 +346,20 @@ defmodule GeoSQL.Test.Fixtures do
         [1, 3],
         [1, 2],
         [2, 1]
+      ],
+      srid: 4326
+    }
+  end
+
+  def linestring(:zm) do
+    %Geometry.LineStringZM{
+      path: [
+        [1, 1, 1, 10],
+        [2, 2, 2, 20],
+        [2, 3.5, 4, 10],
+        [1, 3, 5, 100],
+        [1, 2, 6, 10],
+        [2, 1, 8, 20]
       ],
       srid: 4326
     }

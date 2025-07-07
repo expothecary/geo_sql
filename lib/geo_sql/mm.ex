@@ -414,6 +414,7 @@ defmodule GeoSQL.MM do
   end
 
   @doc group: "Geometry Constructors"
+  @doc "NOTE: this function does not currently exist in Spatialite"
   defmacro polygon(linestring, srid) do
     quote do: fragment("ST_Polygon(?,?)", unquote(linestring), unquote(srid))
   end

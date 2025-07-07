@@ -22,12 +22,12 @@ defmodule GeoSQL.Test.Helper do
             result =
               Enum.zip(l, r)
               |> Enum.reduce(true, fn {l, r}, acc ->
-                acc and Float.round(l, 4) == Float.round(r, 4)
+                acc and round(l) == round(r, 4)
               end)
 
             if result, do: {:cont, true}, else: {:halt, false}
 
-          is_number(l) and is_number(r) and Float.round(l, 4) == Float.round(r, 4) ->
+          is_number(l) and is_number(r) and round(l, 4) == round(r, 4) ->
             {:cont, true}
 
           true ->
@@ -38,6 +38,12 @@ defmodule GeoSQL.Test.Helper do
   end
 
   def fuzzy_match_geometry(_l, _r), do: false
+
+  defp round(number, precision) when is_integer(number) do
+    round(number * 1.0, precision)
+  end
+
+  defp round(number, precision), do: Float.round(number, precision)
 
   defmacro __using__(options \\ []) do
     setup_funs = Keyword.get(options, :setup_funs, [])

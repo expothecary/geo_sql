@@ -81,7 +81,7 @@ defmodule GeoSQL.MM do
 
   @spec contains(GeoSQL.geometry_input(), contains :: GeoSQL.geometry_input()) ::
           GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro contains(geometry, contains) do
     quote do: fragment("ST_Contains(?,?)", unquote(geometry), unquote(contains))
   end
@@ -109,7 +109,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec crosses(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro crosses(geometryA, geometryB) do
     quote do: fragment("ST_Crosses(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -127,6 +127,7 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_CurveToLine(?)", unquote(curve))
   end
 
+  @doc group: "Geometry Editors"
   defmacro curve_to_line(curve, tolerance, tolerance_type \\ 0, flags \\ 0) do
     quote do
       fragment(
@@ -152,7 +153,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec disjoint(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro disjoint(geometryA, geometryB) do
     quote do: fragment("ST_Disjoint(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -175,7 +176,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec equals(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro equals(geometryA, geometryB) do
     quote do: fragment("ST_Equals(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -204,14 +205,17 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_GeometryType(?)", unquote(geometry))
   end
 
+  @doc group: "Data Formats"
   defmacro gml_to_sql(geomgml) do
     quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
   end
 
+  @doc group: "Data Formats"
   defmacro gml_to_sql(geomgml, srid) do
     quote do: fragment("ST_GMLToSQL(?, ?)", unquote(geomgml), unquote(srid))
   end
 
+  @doc group: "Well-Known Text (WKT)"
   defmacro geom_from_text(text, srid \\ 0) do
     quote do: fragment("ST_GeomFromText(?,?)", unquote(text), unquote(srid))
   end
@@ -229,7 +233,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec intersects(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro intersects(geometryA, geometryB) do
     quote do: fragment("ST_Intersects(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -240,6 +244,7 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_IsClosed(?)", unquote(geometry))
   end
 
+  @doc group: "Geometry Accessors"
   defmacro is_empty(geometry) do
     quote do: fragment("ST_IsEmpty(?)", unquote(geometry))
   end
@@ -335,10 +340,12 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_GeomFromWKB(?, ?)", unquote(bytea), unquote(srid))
   end
 
+  @doc group: "Geometry Accessors"
   defmacro num_curves(curve) do
     quote do: fragment("ST_NumCurves(?)", unquote(curve))
   end
 
+  @doc group: "Geometry Accessors"
   defmacro num_patches(geometry) do
     quote do: fragment("ST_NumPatches(?)", unquote(geometry))
   end
@@ -361,24 +368,34 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_NumPoints(?)", unquote(geometry))
   end
 
+  @spec ordering_equals(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Topological Relationships"
   defmacro ordering_equals(geometryA, geometryB) do
     quote do: fragment("ST_OrderingEquals(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
   @spec overlaps(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro overlaps(geometryA, geometryB) do
     quote do: fragment("ST_Overlaps(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @spec patch_n(GeoSQL.geometry_input(), face_index :: number | GeoSQL.geometry_input()) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
   defmacro patch_n(geometry, face_index) do
     quote do: fragment("ST_PatchN(?,?)", unquote(geometry), unquote(face_index))
   end
 
+  @spec perimeter(GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Measurement"
   defmacro perimeter(geometry) do
     quote do: fragment("ST_Perimeter(?)", unquote(geometry))
   end
 
+  @spec perimeter(GeoSQL.geometry_input(), srid :: number | GeoSQL.geometry_input()) ::
+          GeoSQL.fragment()
+  @doc group: "Measurement"
   defmacro perimeter(geography, srid) do
     quote do: fragment("ST_Perimeter(?,?)", unquote(geography), unquote(srid))
   end
@@ -426,7 +443,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec relate(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro relate(geometryA, geometryB) do
     quote do: fragment("ST_Relate(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -437,7 +454,7 @@ defmodule GeoSQL.MM do
           GeoSQL.geometry_input(),
           matrix_or_rule :: String.t() | boundary_node_rule
         ) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro relate(geometryA, geometryB, boundary_rule) when is_atom(boundary_rule) do
     rule_value =
       case boundary_rule do
@@ -457,6 +474,7 @@ defmodule GeoSQL.MM do
     end
   end
 
+  @doc group: "Topological Relationships"
   defmacro relate(geometryA, geometryB, intersectionPatternMatrix) do
     quote do
       fragment(
@@ -487,7 +505,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec touches(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro touches(geometryA, geometryB) do
     quote do: fragment("ST_Touches(?,?)", unquote(geometryA), unquote(geometryB))
   end
@@ -511,7 +529,7 @@ defmodule GeoSQL.MM do
   end
 
   @spec within(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
-  @doc group: "Topology Relationships"
+  @doc group: "Topological Relationships"
   defmacro within(geometryA, geometryB) do
     quote do: fragment("ST_Within(?,?)", unquote(geometryA), unquote(geometryB))
   end

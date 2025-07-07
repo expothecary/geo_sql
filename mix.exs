@@ -2,7 +2,7 @@ defmodule GeoSQL.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/aseigo/geo_sql"
-  @version "0.1.0"
+  @version "1.0.0"
 
   def project do
     [
@@ -63,7 +63,7 @@ defmodule GeoSQL.Mixfile do
       formatters: ["html"],
       groups_for_modules: [
         "Ecto Types": [~r/GeoSQL.Geometry.*/, GeoSQL.Int4],
-        Standard: [~r/GeoSQL.MM[23].*/],
+        "SQL/MM": [~r/GeoSQL.MM.*/],
         "Non-Standard": [~r/GeoSQL.Common.*/],
         PostGIS: [~r/GeoSQL.PostGIS.*/],
         Spatialite: [~r/GeoSQL.SpatialLite.*/],

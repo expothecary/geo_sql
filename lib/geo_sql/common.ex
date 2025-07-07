@@ -934,7 +934,7 @@ defmodule GeoSQL.Common do
   @spec set_srid(
           geometry :: GeoSQL.geometry_input(),
           srid :: pos_integer,
-          repo :: Ecto.Repo.t() | nil
+          Ecto.Repo.t() | nil
         ) ::
           GeoSQL.fragment()
   @doc group: "Spatial Reference Systems"

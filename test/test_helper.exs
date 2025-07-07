@@ -22,7 +22,7 @@ defmodule GeoSQL.Test.Helper do
             result =
               Enum.zip(l, r)
               |> Enum.reduce(true, fn {l, r}, acc ->
-                acc and round(l) == round(r, 4)
+                acc and round(l, 4) == round(r, 4)
               end)
 
             if result, do: {:cont, true}, else: {:halt, false}

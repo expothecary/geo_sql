@@ -298,6 +298,28 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Linear Referencing"
+  @doc "PostGIS extension to `locate_along` with an offset"
+  defmacro locate_along(geometry, measure, offset \\ 0) do
+    quote do
+      fragment("ST_LocateAlong(?,?,?)", unquote(geometry), unquote(measure), unquote(offset))
+    end
+  end
+
+  @doc group: "Linear Referencing"
+  @doc "PostGIS extension to `locate_between` with an offset"
+  defmacro locate_between(geometry, measure_start, measure_end, offset) do
+    quote do
+      fragment(
+        "ST_LocateBetween(?,?,?,?)",
+        unquote(geometry),
+        unquote(measure_start),
+        unquote(measure_end),
+        unquote(offset)
+      )
+    end
+  end
+
+  @doc group: "Linear Referencing"
   @spec locate_between_elevations(
           GeoSQL.geometry_input(),
           elevation_start :: number,

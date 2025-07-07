@@ -150,14 +150,14 @@ uses a number of standard and PostGIS-specific features together:
     where:
       bbox_intersects?(
         field(g, ^columns.geometry),
-        MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, Int4))
+        MM.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, Int4))
       ),
     select: %{
       name: ^layer.name,
       geom:
         as_mvt_geom(
           field(g, ^columns.geometry),
-          MM2.transform(
+          MM.transform(
             tile_envelope(^z, ^x, ^y),
             type(^layer.srid, Int4)
           )
@@ -181,7 +181,7 @@ the geometry struct provided was not serialized.
 For example this query, where `lineA` and `lineB` are `Geometry.LineString` structs:
 
   ```elixir
-  from(location in Locations, select: MM2.intersection(^lineA, ^lineB))
+  from(location in Locations, select: MM.intersection(^lineA, ^lineB))
   ```
 
 may produce this error:
@@ -194,7 +194,7 @@ Casting one of the two type is usually enough to resolve this:
 
 
   ```elixir
-  from(location in Locations, select: MM2.intersection(QueryUtils.cast_to_geometry(^lineA, MyApp.Repo), ^lineB))
+  from(location in Locations, select: MM.intersection(QueryUtils.cast_to_geometry(^lineA, MyApp.Repo), ^lineB))
   ```
 
 Note that using Ecto Schemas or referencing columns from a table avoids these issues, as the
@@ -212,7 +212,7 @@ Example:
 
   ```elixir
   from(g in GeoType,
-    select: g.linestring == MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo), ^line.srid)
+    select: g.linestring == MM.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo), ^line.srid)
   )
   ```
 
@@ -225,11 +225,11 @@ In such cases, use `GeoSQL.QueryUtils.decode_geometry/2`:
 
   ```elixir
   defmodule MyApp.Plots do
-    use GeoSQL.MM2
+    use GeoSQL.MM
     use GeoSQL.QueryUtils
 
     def boundaries() do
-      from(location in Location, select: MM2.boundary(location.geom))
+      from(location in Location, select: MM.boundary(location.geom))
       |> Repo.all()
       |> QueryUtils.decode_geometry(Repo)
     end
@@ -245,10 +245,7 @@ action needs to be taken.
 Features are organized into modules by their availability and topic.
 
 The v2 and v3 sets of standard SQL/MM functions for geospatial applications are found
-in the `GeoSQL.MM2` and `GeoSQL.MM3` modules. Non-standardized but
-commonly implemented functions are found in the `GeoSQL.Common` namespace, while
-implementation-specific fuctions are found in namespaces indicating the target
-database (e.g. `GeoSQL.PostGIS`).
+in the `GeoSQL.MM`module. Non-standardized but commonly implemented functions are found in the `GeoSQL.Common` namespace, while implementation-specific fuctions are found in namespaces indicating the target database (e.g. `GeoSQL.PostGIS`).
 
 Topological and 3D functions are found in `Topo` and `ThreeD` modules within this
 hierarchy, as they less-used and/or have very similar names to more commonly used
@@ -258,24 +255,19 @@ This helps make it clear what features your code relies on, allowing
 one to audit feature usage for compability and avoid incompatible use
 in the first place.
 
-For example, if you using an older version of `PostGIS`, you may want to stick with only the
-functions in the `GeoSQL.MM2` modules as the `GeoSQL.MM3` standard functions were
-only implemented in later versions. Similarly, if targeting both `SpatialLite` and
-`PostGIS`, the code should only use the standard features plus those in the `GeoSQL.Common`
-modules.
+For example, if targeting both `SpatialLite` and `PostGIS`, the code should only use the standard SQL/MM features plus those in the `GeoSQL.Common` modules.
 
 To make this even easier, each of the top-level modules supports the `use` syntax which
 pulls in their suite of features and introduces helpful aliases with one line in your code:
 
   ```elixir
-  use GeoSQL.MM2
-  use GeoSQL.MM3
+  use GeoSQL.MM
 
   def query() do
     from(features in MyApp.Feature
       select: %{
-        area_2d: MM2.area(features.geometry)`
-        area_3d: MM3.ThreeD.area(features.geometry)
+        area_2d: MM.area(features.geometry)`
+        area_3d: MM.ThreeD.area(features.geometry)
       }
     )
   end

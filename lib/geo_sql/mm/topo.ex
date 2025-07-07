@@ -1,4 +1,4 @@
-defmodule GeoSQL.MM3.Topo do
+defmodule GeoSQL.MM.Topo do
   @moduledoc """
   SQL/MM3 Topological functions which can be applied to a toplogy object.
 

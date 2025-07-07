@@ -1,6 +1,6 @@
 defmodule GeoSQL.PostGIS.VectorTiles do
   import Ecto.Query
-  use GeoSQL.MM2
+  use GeoSQL.MM
   require GeoSQL.PostGIS
   require GeoSQL.PostGIS.Operators
   alias GeoSQL.PostGIS
@@ -172,14 +172,14 @@ defmodule GeoSQL.PostGIS.VectorTiles do
         where:
           PostGIS.Operators.bbox_intersects?(
             field(g, ^columns.geometry),
-            MM2.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, GeoSQL.Int4))
+            MM.transform(tile_envelope(^z, ^x, ^y), type(^layer.srid, GeoSQL.Int4))
           ),
         select: %{
           name: ^layer.name,
           geom:
             as_mvt_geom(
               field(g, ^columns.geometry),
-              MM2.transform(
+              MM.transform(
                 tile_envelope(^z, ^x, ^y),
                 type(^layer.srid, GeoSQL.Int4)
               )

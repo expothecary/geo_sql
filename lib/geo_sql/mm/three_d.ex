@@ -1,4 +1,4 @@
-defmodule GeoSQL.MM3.ThreeD do
+defmodule GeoSQL.MM.ThreeD do
   @moduledoc """
   SQL/MM3 3D functions, typically prefixed with `ST_3D` or `CG_3D` in the standard.
 

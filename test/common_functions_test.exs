@@ -3,8 +3,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   @moduletag :common
 
   import Ecto.Query
-  use GeoSQL.MM2
-  use GeoSQL.MM3
+  use GeoSQL.MM
   use GeoSQL.PostGIS
   use GeoSQL.Common
   use GeoSQL.QueryUtils

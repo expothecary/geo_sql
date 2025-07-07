@@ -43,7 +43,7 @@ defmodule GeoSQL.QueryUtils do
   Example:
 
       from(g in GeoType,
-          select: g.linestring == MM2.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo))
+          select: g.linestring == MM.linestring_from_wkb(^QueryUtils.wrap_wkb(wkb, MyApp.Repo))
   """
   @spec wrap_wkb(wkb :: binary, Ecto.Repo.t()) :: GeoSQL.QueryUtils.WKB.t()
   defmacro wrap_wkb(wkb, repo) do
@@ -117,7 +117,7 @@ defmodule GeoSQL.QueryUtils do
   to guarantee corectly decoded geometries regardless of the backend being used.
 
   ```elixir
-        from(location in Location, select: MM2.boundary(location.geom))
+        from(location in Location, select: MM.boundary(location.geom))
         |> Repo.all()
         |> QueryUtils.decode_geometry(Repo)
   ```
@@ -158,7 +158,7 @@ defmodule GeoSQL.QueryUtils do
   of the elements to decode:
 
   ```elixir
-        from(location in Location, select: [location.name, MM2.boundary(location.geom)])
+        from(location in Location, select: [location.name, MM.boundary(location.geom)])
         |> Repo.all()
         |> QueryUtils.decode_geometry(Repo, [1])
   ```
@@ -167,7 +167,7 @@ defmodule GeoSQL.QueryUtils do
 
 
   ```elixir
-        from(location in Location, select: %{name: location.name, boundary: MM2.boundary(location.geom)]})
+        from(location in Location, select: %{name: location.name, boundary: MM.boundary(location.geom)]})
         |> Repo.all()
         |> QueryUtils.decode_geometry(Repo, ["boundary])
   ```

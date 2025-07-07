@@ -1,4 +1,4 @@
-defmodule GeoSQL.MM2 do
+defmodule GeoSQL.MM do
   @moduledoc """
   SQL/MM 2 functions that can used in ecto queries.
 
@@ -6,20 +6,24 @@ defmodule GeoSQL.MM2 do
 
       defmodule Example do
         import Ecto.Query
-        use GeoSQL.MM2
+        use GeoSQL.MM
 
         def example_query(geom) do
-          from location in Location, limit: 5, select: MM2.distance(location.geom, ^geom)
+          from location in Location, limit: 5, select: MM.distance(location.geom, ^geom)
         end
       end
   """
 
   defmacro __using__(_) do
     quote do
-      require GeoSQL.MM2
-      alias GeoSQL.MM2
+      require GeoSQL.MM
+      require GeoSQL.MM.ThreeD
+      require GeoSQL.MM.Topo
+      alias GeoSQL.MM
     end
   end
+
+  use GeoSQL.RepoUtils
 
   @spec area(GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Measurement"
@@ -88,10 +92,51 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_ConvexHull(?)", unquote(geometry))
   end
 
+  @spec coord_dim(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  @doc """
+  Note: this function takes an optional Ecto.Repo parameter due to
+  some backends implementing the non-standard ST_NDims rather than ST_CoordDim
+  """
+  defmacro coord_dim(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_NDims(?)", unquote(geometry))
+
+      _ ->
+        quote do: fragment("ST_CoordDim(?)", unquote(geometry))
+    end
+  end
+
   @spec crosses(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Topology Relationships"
   defmacro crosses(geometryA, geometryB) do
     quote do: fragment("ST_Crosses(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
+  @spec curve_n(GeoSQL.geometry_input(), index :: integer | GeoSQL.geometry_input()) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro curve_n(compound_curve, index) do
+    quote do: fragment("ST_CurveN(?,?)", unquote(compound_curve), unquote(index))
+  end
+
+  @spec curve_to_line(GeoSQL.geometry_input()) :: GeoSQL.fragment()
+  @doc group: "Geometry Accessors"
+  defmacro curve_to_line(curve) do
+    quote do: fragment("ST_CurveToLine(?)", unquote(curve))
+  end
+
+  defmacro curve_to_line(curve, tolerance, tolerance_type \\ 0, flags \\ 0) do
+    quote do
+      fragment(
+        "ST_CurveToLine(?, ?, ?, ?)",
+        unquote(curve),
+        unquote(tolerance),
+        unquote(tolerance_type),
+        unquote(flags)
+      )
+    end
   end
 
   @spec difference(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
@@ -159,6 +204,18 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_GeometryType(?)", unquote(geometry))
   end
 
+  defmacro gml_to_sql(geomgml) do
+    quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
+  end
+
+  defmacro gml_to_sql(geomgml, srid) do
+    quote do: fragment("ST_GMLToSQL(?, ?)", unquote(geomgml), unquote(srid))
+  end
+
+  defmacro geom_from_text(text, srid \\ 0) do
+    quote do: fragment("ST_GeomFromText(?,?)", unquote(text), unquote(srid))
+  end
+
   @spec interior_ring_n(GeoSQL.geometry_input(), index :: pos_integer) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro interior_ring_n(geometry, index) do
@@ -181,6 +238,10 @@ defmodule GeoSQL.MM2 do
   @doc group: "Geometry Accessors"
   defmacro is_closed(geometry) do
     quote do: fragment("ST_IsClosed(?)", unquote(geometry))
+  end
+
+  defmacro is_empty(geometry) do
+    quote do: fragment("ST_IsEmpty(?)", unquote(geometry))
   end
 
   @spec is_ring(GeoSQL.geometry_input()) :: GeoSQL.fragment()
@@ -219,6 +280,25 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_LineStringFromWKB(?,?)", unquote(wkb), unquote(srid))
   end
 
+  @doc group: "Linear Referencing"
+  defmacro locate_along(geometry, measure) do
+    quote do
+      fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
+    end
+  end
+
+  @doc group: "Linear Referencing"
+  defmacro locate_between(geometry, measure_start, measure_end) do
+    quote do
+      fragment(
+        "ST_LocateBetween(?,?,?)",
+        unquote(geometry),
+        unquote(measure_start),
+        unquote(measure_end)
+      )
+    end
+  end
+
   @spec m(GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro m(geometry) do
@@ -255,6 +335,14 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_GeomFromWKB(?, ?)", unquote(bytea), unquote(srid))
   end
 
+  defmacro num_curves(curve) do
+    quote do: fragment("ST_NumCurves(?)", unquote(curve))
+  end
+
+  defmacro num_patches(geometry) do
+    quote do: fragment("ST_NumPatches(?)", unquote(geometry))
+  end
+
   @spec num_geometries(GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Accessors"
   defmacro num_geometries(geometry) do
@@ -273,10 +361,26 @@ defmodule GeoSQL.MM2 do
     quote do: fragment("ST_NumPoints(?)", unquote(geometry))
   end
 
+  defmacro ordering_equals(geometryA, geometryB) do
+    quote do: fragment("ST_OrderingEquals(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
   @spec overlaps(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Topology Relationships"
   defmacro overlaps(geometryA, geometryB) do
     quote do: fragment("ST_Overlaps(?,?)", unquote(geometryA), unquote(geometryB))
+  end
+
+  defmacro patch_n(geometry, face_index) do
+    quote do: fragment("ST_PatchN(?,?)", unquote(geometry), unquote(face_index))
+  end
+
+  defmacro perimeter(geometry) do
+    quote do: fragment("ST_Perimeter(?)", unquote(geometry))
+  end
+
+  defmacro perimeter(geography, srid) do
+    quote do: fragment("ST_Perimeter(?,?)", unquote(geography), unquote(srid))
   end
 
   @spec point(x :: number, y :: number) :: GeoSQL.fragment()
@@ -307,6 +411,11 @@ defmodule GeoSQL.MM2 do
   @doc group: "Geometry Processing"
   defmacro point_on_surface(geometry) do
     quote do: fragment("ST_PointOnSurface(?)", unquote(geometry))
+  end
+
+  @doc group: "Geometry Constructors"
+  defmacro polygon(linestring, srid) do
+    quote do: fragment("ST_Polygon(?,?)", unquote(linestring), unquote(srid))
   end
 
   @spec polygon_from_text(text :: binary(), srid :: integer) :: GeoSQL.fragment()

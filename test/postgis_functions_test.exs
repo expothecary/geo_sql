@@ -7,22 +7,27 @@ defmodule GeoSQL.PostGISFunctions.Test do
   use GeoSQL.Common
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, LocationMulti}
+  alias GeoSQL.Test.Schema.{GeoType, Location, LocationMulti}
 
-  test "query sphere distance" do
-    geom = Fixtures.multipolygon()
+  describe "PostGIS: distance_sphere" do
+    test "returns a distance" do
+      geom = Fixtures.multipolygon()
 
-    PostGISRepo.insert(%Location{name: "hello", geom: geom})
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
 
-    query =
-      from(location in Location, limit: 5, select: PostGIS.distance_sphere(location.geom, ^geom))
+      query =
+        from(location in Location,
+          limit: 5,
+          select: PostGIS.distance_sphere(location.geom, ^geom)
+        )
 
-    results = PostGISRepo.one(query)
+      results = PostGISRepo.one(query)
 
-    assert results == 0
+      assert results == 0
+    end
   end
 
-  describe "is_collection/1" do
+  describe "PostGIS: is_collection" do
     test "returns true for a geometry collection" do
       collection = %Geometry.GeometryCollection{
         geometries: [
@@ -77,7 +82,41 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
-  describe "PostGIS.points/1" do
+  describe "PostGIS: locate_along" do
+    test "returns matching points from a PolygonM past an offset" do
+      linestringzm = Fixtures.linestring(:zm)
+
+      PostGISRepo.insert(%GeoType{linestringzm: linestringzm})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.locate_along(g.linestringzm, 10, 2)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.MultiPointZM{} = result
+      assert Enum.count(result.points) == 5
+    end
+  end
+
+  describe "PostGIS: locate_between" do
+    test "returns matching points from a PolygonM past an offset" do
+      linestringzm = Fixtures.linestring(:zm)
+
+      PostGISRepo.insert(%GeoType{linestringzm: linestringzm})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.locate_between(g.linestringzm, 10, 20, 0.5)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.MultiLineString{} = result
+      assert Enum.count(result.line_strings) == 2
+    end
+  end
+
+  describe "PostGIS: points/1" do
     test "returns multipoint from a linestring" do
       path = [[0.0, 0.0], [1.0, 1.0], [2.0, 2.0]]
 
@@ -128,7 +167,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
-  describe "PostGIS.dump" do
+  describe "PostGIS: dump" do
     test "atomic geometry is returned directly" do
       point = %Geometry.Point{
         coordinates: [0.0, 0.0],

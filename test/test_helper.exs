@@ -93,16 +93,12 @@ defmodule GeoSQL.Test.Helper do
 
     # horrible hack here, but we need to start repo supervised for setup_all functions
     # that need access to a global db object they can modify for all tests aftewards.
-    try do
-      ExUnit.Callbacks.start_link_supervised!(repo.child_spec([]))
-
-      GeoSQL.init(repo, json: Jason, decode_binary: :reference)
-    rescue
-      _ -> :ok
-    end
-
     pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
+    Ecto.Adapters.SQL.Sandbox.mode(pid, :manual)
 
+    GeoSQL.init(repo, json: Jason, decode_binary: :reference)
+
+    #     pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
     # Add the repo pid and name into the context so that tests can access it
     add_repo_to_context(repo, pid, repo_name, acc)
   end

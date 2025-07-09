@@ -2,7 +2,7 @@ defmodule GeoSQL.TilesTest do
   use ExUnit.Case, async: true
   @moduletag :vector_tiles
 
-  use GeoSQL.Test.Helper, setup_funs: [{__MODULE__, :seed_db}], backends: ["pgsql"]
+  use GeoSQL.Test.Helper, backends: ["pgsql"]
   #   use GeoSQL.Test.Helper
   use GeoSQL.PostGIS
 
@@ -25,30 +25,29 @@ defmodule GeoSQL.TilesTest do
 
   supports_vector_tiles = [GeoSQL.Test.PostGIS.Repo]
 
-  def seed_db(context) do
-    repo_info =
-      Helper.repo_info(GeoSQL.Test.PostGIS.Repo, context)
-
-    # seed the DB if there's a PostGIS repo under test
-    if repo_info != nil do
-      insert_pois("public")
-      insert_pois("map")
+  setup do
+    for repo <- Helper.repos(), Enum.member?(unquote(supports_vector_tiles), repo) do
+      insert_pois(repo, "public")
+      insert_pois(repo, "map")
     end
 
     :ok
   end
 
-  def insert_pois(prefix) do
+  def insert_pois(repo, prefix) do
     [
       %{
+        id: 1,
         tags: %{amenity: "bench", backrest: "yes"},
         geom: %Geometry.Point{coordinates: [9.4393, 47.5130171], srid: 4326}
       },
       %{
+        id: 2,
         tags: %{amenity: prefix, access: "private"},
         geom: %Geometry.Point{coordinates: [8.5392315, 47.3774401], srid: 4326}
       },
       %{
+        id: 3,
         tags: %{amenity: "swimming_pool", access: "private"},
         geom: %Geometry.Point{coordinates: [8.5392315, 47.3774401], srid: 4326}
       }
@@ -57,15 +56,20 @@ defmodule GeoSQL.TilesTest do
     |> Enum.reduce(
       Ecto.Multi.new(),
       fn {attrs, index}, multi ->
-        Ecto.Multi.insert(multi, index, VectorTilePOI.changeset(%VectorTilePOI{}, attrs),
+        Ecto.Multi.insert(
+          multi,
+          index,
+          VectorTilePOI.changeset(%VectorTilePOI{id: attrs.id}, attrs),
           prefix: prefix
         )
       end
     )
-    |> PostGISRepo.transaction(prefix: prefix, returning: true)
+    |> repo.transaction(prefix: prefix, returning: true)
 
-    from(v in VectorTilePOI)
-    |> PostGISRepo.all(prefix: prefix)
+    #     from(v in VectorTilePOI)
+    #     |> repo.all(prefix: prefix)
+    #     |> Enum.count()
+    #     |> IO.inspect(label: "FOR PREFIX #{prefix}")
   end
 
   for repo <- Helper.repos(), Enum.member?(supports_vector_tiles, repo) do
@@ -84,7 +88,7 @@ defmodule GeoSQL.TilesTest do
       z = 17
       x = 68645
       y = 45899
-      tile = PostGIS.VectorTiles.generate(PostGISRepo, z, x, y, layers)
+      tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
 
@@ -104,7 +108,7 @@ defmodule GeoSQL.TilesTest do
       z = 17
       x = 68645
       y = 45899
-      tile = PostGIS.VectorTiles.generate(PostGISRepo, z, x, y, layers)
+      tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
 
@@ -129,7 +133,7 @@ defmodule GeoSQL.TilesTest do
       z = 17
       x = 68645
       y = 45899
-      tile = PostGIS.VectorTiles.generate(PostGISRepo, z, x, y, layers)
+      tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
 
@@ -150,7 +154,7 @@ defmodule GeoSQL.TilesTest do
       z = 17
       x = 68645
       y = 45899
-      tile = PostGIS.VectorTiles.generate(PostGISRepo, z, x, y, layers)
+      tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
   end

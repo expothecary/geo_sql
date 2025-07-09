@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] 09-07-2025
+
+* Breaking changes
+  * All SQL/MM functions were collapsed into a single MM module.
+    Migration: Replace all instances of `MM2` and `MM3` with `MM`.
+* Improvements
+  * Expanded unit test suite considerably, improved vector tile generation tests
+* Fixes
+  * `MM.locate_along` was missing a parameter placeholder
+
 ## [0.1.0] 02-07-2025
 
 First release.

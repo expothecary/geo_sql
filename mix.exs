@@ -1,7 +1,7 @@
 defmodule GeoSQL.Mixfile do
   use Mix.Project
 
-  @source_url "https://github.com/aseigo/geo_sql"
+  @source_url "https://github.com/expothecary/geo_sql"
   @version "1.0.0"
 
   def project do
@@ -46,7 +46,8 @@ defmodule GeoSQL.Mixfile do
 
   defp package do
     [
-      description: "Spatial databases and GIS SQL functions",
+      description:
+        "Spatial databases and GIS SQL functions. Currently supports PostGIS and Spatialite.",
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md"],
       maintainers: ["Aaron Seigo"],
       licenses: ["MIT"],

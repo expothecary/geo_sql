@@ -883,8 +883,30 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: perimeter (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "return perimeter of a polygon" do
+        polygon = Fixtures.polygon(:donut)
+        unquote(repo).insert(%GeoType{t: "hello", polygon: polygon})
+
+        result =
+          from(g in GeoType, select: MM.perimeter(g.polygon))
+          |> unquote(repo).one()
+
+        assert is_number(result)
+      end
+
+      if repo != GeoSQL.Test.SQLite3.Repo do
+        # Spatialite doesn't support non-lat/lon perimeter calcs using the spheroid
+        # This isn't a test of the backends, per se, so just skip Spatialite
+        test "return perimeter of a polygon using the spheroid" do
+          polygon = Fixtures.polygon(:donut)
+          unquote(repo).insert(%GeoType{t: "hello", polygon: polygon})
+
+          result =
+            from(g in GeoType, select: MM.perimeter(g.polygon, true))
+            |> unquote(repo).one()
+
+          assert is_number(result)
+        end
       end
     end
 

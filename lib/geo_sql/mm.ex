@@ -393,11 +393,11 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_Perimeter(?)", unquote(geometry))
   end
 
-  @spec perimeter(GeoSQL.geometry_input(), srid :: number | GeoSQL.geometry_input()) ::
+  @spec perimeter(GeoSQL.geometry_input(), use_spheroid :: boolean | GeoSQL.geometry_input()) ::
           GeoSQL.fragment()
   @doc group: "Measurement"
-  defmacro perimeter(geography, srid) do
-    quote do: fragment("ST_Perimeter(?,?)", unquote(geography), unquote(srid))
+  defmacro perimeter(geometry, use_spheroid) do
+    quote do: fragment("ST_Perimeter(?,?)", unquote(geometry), unquote(use_spheroid))
   end
 
   @spec point(x :: number, y :: number) :: GeoSQL.fragment()

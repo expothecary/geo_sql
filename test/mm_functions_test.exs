@@ -228,6 +228,12 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
+    describe "SQL/MM: curve_to_line (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
     describe "SQL/MM: difference (#{repo})" do
       test "return a polygon" do
         comparison = Fixtures.multipolygon(:comparison)
@@ -342,6 +348,56 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
+    describe "SQL/MM: geom_collection_from_text (#{repo})" do
+      test "creates a geometry collection" do
+        geom = Fixtures.geometrycollection()
+
+        wkt = Geometry.to_wkt(geom)
+
+        result =
+          from(location in Location, select: MM.geom_collection_from_text(^wkt, ^geom.srid))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert match?(^result, geom)
+      end
+    end
+
+    describe "SQL/MM: geom_from_text (#{repo})" do
+      test "returns our point" do
+        # wkt does not include the SRID, so set the SRID to 0
+        point = Fixtures.point()
+        wkt = Geometry.to_wkt(point)
+
+        unquote(repo).insert(%GeoType{point: point})
+
+        result =
+          from(g in GeoType,
+            select: MM.geom_from_text(^wkt)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
+      end
+    end
+
+    describe "SQL/MM: geom_from_wkb (#{repo})" do
+      test "creates a geometry" do
+        geom = Fixtures.multipolygon()
+        wkb = Geometry.to_wkb(geom)
+
+        result =
+          from(location in Location,
+            select: MM.geom_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^geom.srid)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert match?(^result, geom)
+      end
+    end
+
     describe "SQL/MM: geometry_n (#{repo})" do
       test "returns the 2nd point of a multpolygon" do
         query =
@@ -375,6 +431,12 @@ defmodule GeoSQL.MMFunctions.Test do
           unquote(repo).one(query)
 
         assert GeoSQL.Geometry.from_db_type(result) == Geometry.MultiPolygon
+      end
+    end
+
+    describe "SQL/MM: gml_to_sql (#{repo})" do
+      test "untested" do
+        # FIXME
       end
     end
 
@@ -412,7 +474,7 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
-    describe "SQL/MM: iontersects (#{repo})" do
+    describe "SQL/MM: intersects (#{repo})" do
       test "can detect intersections" do
         lineA = Fixtures.linestring()
         lineB = Fixtures.linestring(:intersects)
@@ -447,6 +509,39 @@ defmodule GeoSQL.MMFunctions.Test do
           |> unquote(repo).to_boolean()
 
         refute result
+      end
+    end
+
+    describe "SQL/MM: is_empty/1 (#{repo})" do
+      test "returns true for an empty geometry" do
+        empty_point = %Geometry.Point{coordinates: [], srid: 4326}
+
+        unquote(repo).insert(%LocationMulti{name: "empty_point", geom: empty_point})
+
+        query =
+          from(l in LocationMulti,
+            where: l.name == "empty_point",
+            select: MM.is_empty(l.geom)
+          )
+
+        result = unquote(repo).one(query)
+
+        # SQLITE "does not know" on empty points, so returns a valid -1
+        assert result == -1 or unquote(repo).to_boolean(result), "#{unquote(repo)} failed"
+      end
+
+      test "returns false for a non-empty geometry (#{repo})" do
+        point = %Geometry.Point{coordinates: [0, 0], srid: 4326}
+        unquote(repo).insert(%LocationMulti{name: "non_empty", geom: point})
+
+        query =
+          from(l in LocationMulti,
+            where: l.name == "non_empty",
+            select: MM.is_empty(l.geom)
+          )
+
+        result = unquote(repo).one(query)
+        assert not unquote(repo).to_boolean(result), "#{unquote(repo)} failed"
       end
     end
 
@@ -593,6 +688,42 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
+    describe "SQL/MM: locate_along (#{repo})" do
+      test "returns matching points from a PolygonM" do
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM.locate_along(g.linestringzm, 10)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiPointZM{} = result
+        assert Enum.count(result.points) == 3
+      end
+    end
+
+    describe "SQL/MM: locate_between (#{repo})" do
+      test "returns matching points from a PolygonM" do
+        linestringzm = Fixtures.linestring(:zm)
+
+        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
+
+        result =
+          from(g in GeoType,
+            select: MM.locate_between(g.linestringzm, 10, 20)
+          )
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineStringZM{} = result
+        assert Enum.count(result.line_strings) == 2
+      end
+    end
+
     describe "SQL/MM: m (#{repo})" do
       test "returns the m value from a geometry" do
         point = Fixtures.point(:m)
@@ -650,122 +781,9 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
-    describe "SQL/MM: geom_collection_from_text (#{repo})" do
-      test "creates a geometry collection" do
-        geom = Fixtures.geometrycollection()
-
-        wkt = Geometry.to_wkt(geom)
-
-        result =
-          from(location in Location, select: MM.geom_collection_from_text(^wkt, ^geom.srid))
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert match?(^result, geom)
-      end
-    end
-
-    describe "SQL/MM: geom_from_wkb (#{repo})" do
-      test "creates a geometry" do
-        geom = Fixtures.multipolygon()
-        wkb = Geometry.to_wkb(geom)
-
-        result =
-          from(location in Location,
-            select: MM.geom_from_wkb(^QueryUtils.wrap_wkb(wkb, unquote(repo)), ^geom.srid)
-          )
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert match?(^result, geom)
-      end
-    end
-
-    describe "SQL/MM: geom_from_text (#{repo})" do
-      test "returns our point" do
-        # wkt does not include the SRID, so set the SRID to 0
-        point = Fixtures.point()
-        wkt = Geometry.to_wkt(point)
-
-        unquote(repo).insert(%GeoType{point: point})
-
-        result =
-          from(g in GeoType,
-            select: MM.geom_from_text(^wkt)
-          )
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
-      end
-    end
-
-    describe "SQL/MM: is_empty/1 (#{repo})" do
-      test "returns true for an empty geometry" do
-        empty_point = %Geometry.Point{coordinates: [], srid: 4326}
-
-        unquote(repo).insert(%LocationMulti{name: "empty_point", geom: empty_point})
-
-        query =
-          from(l in LocationMulti,
-            where: l.name == "empty_point",
-            select: MM.is_empty(l.geom)
-          )
-
-        result = unquote(repo).one(query)
-
-        # SQLITE "does not know" on empty points, so returns a valid -1
-        assert result == -1 or unquote(repo).to_boolean(result), "#{unquote(repo)} failed"
-      end
-
-      test "returns false for a non-empty geometry (#{repo})" do
-        point = %Geometry.Point{coordinates: [0, 0], srid: 4326}
-        unquote(repo).insert(%LocationMulti{name: "non_empty", geom: point})
-
-        query =
-          from(l in LocationMulti,
-            where: l.name == "non_empty",
-            select: MM.is_empty(l.geom)
-          )
-
-        result = unquote(repo).one(query)
-        assert not unquote(repo).to_boolean(result), "#{unquote(repo)} failed"
-      end
-    end
-
-    describe "SQL/MM: locate_along (#{repo})" do
-      test "returns matching points from a PolygonM" do
-        linestringzm = Fixtures.linestring(:zm)
-
-        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
-
-        result =
-          from(g in GeoType,
-            select: MM.locate_along(g.linestringzm, 10)
-          )
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert %Geometry.MultiPointZM{} = result
-        assert Enum.count(result.points) == 3
-      end
-    end
-
-    describe "SQL/MM: locate_between (#{repo})" do
-      test "returns matching points from a PolygonM" do
-        linestringzm = Fixtures.linestring(:zm)
-
-        unquote(repo).insert(%GeoType{linestringzm: linestringzm})
-
-        result =
-          from(g in GeoType,
-            select: MM.locate_between(g.linestringzm, 10, 20)
-          )
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert %Geometry.MultiLineStringZM{} = result
-        assert Enum.count(result.line_strings) == 2
+    describe "SQL/MM: num_curves (#{repo})" do
+      test "untested" do
+        # FIXME
       end
     end
 
@@ -789,6 +807,12 @@ defmodule GeoSQL.MMFunctions.Test do
           |> unquote(repo).one()
 
         assert result == 2
+      end
+    end
+
+    describe "SQL/MM: num_patches (#{repo})" do
+      test "untested" do
+        # FIXME
       end
     end
 
@@ -849,6 +873,18 @@ defmodule GeoSQL.MMFunctions.Test do
           |> unquote(repo).one()
 
         refute unquote(repo).to_boolean(result)
+      end
+    end
+
+    describe "SQL/MM: patch_n (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "SQL/MM: perimeter (#{repo})" do
+      test "untested" do
+        # FIXME
       end
     end
 

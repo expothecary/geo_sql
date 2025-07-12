@@ -165,11 +165,21 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
+  @spec bd_m_poly_from_text(
+          String.t() | GeoSQL.geometry_input(),
+          pos_integer | GeoSQL.geometry_input()
+        ) ::
+          GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
   defmacro bd_m_poly_from_text(wkt, srid) do
     quote do: fragment("ST_BdMPolyFromText(?, ?)", unquote(wkt), unquote(srid))
   end
 
+  @spec bd_poly_from_text(
+          String.t() | GeoSQL.geometry_input(),
+          pos_integer | GeoSQL.geometry_input()
+        ) ::
+          GeoSQL.fragment()
   @doc group: "Well-Known Text (WKT)"
   defmacro bd_poly_from_text(wkt, srid) do
     quote do: fragment("ST_BdPolyFromText(?, ?)", unquote(wkt), unquote(srid))

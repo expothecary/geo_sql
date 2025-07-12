@@ -165,6 +165,21 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Azimuth(?,?)", unquote(originGeometry), unquote(targetGeometry))
   end
 
+  @doc group: "Well-Known Text (WKT)"
+  defmacro bd_m_poly_from_text(wkt, srid) do
+    quote do: fragment("ST_BdMPolyFromText(?, ?)", unquote(wkt), unquote(srid))
+  end
+
+  @doc group: "Well-Known Text (WKT)"
+  defmacro bd_poly_from_text(wkt, srid) do
+    quote do: fragment("ST_BdPolyFromText(?, ?)", unquote(wkt), unquote(srid))
+  end
+
+  @doc group: "Geometry Processing"
+  defmacro build_area(geometry) do
+    quote do: fragment("ST_BuildArea(?)", unquote(geometry))
+  end
+
   @spec closest_point(
           GeoSQL.geometry_input(),
           GeoSQL.geometry_input(),
@@ -229,21 +244,6 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Constructors"
   defmacro collect(geometryA, geometryB) do
     quote do: fragment("ST_Collect(?,?)", unquote(geometryA), unquote(geometryB))
-  end
-
-  @doc group: "Well-Known Text (WKT)"
-  defmacro bd_poly_from_text(wkt, srid) do
-    quote do: fragment("ST_BdPolyFromText(?, ?)", unquote(wkt), unquote(srid))
-  end
-
-  @doc group: "Well-Known Text (WKT)"
-  defmacro bd_m_poly_from_text(wkt, srid) do
-    quote do: fragment("ST_BdMPolyFromText(?, ?)", unquote(wkt), unquote(srid))
-  end
-
-  @doc group: "Geometry Processing"
-  defmacro build_area(geometry) do
-    quote do: fragment("ST_BuildArea(?)", unquote(geometry))
   end
 
   @spec estimated_extent(
@@ -591,11 +591,6 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @doc group: "Geometry Validation"
-  defmacro make_valid(geometry) do
-    quote do: fragment("ST_MakeValid(?)", unquote(geometry))
-  end
-
   @spec make_point(
           x :: [GeoSQL.fragment()] | [number],
           y :: [GeoSQL.fragment()] | [number],
@@ -666,6 +661,11 @@ defmodule GeoSQL.Common do
       Ecto.Adapters.SQLite3 ->
         quote do: fragment("MakePointM(?,?,?)", unquote(x), unquote(y), unquote(z))
     end
+  end
+
+  @doc group: "Geometry Validation"
+  defmacro make_valid(geometry) do
+    quote do: fragment("ST_MakeValid(?)", unquote(geometry))
   end
 
   @spec max_coord(GeoSQL.geometry_input(), axis :: :x | :y | :z, Ecto.Repo.t() | nil) ::
@@ -859,12 +859,11 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @doc group: "Topology Relationships"
-  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
-    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
-  end
-
-  @spec remove_repeated_points(GeoSQL.geometry_input(), tolerance :: number, Ecto.Repo.t() | nil) ::
+  @spec remove_repeated_points(
+          GeoSQL.geometry_input(),
+          tolerance :: number,
+          Ecto.Repo.t() | nil
+        ) ::
           GeoSQL.fragment()
   @doc group: "Geometry Editors"
   defmacro remove_repeated_points(geometry, tolerance \\ 0, repo \\ nil) do
@@ -875,6 +874,11 @@ defmodule GeoSQL.Common do
       Ecto.Adapters.SQLite3 ->
         quote do: fragment("RemoveRepeatedPoints(?,?)", unquote(geometry), unquote(tolerance))
     end
+  end
+
+  @doc group: "Topology Relationships"
+  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
+    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
   @spec reverse(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()

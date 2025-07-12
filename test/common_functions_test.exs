@@ -228,14 +228,86 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: closest_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a point" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, polygon: polygon})
+
+        query =
+          from(location in GeoType,
+            select:
+              Common.closest_point(location.linestring, location.polygon, false, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
+      end
+
+      test "uses the spheroid when directed" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, polygon: polygon})
+
+        query =
+          from(location in GeoType,
+            select:
+              Common.closest_point(location.linestring, location.polygon, true, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 
     describe "Common: collection_extract (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "extracts points, lines, polygons" do
+        collection = Fixtures.geometry_collection()
+        line = Fixtures.linestring()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              point: Common.collection_extract(^collection, :point),
+              linestring: Common.collection_extract(^collection, :linestring),
+              polygon: Common.collection_extract(^collection, :polygon)
+            }
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo), [:point, :linestring, :polygon])
+
+        case unquote(repo) do
+          GeoSQL.Test.SQLite3.Repo ->
+            assert match?(
+                     %{
+                       point: %Geometry.Point{},
+                       linestring: %Geometry.LineString{},
+                       polygon: nil
+                     },
+                     result
+                   )
+
+          _ ->
+            assert match?(
+                     %{
+                       point: %Geometry.MultiPoint{},
+                       linestring: %Geometry.MultiLineString{},
+                       polygon: %Geometry.MultiPolygon{}
+                     },
+                     result
+                   )
+        end
       end
     end
 

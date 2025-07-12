@@ -350,7 +350,7 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: geom_collection_from_text (#{repo})" do
       test "creates a geometry collection" do
-        geom = Fixtures.geometrycollection()
+        geom = Fixtures.geometry_collection()
 
         wkt = Geometry.to_wkt(geom)
 
@@ -443,7 +443,6 @@ defmodule GeoSQL.MMFunctions.Test do
     describe "SQL/MM: interior_ring_n (#{repo})" do
       test "returns location.geom's inner ring" do
         polygon = Fixtures.polygon(:donut)
-        #         IO.puts(Geometry.to_ewkt(polygon))
         query = from(location in Location, select: MM.interior_ring_n(^polygon, 1))
 
         result =

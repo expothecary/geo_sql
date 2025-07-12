@@ -387,9 +387,9 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
-  def geometrycollection(which \\ :default)
+  def geometry_collection(which \\ :default)
 
-  def geometrycollection(:default) do
+  def geometry_collection(:default) do
     %Geometry.GeometryCollection{
       geometries: [
         %Geometry.Point{coordinates: [30.5, -86.2], srid: 4326},

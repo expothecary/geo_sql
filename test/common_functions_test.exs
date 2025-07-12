@@ -13,7 +13,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   alias GeoSQL.Test.Schema.{Location, LocationMulti, GeoType}
 
   for repo <- Helper.repos() do
-    describe "add_measure (#{repo})" do
+    describe "Common: add_measure (#{repo})" do
       test "adds measure values to a line" do
         line = Fixtures.linestring()
 
@@ -30,7 +30,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "add_point (#{repo})" do
+    describe "Common: add_point (#{repo})" do
       test "adds a point to a line" do
         line = Fixtures.linestring()
         point = Fixtures.point()
@@ -82,7 +82,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "as_ewkb (#{repo})" do
+    describe "Common: as_ewkb (#{repo})" do
       test "returns correct binary data" do
         ewkb = Fixtures.multipolygon_ewkb()
         geom = Fixtures.multipolygon()
@@ -95,7 +95,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "as_ewkt (#{repo})" do
+    describe "Common: as_ewkt (#{repo})" do
       test "returns correct binary data" do
         geom = Fixtures.multipolygon()
 
@@ -109,7 +109,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "as_geojson (#{repo})" do
+    describe "Common: as_geojson (#{repo})" do
       test "returns correct binary data" do
         geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
@@ -129,7 +129,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "as_gml (#{repo})" do
+    describe "Common: as_gml (#{repo})" do
       test "returns correct v3 gml" do
         geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
@@ -159,7 +159,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "as_kml (#{repo})" do
+    describe "Common: as_kml (#{repo})" do
       test "returns correct kml with precision 1" do
         geom = Fixtures.multipolygon()
         unquote(repo).insert(%Location{name: "hello", geom: geom})
@@ -194,7 +194,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "azimuth (#{repo})" do
+    describe "Common: azimuth (#{repo})" do
       test "returns a useful value" do
         db_point = Fixtures.point()
         client_point = Fixtures.point(:comparison)
@@ -209,7 +209,73 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "extent (#{repo})" do
+    describe "Common: bd_m_poly_from_text (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: bd_poly_from_text (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: build_area (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: closest_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: collection_extract (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: concave_hull (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: covers (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: covered_by (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: collect (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: estimated_extent (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: expand (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: extent (#{repo})" do
       test "extent" do
         geom = Fixtures.multipolygon()
 
@@ -225,7 +291,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "flip_coordinates (#{repo})" do
+    describe "Common: flip_coordinates (#{repo})" do
       test "inverts x/y coordinates" do
         point = Fixtures.point()
         flipped = %Geometry.Point{coordinates: Enum.reverse(point.coordinates), srid: point.srid}
@@ -241,7 +307,85 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "line_merge/2 (#{repo})" do
+    describe "Common: geom_from_ewkt (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: geom_from_geojson (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: geom_from_kml (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: interpolate_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: is_polygon_clockwise (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: is_polygon_counter_clockwise (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: is_valid_detail (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: is_valid_reason (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: largest_empty_circle (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: line_interpolate_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: line_interpolate_points (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: line_locate_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: line_substring (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: line_merge/2 (#{repo})" do
       supports_directed_merges = [GeoSQL.Test.PostGIS.Repo]
 
       if Enum.member?(supports_directed_merges, repo) do
@@ -320,7 +464,19 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "makepoint (#{repo})" do
+    describe "Common: locate_along (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: locate_between (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: make_point (#{repo})" do
       test "makes a 2D point" do
         line = Fixtures.linestring()
         point = Fixtures.point()
@@ -374,7 +530,61 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "node (#{repo})" do
+    describe "Common: make_valid (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: max_coord (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: max_distance (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: maximum_inscribed_circle (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: min_coord (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: minimum_bounding_circle (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: minimum_bounding_radius (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: minimum_clearance (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common:  multi(#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: node (#{repo})" do
       supports_self_intersection = [GeoSQL.Test.PostGIS.Repo]
 
       test "nodes from a linestring" do
@@ -466,6 +676,180 @@ defmodule GeoSQL.CommonFunctions.Test do
                    [cross_point, Enum.at(coordinates2, 1)]
                  ]
         end
+      end
+    end
+
+    describe "Common: number_of_dimension (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: number_of_points (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: number_of_rings (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: number_of_geometries (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: oriented_envelope (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: offset_curve (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: polygonize (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: project (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: reduce_precision (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: remove_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: remove_repeated_points (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: relate_match (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: reverse (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: rotate (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: segmentize (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: set_point (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: set_srid (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: shared_paths (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: shift_longitude (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: shortest_line (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: simplify (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: simplify_preserve_topology (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: snap_to_grid (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: split (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: subdivide (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: translate (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: transform_pipeline (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: triangulate_polygon (#{repo})" do
+      test "untested" do
+        # FIXME
+      end
+    end
+
+    describe "Common: unary_union (#{repo})" do
+      test "untested" do
+        # FIXME
       end
     end
   end

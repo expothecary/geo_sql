@@ -38,6 +38,11 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
     )
 
     execute(
+      "SELECT AddGeometryColumn('specified_columns', 'linestringm', 4326, 'LINESTRINGM')",
+      ""
+    )
+
+    execute(
       "SELECT AddGeometryColumn('specified_columns', 'linestringzm', 4326, 'LINESTRINGZM')",
       ""
     )

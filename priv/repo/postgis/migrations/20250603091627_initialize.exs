@@ -32,6 +32,7 @@ defmodule GeoSQL.PostGIS.Test.Repo.Migrations.Initialize do
           pointz geometry(PointZ, 4326),
           linestring geometry(Linestring, 4326),
           linestringz geometry(LineStringZ, 4326),
+          linestringm geometry(LineStringM, 4326),
           linestringzm geometry(LineStringZM, 4326),
           polygon geometry(Polygon, 4326),
           polygonm geometry(PolygonM, 4326),

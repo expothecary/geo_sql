@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] 09-07-2025
+
+* Improvements
+  * `QueryUtils.decode_geometry` now supports tuples in addition to maps and lists.
+  * Expanded unit test coverage.
+* Fixes
+  * `MM.perimeter` had misleading parameter names.
+
 ## [1.0.0] 09-07-2025
 
 * Breaking changes

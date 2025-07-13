@@ -441,14 +441,29 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: is_valid_detail (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns details on validity" do
+        invalid_polygon = Fixtures.polygon(:invalid)
+        unquote(repo).insert(%GeoType{t: "hello", polygon: invalid_polygon})
+
+        query = from(g in GeoType, select: Common.is_valid_detail(g.polygon))
+
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert match?(%Geometry.Point{}, result) or
+                 match?({false, "Self-intersection", %Geometry.Point{}}, result)
       end
     end
 
     describe "Common: is_valid_reason (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns reason for validity" do
+        invalid_polygon = Fixtures.polygon(:invalid)
+        unquote(repo).insert(%GeoType{t: "hello", polygon: invalid_polygon})
+
+        query = from(g in GeoType, select: Common.is_valid_reason(g.polygon))
+
+        result = unquote(repo).one(query)
+
+        assert is_binary(result)
       end
     end
 

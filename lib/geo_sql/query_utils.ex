@@ -146,6 +146,8 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
+  def decode_geometry(query_result, _repo), do: query_result
+
   @doc """
   When returning geometries as part of a map or list Ecto query `select` clause (as opposed to
   returning an `Ecto.Schema` struct, where geometries are automatically decoded), geometries may

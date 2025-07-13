@@ -156,8 +156,14 @@ defmodule GeoSQL.QueryUtils do
   To get `Geo` structs from these queries, pass the results of the query to `decode_geometry/3`.
 
   The third `fields_to_decode` parameter is a list of the fields to decode. When the query
-  results are lists, the `fields_to_decode` must be a list of integers that are the indexes
-  of the elements to decode:
+  results are lists or tuples, the `fields_to_decode` must be a list of integers that are the indexes
+  of the elements to decode. In the case of maps, `fields_to_decode` should be the keys (strings or
+  atoms) in the map that contain geometry data.
+
+  This function is intentionally liberal with what it accepts. Instead of creating errors, it will
+  instead return the original data in the fields that failed to decode. As real-world query returns
+  can be noisy and differ between backends, this is a more usable approach in practice than returning
+  either error tuples or letting exceptions bubble up.
 
   ```elixir
         from(location in Location, select: [location.name, MM.boundary(location.geom)])

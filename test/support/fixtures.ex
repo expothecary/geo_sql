@@ -333,6 +333,10 @@ defmodule GeoSQL.Test.Fixtures do
     %Geometry.LineString{path: [[30, -90], [30, -91]], srid: 4326}
   end
 
+  def linestring(:m) do
+    %Geometry.LineStringM{path: [[30, -90, 0], [30, -91, 10], [32, -95, 30]], srid: 4326}
+  end
+
   def linestring(:intersects) do
     %Geometry.LineString{path: [[29, -90], [31, -91]], srid: 4326}
   end

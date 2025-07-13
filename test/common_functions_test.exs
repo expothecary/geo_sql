@@ -398,20 +398,45 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: interpolate_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "modifies a LineStringM" do
+        point = Fixtures.point()
+        line = Fixtures.linestring(:m)
+
+        unquote(repo).insert(%GeoType{t: "interpolate_point", linestringm: line})
+
+        result =
+          from(g in GeoType, select: Common.interpolate_point(g.linestringm, ^point))
+          |> unquote(repo).one()
+
+        assert is_number(result)
       end
     end
 
     describe "Common: is_polygon_clockwise (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "detects clockwise-ness" do
+        polygon = Fixtures.polygon()
+
+        unquote(repo).insert(%GeoType{t: "interpolate_point", polygon: polygon})
+
+        result =
+          from(g in GeoType, select: Common.is_polygon_clockwise(g.polygon))
+          |> unquote(repo).one()
+
+        assert unquote(repo).to_boolean(result)
       end
     end
 
     describe "Common: is_polygon_counter_clockwise (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "detects counter-clockwise-ness" do
+        polygon = Fixtures.polygon()
+
+        unquote(repo).insert(%GeoType{t: "interpolate_point", polygon: polygon})
+
+        result =
+          from(g in GeoType, select: Common.is_polygon_counter_clockwise(g.polygon))
+          |> unquote(repo).one()
+
+        refute unquote(repo).to_boolean(result)
       end
     end
 

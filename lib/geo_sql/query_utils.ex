@@ -174,6 +174,7 @@ defmodule GeoSQL.QueryUtils do
         |> QueryUtils.decode_geometry(Repo, ["boundary])
   ```
   """
+  @spec decode_geometry(term, Ecto.Repo.t(), [non_neg_integer] | [String.t()] | [:atom]) :: term
   def decode_geometry(nil, _repo, _fields_to_decode), do: nil
   def decode_geometry([], _repo, _fields_to_decode), do: []
 
@@ -187,6 +188,25 @@ defmodule GeoSQL.QueryUtils do
     end
   end
 
+  defp decode_all(query_results, type_extension, fields_to_decode) when is_tuple(query_results) do
+    Enum.reduce(
+      fields_to_decode,
+      query_results,
+      fn index, query_result ->
+        if is_integer(index) and index >= 0 and index <= tuple_size(query_result) do
+          encoded = elem(query_result, index)
+          decoded = decode_one(type_extension, encoded)
+
+          query_result
+          |> Tuple.delete_at(index)
+          |> Tuple.insert_at(index, decoded)
+        else
+          query_result
+        end
+      end
+    )
+  end
+
   defp decode_all(%{} = query_results, type_extension, fields_to_decode) do
     Enum.reduce(fields_to_decode, query_results, fn field, query_result ->
       encoded_field = Map.get(query_result, field)
@@ -194,7 +214,8 @@ defmodule GeoSQL.QueryUtils do
       if encoded_field == nil do
         query_result
       else
-        Map.put(query_result, field, decode_one(type_extension, encoded_field))
+        decoded = decode_one(type_extension, encoded_field)
+        Map.put(query_result, field, decoded)
       end
     end)
   end
@@ -218,11 +239,20 @@ defmodule GeoSQL.QueryUtils do
     end)
   end
 
+  defp decode_all(query_result, _, _), do: query_result
+
   defp decode_one(type_extension, encoded_field) do
-    case type_extension.decode_geometry(encoded_field) do
-      {:ok, successfully_decoded_field} -> successfully_decoded_field
-      :error -> encoded_field
-      {:error, _} -> encoded_field
+    try do
+      case type_extension.decode_geometry(encoded_field) do
+        {:ok, successfully_decoded_field} -> successfully_decoded_field
+        :error -> encoded_field
+        {:error, _} -> encoded_field
+      end
+    rescue
+      _ ->
+        # error, usually because the field was not a geometry.
+        # swallow that error
+        encoded_field
     end
   end
 end

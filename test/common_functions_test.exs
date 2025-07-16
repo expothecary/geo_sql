@@ -578,13 +578,43 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "Common: locate_along (#{repo})" do
       test "untested" do
-        # FIXME
+        line = Fixtures.linestring(:m)
+        [_, point | _] = line.path
+
+        expected = [
+          [%Geometry.PointM{coordinates: point, srid: line.srid}],
+          [%Geometry.MultiPointM{points: [point], srid: line.srid}]
+        ]
+
+        unquote(repo).insert(%GeoType{t: "locate_along", linestringm: line})
+
+        result =
+          from(g in GeoType, select: Common.locate_along(g.linestringm, 10))
+          |> unquote(repo).all()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Enum.any?(expected, fn expected -> expected == result end)
       end
     end
 
     describe "Common: locate_between (#{repo})" do
       test "untested" do
-        # FIXME
+        line = Fixtures.linestring(:m)
+        coordinates = Enum.slice(line.path, 1, 2)
+
+        expected = [
+          [%Geometry.LineStringM{path: coordinates, srid: line.srid}],
+          [%Geometry.MultiLineStringM{line_strings: [coordinates], srid: 4326}]
+        ]
+
+        unquote(repo).insert(%GeoType{t: "locate_between", linestringm: line})
+
+        result =
+          from(g in GeoType, select: Common.locate_between(g.linestringm, 10, 30))
+          |> unquote(repo).all()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Enum.any?(expected, fn expected -> expected == result end)
       end
     end
 
@@ -593,9 +623,9 @@ defmodule GeoSQL.CommonFunctions.Test do
         line = Fixtures.linestring()
         point = Fixtures.point()
 
-        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line, point: point})
 
-        query = from(location in GeoType, select: Common.make_point(1, 2, unquote(repo)))
+        query = from(g in GeoType, select: Common.make_point(1, 2, unquote(repo)))
 
         assert [%Geometry.Point{coordinates: [1.0, 2.0], srid: 0}] =
                  unquote(repo).all(query)

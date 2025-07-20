@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] 21-07-2025
+
+* Improvements
+  * Introduce the `GeoSQL.Geometry.Geopackage` Ecto type, allowing Ecto schemas to
+    have geometry fields backed by Geopackage data. Currently only supported with
+    SQLite3 databases, and relies on the Spatialite module being available.
+
 ## [1.2.0] 20-07-2025
 
 * Improvements
@@ -11,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
     * `GeoSQL.SpatiaLite.is_valid_gpb`: checks validity of a Geopackage blob
   * More tests
 * Fixes
-  * Stanardized on the proper spelling of SpatiaLite
+  * Standardized on the proper spelling of SpatiaLite
 
 ## [1.1.0] 09-07-2025
 

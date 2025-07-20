@@ -4,22 +4,22 @@ defmodule GeoSQL.Geometry do
 
     * GeoSQL.Geometry, a catch-all type
     * GeoSQL.Geometry.Point
-    * GeoSQLGeometry.PointZ
-    * GeoSQLGeometry.PointM
-    * GeoSQLGeometry.PointZM
-    * GeoSQLGeometry.LineString
-    * GeoSQLGeometry.LineStringZ
-    * GeoSQLGeometry.LineStringZM
-    * GeoSQLGeometry.Polygon
-    * GeoSQLGeometry.PolygonZ
-    * GeoSQLGeometry.MultiPoint
-    * GeoSQLGeometry.MultiPointZ
-    * GeoSQLGeometry.MultiLineString
-    * GeoSQLGeometry.MultiLineStringZ
-    * GeoSQLGeometry.MultiLineStringZM
-    * GeoSQLGeometry.MultiPolygon
-    * GeoSQLGeometry.MultiPolygonZ
-    * GeoSQLGeometry.GeometryCollection
+    * GeoSQL.Geometry.PointZ
+    * GeoSQL.Geometry.PointM
+    * GeoSQL.Geometry.PointZM
+    * GeoSQL.Geometry.LineString
+    * GeoSQL.Geometry.LineStringZ
+    * GeoSQL.Geometry.LineStringZM
+    * GeoSQL.Geometry.Polygon
+    * GeoSQL.Geometry.PolygonZ
+    * GeoSQL.Geometry.MultiPoint
+    * GeoSQL.Geometry.MultiPointZ
+    * GeoSQL.Geometry.MultiLineString
+    * GeoSQL.Geometry.MultiLineStringZ
+    * GeoSQL.Geometry.MultiLineStringZM
+    * GeoSQL.Geometry.MultiPolygon
+    * GeoSQL.Geometry.MultiPolygonZ
+    * GeoSQL.Geometry.GeometryCollection
 
   Example:
 

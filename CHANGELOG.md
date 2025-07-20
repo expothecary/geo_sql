@@ -2,6 +2,17 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] 20-07-2025
+
+* Improvements
+  * Support for SpatiaLite's Geopackage interoperability functions:
+    * `GeoSQL.SpatiaLite.as_gpb`: convert a geometry to a Geopackage binary
+    * `GeoSQL.SpatiaLite.geom_from_gpb`: convert a Geopackage binary to a geometry
+    * `GeoSQL.SpatiaLite.is_valid_gpb`: checks validity of a Geopackage blob
+  * More tests
+* Fixes
+  * Stanardized on the proper spelling of SpatiaLite
+
 ## [1.1.0] 09-07-2025
 
 * Improvements

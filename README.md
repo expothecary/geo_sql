@@ -1,7 +1,7 @@
 # GeoSQL
 
 This library provides access to geometric and geographic SQL functions as
-implemented in SQL extensions such as PostGIS and SpatialLite.
+implemented in SQL extensions such as PostGIS and SpatiaLite.
 
 This includes the entire suite of SQL/MM spatial functions,
 non-standard functions that are found in commonly used GIS-enabled databases,
@@ -11,7 +11,7 @@ level functions for features such as generating Mapbox vector tiles.
 The goals of this library are:
 
  * Ease: fast to get started, hide complexity where possible
- * Portability: currently supports PostGIS and SpatialLite.
+ * Portability: currently supports PostGIS and SpatiaLite.
  * Completeness: extensive support for GIS SQL functions, not just the most common ones.
  * Clarity: Functions organized by their availability and standards compliance
  * Utility: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
@@ -255,7 +255,7 @@ This helps make it clear what features your code relies on, allowing
 one to audit feature usage for compability and avoid incompatible use
 in the first place.
 
-For example, if targeting both `SpatialLite` and `PostGIS`, the code should only use the standard SQL/MM features plus those in the `GeoSQL.Common` modules.
+For example, if targeting both `SpatiaLite` and `PostGIS`, the code should only use the standard SQL/MM features plus those in the `GeoSQL.Common` modules.
 
 To make this even easier, each of the top-level modules supports the `use` syntax which
 pulls in their suite of features and introduces helpful aliases with one line in your code:
@@ -355,7 +355,7 @@ Current the following backends are recognized:
 ## Contributing
 
 If you would like to contribute support for more functions (PostGIS and
-SpatialLite both provide a frighteningly impressive amount of them!) or
+SpatiaLite both provide a frighteningly impressive amount of them!) or
 support for other databases, do not hesitate to make a PR and the author
 will review and merge in a timely fashion.
 

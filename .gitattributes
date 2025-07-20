@@ -1,0 +1,2 @@
+*.gpkg filter=lfs diff=lfs merge=lfs -text
+*.sqlite3 filter=lfs diff=lfs merge=lfs -text

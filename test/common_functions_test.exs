@@ -288,7 +288,7 @@ defmodule GeoSQL.CommonFunctions.Test do
           |> QueryUtils.decode_geometry(unquote(repo), [:point, :linestring, :polygon])
 
         case unquote(repo) do
-          GeoSQL.Test.SQLite3.Repo ->
+          GeoSQL.Test.SpatiaLite.Repo ->
             assert match?(
                      %{
                        point: %Geometry.Point{},

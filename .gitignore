@@ -23,3 +23,5 @@ ex_gis_store-*.tar
 /tmp/
 
 functions_status.md
+test/support/*-shm
+test/support/*-wal

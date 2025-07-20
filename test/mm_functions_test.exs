@@ -567,7 +567,7 @@ defmodule GeoSQL.MMFunctions.Test do
             }
           end)
 
-        if unquote(repo) == GeoSQL.Test.SQLite3.Repo do
+        if unquote(repo) == GeoSQL.Test.SpatiaLite.Repo do
           # Spatialite appears to be buggy here and returns 0 (false) for a polygon ring
           assert match?(%{line: false}, result)
           refute match?(%{polygon: true}, result)
@@ -828,7 +828,7 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
-    if repo != GeoSQL.Test.SQLite3.Repo do
+    if repo != GeoSQL.Test.SpatiaLite.Repo do
       describe "SQL/MM: ordering_equals (#{repo})" do
         test "returns true with identical geometry" do
           linestring = Fixtures.linestring()
@@ -893,7 +893,7 @@ defmodule GeoSQL.MMFunctions.Test do
         assert is_number(result)
       end
 
-      if repo != GeoSQL.Test.SQLite3.Repo do
+      if repo != GeoSQL.Test.SpatiaLite.Repo do
         # Spatialite doesn't support non-lat/lon perimeter calcs using the spheroid
         # This isn't a test of the backends, per se, so just skip Spatialite
         test "return perimeter of a polygon using the spheroid" do
@@ -983,7 +983,7 @@ defmodule GeoSQL.MMFunctions.Test do
       end
     end
 
-    if repo != GeoSQL.Test.SQLite3.Repo do
+    if repo != GeoSQL.Test.SpatiaLite.Repo do
       describe "SQL/MM: polygon (#{repo})" do
         test "constructs a polygon from a linestring" do
           linestring = Fixtures.linestring(:ring)

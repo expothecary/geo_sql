@@ -18,7 +18,7 @@ defmodule GeoSQL.Common do
   available in all support SQL GIS extensions.
 
   Some backends may require special initialization or
-  dependencies loaded for some of these functions to work. For examplke, SpatialLite
+  dependencies loaded for some of these functions to work. For example, SpatiaLite
   must be built with the GEO package for some of these functions to be available.
 
   Consult the documentation for the database GIS extension being used for such

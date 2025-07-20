@@ -129,7 +129,7 @@ defmodule GeoSQL.QueryUtils do
   def decode_geometry(query_result, repo) when is_binary(query_result) do
     case repo.__adapter__() do
       Ecto.Adapters.Postgres -> query_result
-      Ecto.Adapters.SQLite3 -> decode_one(GeoSQL.SpatialLite.TypeExtension, query_result)
+      Ecto.Adapters.SQLite3 -> decode_one(GeoSQL.SpatiaLite.TypeExtension, query_result)
     end
   end
 
@@ -141,7 +141,7 @@ defmodule GeoSQL.QueryUtils do
       Ecto.Adapters.SQLite3 ->
         Enum.map(
           query_results,
-          fn query_result -> decode_one(GeoSQL.SpatialLite.TypeExtension, query_result) end
+          fn query_result -> decode_one(GeoSQL.SpatiaLite.TypeExtension, query_result) end
         )
     end
   end
@@ -190,7 +190,7 @@ defmodule GeoSQL.QueryUtils do
         query_results
 
       Ecto.Adapters.SQLite3 ->
-        decode_all(query_results, GeoSQL.SpatialLite.TypeExtension, fields_to_decode)
+        decode_all(query_results, GeoSQL.SpatiaLite.TypeExtension, fields_to_decode)
     end
   end
 

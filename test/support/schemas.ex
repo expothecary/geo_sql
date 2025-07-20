@@ -50,3 +50,14 @@ defmodule GeoSQL.Test.Schema.WrongGeoType do
     field(:linestring, GeoSQL.Geometry.Point)
   end
 end
+
+defmodule GeoSQL.Test.Schema.Geopackage do
+  use Ecto.Schema
+
+  @primary_key false
+  schema "dnr_wildlife_management_areas_public_facilities_polygons" do
+    field(:id, :integer, source: :OBJECTID)
+    field(:name, :string)
+    field(:shape, GeoSQL.Geometry.Polygon, source: :Shape)
+  end
+end

@@ -1,9 +1,22 @@
 {:ok, _} = Application.ensure_all_started(:ecto_sql)
 
 defmodule GeoSQL.Test.Helper do
-  def repos() do
-    Application.get_env(:geo_sql, :ecto_repos)
-  end
+  # There are repos which are for general testing, such as the main postgis and spatialite repos,
+  # but there are also repos which are for specific tests only, such as the geopackage lib.
+  all_repos =
+    Application.compile_env(:geo_sql, :ecto_repos)
+
+  under_test_repos =
+    Enum.filter(
+      all_repos,
+      fn repo ->
+        Application.compile_env(:geo_sql, repo) |> Keyword.get(:testing_primary, false)
+      end
+    )
+
+  def repos(which \\ :under_test)
+  def repos(:under_test), do: unquote(under_test_repos)
+  def repos(:all), do: unquote(all_repos)
 
   def is_a(%x{}, which), do: Enum.member?(which, x)
   def is_a(_, _), do: false
@@ -50,14 +63,15 @@ defmodule GeoSQL.Test.Helper do
 
     quote do
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
-      alias GeoSQL.Test.SQLite3.Repo, as: SQLite3Repo
+      alias GeoSQL.Test.SpatiaLite.Repo, as: SpatialiteRepo
+      alias GeoSQL.Test.Geopackage.Repo, as: GeopackageRepo
       alias GeoSQL.Test.Fixtures
       alias GeoSQL.Test.Helper
 
       setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++ unquote(setup_funs)
 
       setup context do
-        for repo <- GeoSQL.Test.Helper.repos() do
+        for repo <- GeoSQL.Test.Helper.repos(:all) do
           GeoSQL.Test.Helper.ecto_setup(repo, context)
         end
 
@@ -67,7 +81,7 @@ defmodule GeoSQL.Test.Helper do
   end
 
   def ecto_setup_all(context) do
-    Enum.reduce(repos(), [repo_info: %{}], fn repo, acc ->
+    Enum.reduce(repos(:all), [repo_info: %{}], fn repo, acc ->
       repo_name = String.to_atom(to_string(context.module) <> repo_name_suffix(repo))
       ecto_setup_repo(repo, repo_name, acc)
     end)
@@ -84,7 +98,8 @@ defmodule GeoSQL.Test.Helper do
   # A globally shared repo is problematic due to not wanting to polute the main library
   # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
   def repo_name_suffix(GeoSQL.Test.PostGIS.Repo), do: "PostGISRepo"
-  def repo_name_suffix(GeoSQL.Test.SQLite3.Repo), do: "SQLite3Repo"
+  def repo_name_suffix(GeoSQL.Test.SpatiaLite.Repo), do: "SpatiaLiteRepo"
+  def repo_name_suffix(GeoSQL.Test.Geopackage.Repo), do: "GeopackageRepo"
 
   def ecto_setup_repo(repo, repo_name, acc) do
     repo_spec =
@@ -129,7 +144,7 @@ defmodule GeoSQL.Test.Helper do
   end
 end
 
-excludable_tags = [:pgsql]
+excludable_tags = [:pgsql, :sqlite3]
 
 exclude_tags =
   GeoSQL.Test.Helper.repos()
@@ -139,6 +154,7 @@ exclude_tags =
       repo, exclude_tags ->
         case repo.__adapter__() do
           Ecto.Adapters.Postgres -> Enum.reject(exclude_tags, fn tag -> tag == :pgsql end)
+          Ecto.Adapters.SQLite3 -> Enum.reject(exclude_tags, fn tag -> tag == :sqlite3 end)
           _ -> exclude_tags
         end
     end

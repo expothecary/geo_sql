@@ -1,17 +1,17 @@
-defmodule GeoSQL.SpatialLite.TypeExtension do
+defmodule GeoSQL.SpatiaLite.TypeExtension do
   @moduledoc """
   A type extension for `ecto_sqlite3` that implements storage and retrieval of
-  `geo` structs for SpatialLite databases.
+  `geo` structs for Spatialite databases.
 
   To activate the extension, add this to your `config.exs`:
 
   ```elixir
     config :ecto_sqlite3,
-      extensions: [GeoSQL.SpatialLite.TypeExtension]
+      extensions: [GeoSQL.Spatialite.TypeExtension]
   ```
 
   Also be sure to add `load_extensions: ["mod_spatialite"]` to the config of
-  `Ecto.Repo`s which use the `Ecto.Adapters.SQLite3` adapter to ensure SpatialLite
+  `Ecto.Repo`s which use the `Ecto.Adapters.SQLite3` adapter to ensure Spatialite
   features are available.
   """
   @behaviour Ecto.Adapters.SQLite3.TypeExtension
@@ -115,7 +115,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
   def decode_geometry(nil), do: {:ok, nil}
 
   def decode_geometry(data) do
-    # it is retrieved in SpatialLite's format, so translate it to WKB
+    # it is retrieved in SpatiaLite's format, so translate it to WKB
     conn = InMemorySqlite.conn()
 
     # prepare the statement; note the use of unhex to get a binary blob out
@@ -142,7 +142,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
       Geometry.to_ewkt(geometry)
       |> sanitize_zm_labels()
 
-    # translate it to SpatialLite's format
+    # translate it to SpatiaLite's format
     conn = InMemorySqlite.conn()
     {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT GeomFromEWKT(?1)")
     :ok = Exqlite.Sqlite3.bind(statement, [data])
@@ -155,7 +155,7 @@ defmodule GeoSQL.SpatialLite.TypeExtension do
     end
   end
 
-  # SpatialLite does not like Z/ZM suffixes on the primitive types.
+  # SpatiaLite does not like Z/ZM suffixes on the primitive types.
   # e.g. POINTZ will error, while a POINT with 3-dimensional will work.
   # HOWEVER ... POINTM is a thing. *sigh*
   # Also, Spatialite does not like spaces about the geometry type,

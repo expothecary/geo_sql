@@ -67,15 +67,24 @@ defmodule GeoSQL.Mixfile do
         "SQL/MM": [~r/GeoSQL.MM.*/],
         "Non-Standard": [~r/GeoSQL.Common.*/],
         PostGIS: [~r/GeoSQL.PostGIS.*/],
-        Spatialite: [~r/GeoSQL.SpatialLite.*/],
+        SpatiaLite: [~r/GeoSQL.SpatiaLite.*/],
         Utilities: [~r/GeoSQL.*Utils/]
       ]
     ]
   end
 
+  # TODO: would be nice to find a way to get this from the test config.
+  defp dynamic_test_repos(command),
+    do: "#{command} --quiet -r GeoSQL.Test.PostGIS.Repo -r GeoSQL.Test.SpatiaLite.Repo"
+
   defp aliases do
     [
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test", "ecto.drop --quiet"]
+      test: [
+        dynamic_test_repos("ecto.create"),
+        dynamic_test_repos("ecto.migrate"),
+        "test",
+        dynamic_test_repos("ecto.drop")
+      ]
     ]
   end
 end

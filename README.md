@@ -75,6 +75,39 @@ Example:
   end
   ```
 
+#### Geopackage
+
+The Geopackage standard defines its own binary format for serializing geometries in SQLite3
+databases. GeoSQL provides access to these types via the `GeoSQL.Geometry.Geopackage` type
+allowing Ecto schemas to contain geometry fields that are stored as Geopackage data.
+
+Example:
+
+  ```elixir
+  defmodule GeoSQL.Test.Schema.Geopackage do
+    use Ecto.Schema
+
+    @primary_key false
+    schema "some_table_in_geopackage" do
+      field(:id, :integer, source: :OBJECTID)
+      field(:name, :string)
+      field(:shape, GeoSQL.Geometry.Geopackage, source: :Shape)
+    end
+  end
+  ```
+
+This schema can now be used in queries like any other:
+
+  ```elixir
+  from(g in Geopackage) |> GeopackageRepo.all()
+  ```
+
+Due to being tied to SQLite3, only SQLite3 databases are supported and the Spatialite
+module must be available as it is (currently) used to do the serialization in memory.
+
+NOTE: If the `Geometry` library gains support for the Geopackage binary format, similar to
+its suport for the WKB format, then the Spatialite requirement may be dropped.
+
 ### Readying the Repo with `GeoSQL.init/1`
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling

@@ -58,6 +58,6 @@ defmodule GeoSQL.Test.Schema.Geopackage do
   schema "dnr_wildlife_management_areas_public_facilities_polygons" do
     field(:id, :integer, source: :OBJECTID)
     field(:name, :string)
-    field(:shape, GeoSQL.Geometry, source: :Shape)
+    field(:shape, GeoSQL.Geometry.Geopackage, source: :Shape)
   end
 end

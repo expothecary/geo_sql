@@ -81,6 +81,10 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
     [&__MODULE__.decode_geometry/1, ecto_type]
   end
 
+  def loaders(:geopackage_geometry, ecto_type) do
+    [&__MODULE__.decode_geopackage_geometry/1, ecto_type]
+  end
+
   def loaders(_primitive_type, _ecto_type), do: nil
 
   @impl true
@@ -90,6 +94,10 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
 
   def dumpers(:geography, ecto_type) do
     [ecto_type, &__MODULE__.encode_geometry/1]
+  end
+
+  def dumpers(:geopackage_geometry, ecto_type) do
+    [ecto_type, &__MODULE__.encode_geopackage_geometry/1]
   end
 
   def dumpers(_ecto_type, _primitive_type), do: nil
@@ -107,6 +115,13 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
 
   def encode_geometry(%x{} = geometry) when x in @geo_types do
     {:ok, convert_geometry(geometry)}
+  rescue
+    exception ->
+      {:error, exception}
+  end
+
+  def encode_geopackage_geometry(%x{} = geometry) when x in @geo_types do
+    {:ok, convert_geopackage_geometry(geometry)}
   rescue
     exception ->
       {:error, exception}
@@ -145,6 +160,49 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
     # translate it to SpatiaLite's format
     conn = InMemorySqlite.conn()
     {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT GeomFromEWKT(?1)")
+    :ok = Exqlite.Sqlite3.bind(statement, [data])
+    {:row, [encoded]} = Exqlite.Sqlite3.step(conn, statement)
+    :ok = Exqlite.Sqlite3.release(conn, statement)
+
+    case encoded do
+      nil -> nil
+      _ -> {:blob, encoded}
+    end
+  end
+
+  def decode_geopackage_geometry(nil), do: {:ok, nil}
+
+  def decode_geopackage_geometry(data) do
+    # it is retrieved in SpatiaLite's format, so translate it to WKB
+    conn = InMemorySqlite.conn()
+
+    # prepare the statement; note the use of unhex to get a binary blob out
+    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT unhex(AsEWKB(GeomFromGPB(?1)))")
+
+    # bind the blob via a :blob tuple
+    :ok = Exqlite.Sqlite3.bind(statement, [{:blob, data}])
+
+    # get the response back
+    {:row, [ewkb]} = Exqlite.Sqlite3.step(conn, statement)
+
+    # release our resources
+    :ok = Exqlite.Sqlite3.release(conn, statement)
+
+    # decode the WKB to a Geo struct
+    case Geometry.from_ewkb(ewkb) do
+      {:ok, data} -> {:ok, data}
+      {:error, _reason} -> :error
+    end
+  end
+
+  defp convert_geopackage_geometry(geometry) do
+    data =
+      Geometry.to_ewkb(geometry)
+      |> sanitize_zm_labels()
+
+    # translate it to SpatiaLite's format
+    conn = InMemorySqlite.conn()
+    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "SELECT AsGPB(GeomFromEWKB(?1))")
     :ok = Exqlite.Sqlite3.bind(statement, [data])
     {:row, [encoded]} = Exqlite.Sqlite3.step(conn, statement)
     :ok = Exqlite.Sqlite3.release(conn, statement)

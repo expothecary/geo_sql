@@ -3,6 +3,7 @@ defmodule GeoSQL.Geometry do
   Geometry types for use with ecto. Supported types include:
 
     * GeoSQL.Geometry, a catch-all type
+    * GeoSQL.Geometry.Geopackage, a catch-all type for fields containing Geopackage geometry blobs
     * GeoSQL.Geometry.Point
     * GeoSQL.Geometry.PointZ
     * GeoSQL.Geometry.PointM
@@ -248,6 +249,23 @@ defmodule GeoSQL.Geometry do
       {:error, reason} -> {:error, [message: "Failed to decode GeoJSON", reason: reason]}
     end
   end
+end
+
+defmodule GeoSQL.Geometry.Geopackage do
+  # This is just GeoSQL.Geometry in a Geopackage costume
+  # It allows type systems to differentiate beteween standard
+  # geometry encodings and Geopackage encoding.
+  @moduledoc false
+  @type t :: Geometry.t()
+  use Ecto.Type
+
+  def type, do: :geopackage_geometry
+  def blank?(_), do: false
+  defdelegate load(geom), to: GeoSQL.Geometry
+  defdelegate dump(geom), to: GeoSQL.Geometry
+  defdelegate cast(value), to: GeoSQL.Geometry
+  defdelegate embed_as(value), to: GeoSQL.Geometry
+  defdelegate equal?(a, b), to: GeoSQL.Geometry
 end
 
 for type <- GeoSQL.Geometry.all_types() do

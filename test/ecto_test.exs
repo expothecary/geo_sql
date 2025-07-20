@@ -1,9 +1,17 @@
 defmodule GeoSQL.Ecto.Test do
   use ExUnit.Case, async: true
+  @moduletag :ecto
+
   import Ecto.Query
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, Geographies, LocationMulti, GeoType, WrongGeoType}
+  alias GeoSQL.Test.Schema.{
+    Location,
+    Geographies,
+    LocationMulti,
+    GeoType,
+    WrongGeoType
+  }
 
   for repo <- Helper.repos() do
     describe "Basic geometry queries #{repo}" do
@@ -132,6 +140,26 @@ defmodule GeoSQL.Ecto.Test do
 
         assert m1.geom == geom1
         assert m2.geom == geom2
+      end
+    end
+  end
+
+  if Enum.member?(Helper.repos(:all), GeoSQL.Test.SpatiaLite.Repo) do
+    alias GeoSQL.Test.Schema.Geopackage
+
+    describe "GeoPackage geometry in schemas" do
+      test "decodes a Geopackage-encoded polygon" do
+        query = from(g in Geopackage, where: g.id == 3)
+        result = GeopackageRepo.one(query)
+
+        assert match?(
+                 %Geopackage{
+                   id: 3,
+                   name: "Sanctuary- ABSOLUTELY NO TRESPASSING!",
+                   shape: %Geometry.MultiPolygon{}
+                 },
+                 result
+               )
       end
     end
   end

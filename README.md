@@ -104,6 +104,8 @@ This schema can now be used in queries like any other:
 
 Due to being tied to SQLite3, only SQLite3 databases are supported and the Spatialite
 module must be available as it is (currently) used to do the serialization in memory.
+The Spatialite module does not need to be initialized on a Geopackage database, but
+it does need to be available on the system for GeoSQL to use.
 
 NOTE: If the `Geometry` library gains support for the Geopackage binary format, similar to
 its suport for the WKB format, then the Spatialite requirement may be dropped.

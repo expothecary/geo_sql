@@ -394,6 +394,26 @@ defmodule GeoSQL.Test.Fixtures do
     }
   end
 
+  def multilinestring(:polygonizable) do
+    %Geometry.MultiLineString{
+      line_strings: [
+        [
+          [29, -89],
+          [31, -89],
+          [32, -90],
+          [29, -89]
+        ],
+        [
+          [30, -90],
+          [30, -91],
+          [30, -92],
+          [30, -90]
+        ]
+      ],
+      srid: 4326
+    }
+  end
+
   def geometry_collection(which \\ :default)
 
   def geometry_collection(:default) do
@@ -401,6 +421,19 @@ defmodule GeoSQL.Test.Fixtures do
       geometries: [
         %Geometry.Point{coordinates: [30.5, -86.2], srid: 4326},
         %Geometry.LineString{path: [[29.0, -90.0], [31.0, -91.0]], srid: 4326}
+      ],
+      srid: 4326
+    }
+  end
+
+  def geometry_collection(:courtyard) do
+    %Geometry.GeometryCollection{
+      geometries: [
+        %Geometry.LineString{path: [[180, 40], [30, 20], [20, 90]], srid: 4326},
+        %Geometry.LineString{path: [[180, 40], [160, 160]], srid: 4326},
+        %Geometry.LineString{path: [[160, 160], [80, 90], [80, 120], [20, 90]], srid: 4326},
+        %Geometry.LineString{path: [[80, 60], [120, 130], [150, 80]], srid: 4326},
+        %Geometry.LineString{path: [[80, 60], [150, 80]], srid: 4326}
       ],
       srid: 4326
     }

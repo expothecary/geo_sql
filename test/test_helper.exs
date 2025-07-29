@@ -21,36 +21,49 @@ defmodule GeoSQL.Test.Helper do
   def is_a(%x{}, which), do: Enum.member?(which, x)
   def is_a(_, _), do: false
 
-  def fuzzy_match_geometry([left], [right]) when is_list(left) and is_list(right) do
+  def fuzzy_match_geometry(%{rings: left}, right) do
+    fuzzy_match_geometry(left, right)
+  end
+
+  def fuzzy_match_geometry(%{coordinates: left}, right) do
+    fuzzy_match_geometry(left, right)
+  end
+
+  def fuzzy_match_geometry(left, %{rings: right}) do
+    fuzzy_match_geometry(left, right)
+  end
+
+  def fuzzy_match_geometry(left, %{coordinates: right}) do
     fuzzy_match_geometry(left, right)
   end
 
   def fuzzy_match_geometry(left, right) when is_list(left) and is_list(right) do
+    fuzzy_match_geometry_list(left, right)
+  end
+
+  def fuzzy_match_geometry(_l, _r), do: false
+
+  defp fuzzy_match_geometry_list([], []), do: true
+
+  defp fuzzy_match_geometry_list([left | left_rest], [right | right_rest])
+       when is_list(left) and is_list(right) do
+    fuzzy_match_geometry_list(left, right) and
+      fuzzy_match_geometry_list(left_rest, right_rest)
+  end
+
+  defp fuzzy_match_geometry_list(left, right) do
     Enum.zip(left, right)
     |> Enum.reduce_while(
       true,
       fn {l, r}, _acc ->
-        cond do
-          is_list(l) and is_list(r) ->
-            result =
-              Enum.zip(l, r)
-              |> Enum.reduce(true, fn {l, r}, acc ->
-                acc and round(l, 4) == round(r, 4)
-              end)
-
-            if result, do: {:cont, true}, else: {:halt, false}
-
-          is_number(l) and is_number(r) and round(l, 4) == round(r, 4) ->
-            {:cont, true}
-
-          true ->
-            {:halt, false}
+        if round(l, 4) == round(r, 4) do
+          {:cont, true}
+        else
+          {:halt, false}
         end
       end
     )
   end
-
-  def fuzzy_match_geometry(_l, _r), do: false
 
   defp round(number, precision) when is_integer(number) do
     round(number * 1.0, precision)

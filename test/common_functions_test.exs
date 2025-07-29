@@ -199,10 +199,10 @@ defmodule GeoSQL.CommonFunctions.Test do
         db_point = Fixtures.point()
         client_point = Fixtures.point(:comparison)
 
-        unquote(repo).insert(%GeoType{t: "hello", point: db_point})
+        unquote(repo).insert(%GeoType{t: "azimuth", point: db_point})
 
         query =
-          from(location in GeoType, select: Common.azimuth(location.point, ^client_point))
+          from(g in GeoType, select: Common.azimuth(g.point, ^client_point))
 
         assert [value] = unquote(repo).all(query)
         assert is_number(value)
@@ -210,20 +210,84 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: bd_m_poly_from_text (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "produces a MultiPolygon" do
+        multilinestering = Fixtures.multilinestring(:polygonizable)
+
+        unquote(repo).insert(%GeoType{
+          t: "bd_m_poly_from_text",
+          multilinestring: multilinestering
+        })
+
+        query =
+          from(g in GeoType,
+            select:
+              Common.bd_m_poly_from_text(
+                MM.as_text(g.multilinestring),
+                ^multilinestering.srid
+              )
+          )
+
+        [value] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiPolygon{} = value
       end
     end
 
     describe "Common: bd_poly_from_text (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "produces a Polygon" do
+        multilinestering = Fixtures.multilinestring(:polygonizable)
+
+        unquote(repo).insert(%GeoType{
+          t: "bd_poly_from_text",
+          multilinestring: multilinestering
+        })
+
+        query =
+          from(g in GeoType,
+            select:
+              Common.bd_poly_from_text(
+                MM.as_text(g.multilinestring),
+                ^multilinestering.srid
+              )
+          )
+
+        [value] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = value
       end
     end
 
     describe "Common: build_area (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a polygon with a hole" do
+        collection = Fixtures.geometry_collection(:courtyard)
+
+        expected = %Geometry.Polygon{
+          rings: [
+            [[180, 40], [30, 20], [20, 90], [80, 120], [80, 90], [160, 160], [180, 40]],
+            [[150, 80], [120, 130], [80, 60], [150, 80]]
+          ],
+          srid: 4326
+        }
+
+        unquote(repo).insert(%Location{
+          name: "build_area",
+          geom: collection
+        })
+
+        query =
+          from(l in Location,
+            select: Common.build_area(l.geom)
+          )
+
+        [value] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(expected, value)
       end
     end
 

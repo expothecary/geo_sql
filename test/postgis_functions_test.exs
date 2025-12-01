@@ -98,6 +98,33 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
+  describe "PostGIS: bounding_diagonal" do
+    test "returns a distance" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+
+      query =
+        from(location in Location,
+          select: %{
+            regular: PostGIS.bounding_diagonal(location.geom),
+            best_fit: PostGIS.bounding_diagonal(location.geom, true)
+          }
+        )
+
+      results = PostGISRepo.one(query)
+
+      srid = geom.srid
+
+      assert %{
+               regular: %Geometry.LineString{srid: ^srid},
+               best_fit: %Geometry.LineString{srid: ^srid}
+             } = results
+
+      refute Helper.fuzzy_match_geometry(results.regular, results.best_fit)
+    end
+  end
+
   describe "PostGIS: distance_sphere" do
     test "returns a distance" do
       geom = Fixtures.multipolygon()

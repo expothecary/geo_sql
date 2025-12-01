@@ -9,6 +9,23 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   alias GeoSQL.Test.Schema.{GeoType, Location, LocationMulti}
 
+  describe "PostGIS: affine" do
+    test "performs an affine transformation" do
+      geom = Fixtures.multipolygon()
+
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+
+      query =
+        from(location in Location,
+          limit: 5,
+          select: PostGIS.affine(location.geom, 1, 2, 3, 4, 5, 6, 7, 8, 9, 5, 10, 15)
+        )
+
+      results = PostGISRepo.one(query)
+      assert %Geometry.MultiPolygon{} = results
+    end
+  end
+
   describe "PostGIS: distance_sphere" do
     test "returns a distance" do
       geom = Fixtures.multipolygon()

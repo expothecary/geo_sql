@@ -33,7 +33,7 @@ defmodule GeoSQL.PostGIS do
   defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
     quote do
       fragment(
-        "ST_Affine(?,?,?,?,?,?,?,?,?,?,?)",
+        "ST_Affine(?,?,?,?,?,?,?,?,?,?,?,?,?)",
         unquote(geometry),
         unquote(a),
         unquote(b),

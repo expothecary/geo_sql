@@ -256,6 +256,11 @@ defmodule GeoSQL.Common do
     quote do: fragment("ST_Collect(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
+  @doc group: "Math Utils"
+  defmacro degrees(radians) do
+    quote do: fragment("Degrees(?)", unquote(radians))
+  end
+
   @spec estimated_extent(
           table :: String.t() | {schema :: String.t(), table :: String.t()},
           column :: String.t(),
@@ -849,6 +854,11 @@ defmodule GeoSQL.Common do
         unquote(azimuth)
       )
     end
+  end
+
+  @doc group: "Math Utils"
+  defmacro radians(degrees) do
+    quote do: fragment("Radians(?)", unquote(degrees))
   end
 
   @doc group: "Geometry Processing"

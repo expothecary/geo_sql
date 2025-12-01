@@ -399,6 +399,16 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "Common: degrees (#{repo})" do
+      test "Converts radians to degrees" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.degrees(0.5))
+        result = unquote(repo).one(query)
+        assert is_number(result)
+      end
+    end
+
     describe "Common: estimated_extent (#{repo})" do
       test "untested" do
         # FIXME
@@ -930,6 +940,16 @@ defmodule GeoSQL.CommonFunctions.Test do
     describe "Common: project (#{repo})" do
       test "untested" do
         # FIXME
+      end
+    end
+
+    describe "Common: radians (#{repo})" do
+      test "Converts degrees to radians" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.radians(45))
+        result = unquote(repo).one(query)
+        assert is_number(result)
       end
     end
 

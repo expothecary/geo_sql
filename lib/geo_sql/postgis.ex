@@ -106,7 +106,7 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Angle(?,?)", unquote(lineA), unquote(lineB))
   end
 
-  @spec contains_properly(
+  @spec bounding_diagonal(
           GeoSQL.geometry_input(),
           best_fit? :: boolean
         ) :: GeoSQL.fragment()

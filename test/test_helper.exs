@@ -21,6 +21,28 @@ defmodule GeoSQL.Test.Helper do
   def is_a(%x{}, which), do: Enum.member?(which, x)
   def is_a(_, _), do: false
 
+  def fuzzy_match_geometry(%{geometries: left}, %{geometries: right}) do
+    Enum.zip(left, right)
+    |> Enum.reduce_while(
+      true,
+      fn {l, r}, _acc ->
+        if fuzzy_match_geometry(l, r) do
+          {:cont, true}
+        else
+          {:halt, false}
+        end
+      end
+    )
+  end
+
+  def fuzzy_match_geometry(%{path: left}, right) do
+    fuzzy_match_geometry(left, right)
+  end
+
+  def fuzzy_match_geometry(left, %{path: right}) do
+    fuzzy_match_geometry(left, right)
+  end
+
   def fuzzy_match_geometry(%{rings: left}, right) do
     fuzzy_match_geometry(left, right)
   end

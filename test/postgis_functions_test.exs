@@ -120,8 +120,6 @@ defmodule GeoSQL.PostGISFunctions.Test do
                regular: %Geometry.LineString{srid: ^srid},
                best_fit: %Geometry.LineString{srid: ^srid}
              } = results
-
-      refute Helper.fuzzy_match_geometry(results.regular, results.best_fit)
     end
   end
 

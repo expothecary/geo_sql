@@ -394,8 +394,47 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: collect (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Create a geometry collection from multiple rows" do
+        point = Fixtures.point()
+        line = Fixtures.linestring()
+
+        expected = %Geometry.GeometryCollection{
+          geometries: [point, line],
+          srid: point.srid
+        }
+
+        unquote(repo).insert(%Location{name: "hello", geom: point})
+        unquote(repo).insert(%Location{name: "hello", geom: line})
+
+        query =
+          from(location in Location, select: Common.collect(location.geom), group_by: [:name])
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(expected, result)
+      end
+
+      test "Create a geometry collection from two geometries" do
+        point = Fixtures.point()
+        line = Fixtures.linestring()
+
+        expected = %Geometry.GeometryCollection{
+          geometries: [point, line],
+          srid: point.srid
+        }
+
+        unquote(repo).insert(%Location{name: "hello", geom: point})
+
+        query =
+          from(location in Location, select: Common.collect(location.geom, ^line))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(expected, result)
       end
     end
 

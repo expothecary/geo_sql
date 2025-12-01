@@ -115,8 +115,6 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_BoundingDiagonal(?,?)", unquote(geometry), unquote(best_fit?))
   end
 
-  CollectionHomogenize
-
   @spec collection_homogenize(collection :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Editors"
   defmacro collection_homogenize(collection) do

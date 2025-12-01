@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] 01-12-2025
+
+* Improvements
+  * Degree<->radians conversion utilities in `Common.degrees/1` and `Common.radians/1`
+  * Expanded unit test coverage
+* Fixes
+  * Affine transformations with z-values with PostGIS.affine/11 had wrong number of placeholders
+
 ## [1.3.0] 21-07-2025
 
 * Improvements

@@ -125,6 +125,30 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
+  describe "PostGIS: collection_homogenize" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: contains_properly" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: d_within" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: d_fully_within" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
   describe "PostGIS: distance_sphere" do
     test "returns a distance" do
       geom = Fixtures.multipolygon()
@@ -140,6 +164,109 @@ defmodule GeoSQL.PostGISFunctions.Test do
       results = PostGISRepo.one(query)
 
       assert results == 0
+    end
+  end
+
+  describe "PostGIS: dump" do
+    test "atomic geometry is returned directly" do
+      point = %Geometry.Point{
+        coordinates: [0.0, 0.0],
+        srid: 4326
+      }
+
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: point})
+
+      query =
+        from(location in LocationMulti,
+          where: location.name == "point",
+          select: PostGIS.dump(location.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result == {[], point}
+    end
+
+    test "breaks a multipolygon into its constituent polygons" do
+      polygon1 = %Geometry.Polygon{
+        rings: [[[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]],
+        srid: 4326
+      }
+
+      polygon2 = %Geometry.Polygon{
+        rings: [[[2.0, 2.0], [2.0, 3.0], [3.0, 3.0], [3.0, 2.0], [2.0, 2.0]]],
+        srid: 4326
+      }
+
+      PostGISRepo.insert(%LocationMulti{name: "polygon1", geom: polygon1})
+      PostGISRepo.insert(%LocationMulti{name: "polygon2", geom: polygon2})
+
+      query =
+        from(
+          location in LocationMulti,
+          where: location.name in ["polygon1", "polygon2"],
+          select: PostGIS.dump(Common.collect(location.geom))
+        )
+
+      results = PostGISRepo.all(query)
+      assert length(results) == 2
+
+      Enum.each(results, fn {_path, geom} ->
+        assert %Geometry.Polygon{} = geom
+      end)
+
+      expected_polygons = MapSet.new([polygon1, polygon2])
+      actual_polygons = MapSet.new(Enum.map(results, fn {_path, geom} -> geom end))
+
+      assert MapSet.equal?(expected_polygons, actual_polygons)
+    end
+  end
+
+  describe "PostGIS: dump_points" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: dump_segments" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: dump_rings" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: expand" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: generate_points" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: has_arc" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: has_m" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: has_z" do
+    test "untested" do
+      # FIXME
     end
   end
 
@@ -198,6 +325,18 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
+  describe "PostGIS: line_crossing_direction" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: line_to_curve" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
   describe "PostGIS: locate_along" do
     test "returns matching points from a PolygonM past an offset" do
       linestringzm = Fixtures.linestring(:zm)
@@ -229,6 +368,54 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
       assert %Geometry.MultiLineString{} = result
       assert Enum.count(result.line_strings) == 2
+    end
+  end
+
+  describe "PostGIS: locate_between_elevations" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: longest_line" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: make_box_2d" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: make_envelope" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: make_valid" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: mem_union" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: mem_size" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: normalize" do
+    test "untested" do
+      # FIXME
     end
   end
 
@@ -283,58 +470,87 @@ defmodule GeoSQL.PostGISFunctions.Test do
     end
   end
 
-  describe "PostGIS: dump" do
-    test "atomic geometry is returned directly" do
-      point = %Geometry.Point{
-        coordinates: [0.0, 0.0],
-        srid: 4326
-      }
-
-      PostGISRepo.insert(%LocationMulti{name: "point", geom: point})
-
-      query =
-        from(location in LocationMulti,
-          where: location.name == "point",
-          select: PostGIS.dump(location.geom)
-        )
-
-      result = PostGISRepo.one(query)
-
-      assert result == {[], point}
+  describe "PostGIS: quantize_coordinates" do
+    test "untested" do
+      # FIXME
     end
+  end
 
-    test "breaks a multipolygon into its constituent polygons" do
-      polygon1 = %Geometry.Polygon{
-        rings: [[[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0], [0.0, 0.0]]],
-        srid: 4326
-      }
+  describe "PostGIS: remove_irrelevant_points_for_view" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      polygon2 = %Geometry.Polygon{
-        rings: [[[2.0, 2.0], [2.0, 3.0], [3.0, 3.0], [3.0, 2.0], [2.0, 2.0]]],
-        srid: 4326
-      }
+  describe "PostGIS: remove_small_parts" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      PostGISRepo.insert(%LocationMulti{name: "polygon1", geom: polygon1})
-      PostGISRepo.insert(%LocationMulti{name: "polygon2", geom: polygon2})
+  describe "PostGIS: rotate" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      query =
-        from(
-          location in LocationMulti,
-          where: location.name in ["polygon1", "polygon2"],
-          select: PostGIS.dump(Common.collect(location.geom))
-        )
+  describe "PostGIS: rotate_x" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      results = PostGISRepo.all(query)
-      assert length(results) == 2
+  describe "PostGIS: rotate_y" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      Enum.each(results, fn {_path, geom} ->
-        assert %Geometry.Polygon{} = geom
-      end)
+  describe "PostGIS: rotate_z" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      expected_polygons = MapSet.new([polygon1, polygon2])
-      actual_polygons = MapSet.new(Enum.map(results, fn {_path, geom} -> geom end))
+  describe "PostGIS: scale" do
+    test "untested" do
+      # FIXME
+    end
+  end
 
-      assert MapSet.equal?(expected_polygons, actual_polygons)
+  describe "PostGIS: scroll" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: summary" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: swap_ordinates" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: trans_scale" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: wrap_x" do
+    test "untested" do
+      # FIXME
+    end
+  end
+
+  describe "PostGIS: zm_flag" do
+    test "untested" do
+      # FIXME
     end
   end
 end

@@ -309,6 +309,10 @@ defmodule GeoSQL.Test.Fixtures do
     %Geometry.MultiPoint{points: [[30, -90], [4, 10], [5, 20]], srid: 4326}
   end
 
+  def multipoint(:two_vector) do
+    %Geometry.MultiPoint{points: [[10, 10], [0, 0], [90, 90], [100, 80]], srid: 4326}
+  end
+
   def point(which \\ :default)
 
   def point(:default) do

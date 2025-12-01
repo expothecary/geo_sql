@@ -77,8 +77,33 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Measurement"
-  defmacro angle(geometryA, geometryB) do
-    quote do: fragment("ST_Angle(?,?)", unquote(geometryA), unquote(geometryB))
+  defmacro angle(vectorAPoint1, vectorAPoint2, vectorBPoint1, vectorBPoint2) do
+    quote do
+      fragment(
+        "ST_Angle(?,?,?,?)",
+        unquote(vectorAPoint1),
+        unquote(vectorAPoint2),
+        unquote(vectorBPoint1),
+        unquote(vectorBPoint2)
+      )
+    end
+  end
+
+  @doc group: "Measurement"
+  defmacro angle(point1, midpoint, point2) do
+    quote do
+      fragment(
+        "ST_Angle(?,?,?)",
+        unquote(point1),
+        unquote(midpoint),
+        unquote(point2)
+      )
+    end
+  end
+
+  @doc group: "Measurement"
+  defmacro angle(lineA, lineB) do
+    quote do: fragment("ST_Angle(?,?)", unquote(lineA), unquote(lineB))
   end
 
   @spec contains_properly(

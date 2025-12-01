@@ -5,6 +5,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
   import Ecto.Query
   use GeoSQL.PostGIS
   use GeoSQL.Common
+  use GeoSQL.MM
   use GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{GeoType, Location, LocationMulti}
@@ -38,6 +39,62 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
       results = PostGISRepo.one(query)
       assert %Geometry.MultiPolygon{} = results
+    end
+  end
+
+  describe "PostGIS: angle" do
+    test "returns the angle between two lines" do
+      line2 = Fixtures.linestring()
+      line1 = Fixtures.linestring(:intersects)
+
+      PostGISRepo.insert(%Location{name: "hello", geom: line1})
+
+      query =
+        from(location in Location,
+          select: PostGIS.angle(location.geom, ^line2)
+        )
+
+      results = PostGISRepo.one(query)
+      assert is_number(results)
+    end
+
+    test "returns the angle between two vectors defined by four points" do
+      multipoint = Fixtures.multipoint(:two_vector)
+
+      PostGISRepo.insert(%Location{name: "hello", geom: multipoint})
+
+      query =
+        from(l in Location,
+          select:
+            PostGIS.angle(
+              MM.geometry_n(l.geom, 1),
+              MM.geometry_n(l.geom, 2),
+              MM.geometry_n(l.geom, 3),
+              MM.geometry_n(l.geom, 4)
+            )
+        )
+
+      results = PostGISRepo.one(query)
+      assert is_number(results)
+    end
+
+    test "returns the angle between two vectors defined by a shared point and two unique points" do
+      multipoint = Fixtures.multipoint(:two_vector)
+
+      PostGISRepo.insert(%Location{name: "hello", geom: multipoint})
+
+      query =
+        from(l in Location,
+          select:
+            PostGIS.angle(
+              MM.geometry_n(l.geom, 1),
+              MM.geometry_n(l.geom, 2),
+              MM.geometry_n(l.geom, 3)
+            )
+        )
+
+      results = PostGISRepo.one(query)
+      assert is_number(results)
     end
   end
 

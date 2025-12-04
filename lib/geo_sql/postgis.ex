@@ -30,6 +30,7 @@ defmodule GeoSQL.PostGIS do
           z_offset :: number
         ) :: GeoSQL.fragment()
   @doc group: "Affine Transformations"
+  # credo:disable-for-next-line Credo.Check.Refactor.FunctionArity
   defmacro affine(geometry, a, b, c, d, e, f, g, h, i, x_offset, y_offset, z_offset) do
     quote do
       fragment(

@@ -126,7 +126,7 @@ defmodule GeoSQL.MMFunctions.Test do
           unquote(repo).all(query)
           |> QueryUtils.decode_geometry(unquote(repo))
 
-        assert Helper.is_a(result, [Geometry.LineString, Geometry.MultiLineString])
+        assert Helper.is?(result, [Geometry.LineString, Geometry.MultiLineString])
 
         case result do
           %Geometry.LineString{path: path} ->

@@ -18,8 +18,8 @@ defmodule GeoSQL.Test.Helper do
   def repos(:under_test), do: unquote(under_test_repos)
   def repos(:all), do: unquote(all_repos)
 
-  def is_a(%x{}, which), do: Enum.member?(which, x)
-  def is_a(_, _), do: false
+  def is?(%x{}, which), do: Enum.member?(which, x)
+  def is?(_, _), do: false
 
   def fuzzy_match_geometry(%{geometries: left}, %{geometries: right}) do
     Enum.zip(left, right)

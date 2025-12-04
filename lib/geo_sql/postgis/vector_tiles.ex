@@ -26,7 +26,8 @@ defmodule GeoSQL.PostGIS.VectorTiles do
           %PostGIS.VectorTiles.Layer{
             name: "buildings",
             source: "buildings",
-            columns: %{geometry: :footprint, id: :id, tags: :tags}
+            columns: %{geometry: :footprint, id: :id, tags: :tags},
+            compose_query_fn: fn query -> from(q in query, where: not is_nil(q.name)) end
           }
         ]
 
@@ -40,6 +41,10 @@ defmodule GeoSQL.PostGIS.VectorTiles do
 
   Database prefixes ("schemas" in PostgreSQL) are also supported both on the whole tile query
   as well as per-layer.
+
+  Custom clauses can be added per-layer using the the optional `compose_query_fn` which is called
+  with the layer's Ecto query. The function must also return an ecto function. This is particularly
+  useful for filtering with where clauses.
 
   For non-trivial tables, ensure that a `GIST` index exists on the geometry columns used.
   """

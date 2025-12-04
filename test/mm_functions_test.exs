@@ -455,14 +455,14 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: intersection (#{repo})" do
       test "returns intersecton point" do
-        lineA = Fixtures.linestring()
-        lineB = Fixtures.linestring(:intersects)
+        line_a = Fixtures.linestring()
+        line_b = Fixtures.linestring(:intersects)
 
-        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line_a})
 
         query =
           from(location in GeoType,
-            select: MM.intersection(location.linestring, ^lineB)
+            select: MM.intersection(location.linestring, ^line_b)
           )
 
         result =
@@ -475,14 +475,14 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: intersects (#{repo})" do
       test "can detect intersections" do
-        lineA = Fixtures.linestring()
-        lineB = Fixtures.linestring(:intersects)
+        line_a = Fixtures.linestring()
+        line_b = Fixtures.linestring(:intersects)
 
-        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line_a})
 
         query =
           from(location in GeoType,
-            select: MM.intersects(location.linestring, ^lineB)
+            select: MM.intersects(location.linestring, ^line_b)
           )
 
         result =
@@ -495,8 +495,8 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: is_closed (#{repo})" do
       test "can detect closure of geometry" do
-        lineA = Fixtures.linestring()
-        unquote(repo).insert(%GeoType{t: "hello", linestring: lineA})
+        line_a = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line_a})
 
         query =
           from(location in GeoType,
@@ -1022,11 +1022,11 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: relate (#{repo})" do
       test "calculates the spatial relationship between two geometries" do
-        polygonA = Fixtures.polygon(:donut)
-        polygonB = Fixtures.polygon()
+        polygon_a = Fixtures.polygon(:donut)
+        polygon_b = Fixtures.polygon()
 
         result =
-          from(location in Location, select: MM.relate(^polygonA, ^polygonB))
+          from(location in Location, select: MM.relate(^polygon_a, ^polygon_b))
           |> unquote(repo).one()
           |> QueryUtils.decode_geometry(unquote(repo))
 
@@ -1034,12 +1034,12 @@ defmodule GeoSQL.MMFunctions.Test do
       end
 
       test "calculates the spatial relationship between two geometries, with a mode" do
-        polygonA = Fixtures.polygon(:donut)
-        polygonB = Fixtures.polygon()
+        polygon_a = Fixtures.polygon(:donut)
+        polygon_b = Fixtures.polygon()
 
         result =
           from(location in Location,
-            select: MM.relate(^polygonA, ^polygonB, :multivalent_endpoint)
+            select: MM.relate(^polygon_a, ^polygon_b, :multivalent_endpoint)
           )
           |> unquote(repo).one()
           |> QueryUtils.decode_geometry(unquote(repo))
@@ -1048,12 +1048,12 @@ defmodule GeoSQL.MMFunctions.Test do
       end
 
       test "confirms the spatial relationship between two geometries" do
-        polygonA = Fixtures.polygon(:donut)
-        polygonB = Fixtures.polygon()
+        polygon_a = Fixtures.polygon(:donut)
+        polygon_b = Fixtures.polygon()
 
         result =
           from(location in Location,
-            select: MM.relate(^polygonA, ^polygonB, "212FF1FF2")
+            select: MM.relate(^polygon_a, ^polygon_b, "212FF1FF2")
           )
           |> unquote(repo).one()
           |> unquote(repo).to_boolean()
@@ -1135,20 +1135,20 @@ defmodule GeoSQL.MMFunctions.Test do
 
     describe "SQL/MM: union (#{repo})" do
       test "combines two polygons" do
-        polygonA = Fixtures.polygon()
-        polygonB = Fixtures.polygon(:piece)
+        polygon_a = Fixtures.polygon()
+        polygon_b = Fixtures.polygon(:piece)
 
         expected = %Geometry.MultiPolygon{
-          polygons: [polygonA.rings, polygonB.rings],
-          srid: polygonA.srid
+          polygons: [polygon_a.rings, polygon_b.rings],
+          srid: polygon_a.srid
         }
 
         result =
           from(location in Location,
             select:
               MM.union(
-                QueryUtils.cast_to_geometry(^polygonA, unquote(repo)),
-                QueryUtils.cast_to_geometry(^polygonB, unquote(repo))
+                QueryUtils.cast_to_geometry(^polygon_a, unquote(repo)),
+                QueryUtils.cast_to_geometry(^polygon_b, unquote(repo))
               )
           )
           |> unquote(repo).one()
@@ -1159,15 +1159,15 @@ defmodule GeoSQL.MMFunctions.Test do
 
       if repo.has_array_literals?() do
         test "combines a list of polygons" do
-          polygonA = Fixtures.polygon()
-          polygonB = Fixtures.polygon(:piece)
+          polygon_a = Fixtures.polygon()
+          polygon_b = Fixtures.polygon(:piece)
 
           result =
             from(location in Location,
               select:
                 MM.union([
-                  QueryUtils.cast_to_geometry(^polygonB, unquote(repo)),
-                  QueryUtils.cast_to_geometry(^polygonA, unquote(repo))
+                  QueryUtils.cast_to_geometry(^polygon_b, unquote(repo)),
+                  QueryUtils.cast_to_geometry(^polygon_a, unquote(repo))
                 ])
             )
             |> unquote(repo).one()

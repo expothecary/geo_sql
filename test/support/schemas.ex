@@ -1,4 +1,5 @@
 defmodule GeoSQL.Test.Schema.Location do
+  @moduledoc false
   use Ecto.Schema
 
   schema "locations" do
@@ -8,6 +9,7 @@ defmodule GeoSQL.Test.Schema.Location do
 end
 
 defmodule GeoSQL.Test.Schema.Geographies do
+  @moduledoc false
   use Ecto.Schema
 
   schema "geographies" do
@@ -17,6 +19,7 @@ defmodule GeoSQL.Test.Schema.Geographies do
 end
 
 defmodule GeoSQL.Test.Schema.LocationMulti do
+  @moduledoc false
   use Ecto.Schema
 
   schema "location_multi" do
@@ -26,6 +29,7 @@ defmodule GeoSQL.Test.Schema.LocationMulti do
 end
 
 defmodule GeoSQL.Test.Schema.GeoType do
+  @moduledoc false
   use Ecto.Schema
 
   schema "specified_columns" do
@@ -44,6 +48,7 @@ defmodule GeoSQL.Test.Schema.GeoType do
 end
 
 defmodule GeoSQL.Test.Schema.WrongGeoType do
+  @moduledoc false
   use Ecto.Schema
 
   schema "specified_columns" do
@@ -53,6 +58,7 @@ defmodule GeoSQL.Test.Schema.WrongGeoType do
 end
 
 defmodule GeoSQL.Test.Schema.Geopackage do
+  @moduledoc false
   use Ecto.Schema
 
   @primary_key false

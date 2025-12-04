@@ -86,8 +86,8 @@ defmodule GeoSQL.TilesTest do
         "\x1A\x86\x01\n\x04pois\x12\x13\x12\b\0\0\x01\x01\x02\x02\x03\x03\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x12\x13\x12\b\0\0\x01\x04\x02\x02\x03\x05\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x1A\x04name\x1A\x02id\x1A\x06access\x1A\aamenity\"\x06\n\x04pois\"\x02(\x02\"\t\n\aprivate\"\b\n\x06public\"\x02(\x03\"\x0F\n\rswimming_pool(\x80 x\x02"
 
       z = 17
-      x = 68645
-      y = 45899
+      x = 68_645
+      y = 45_899
       tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
@@ -106,8 +106,8 @@ defmodule GeoSQL.TilesTest do
         "\x1A\x8D\x01\n\tuser_pois\x12\x13\x12\b\0\0\x01\x01\x02\x02\x03\x03\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x12\x13\x12\b\0\0\x01\x04\x02\x02\x03\x05\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x1A\x04name\x1A\x02id\x1A\x06access\x1A\aamenity\"\v\n\tuser_pois\"\x02(\x02\"\t\n\aprivate\"\x05\n\x03map\"\x02(\x03\"\x0F\n\rswimming_pool(\x80 x\x02"
 
       z = 17
-      x = 68645
-      y = 45899
+      x = 68_645
+      y = 45_899
       tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
@@ -131,8 +131,8 @@ defmodule GeoSQL.TilesTest do
         "\x1A\xC9\x01\n\tuser_pois\x12\x13\x12\b\0\0\x01\x01\x02\x02\x03\x03\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x12\x13\x12\b\0\0\x01\x04\x02\x02\x03\x05\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x12\x13\x12\b\0\x06\x01\x01\x02\x02\x03\a\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x12\x13\x12\b\0\x06\x01\x04\x02\x02\x03\x05\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x1A\x04name\x1A\x02id\x1A\x06access\x1A\aamenity\"\v\n\tuser_pois\"\x02(\x02\"\t\n\aprivate\"\x05\n\x03map\"\x02(\x03\"\x0F\n\rswimming_pool\"\x06\n\x04pois\"\b\n\x06public(\x80 x\x02"
 
       z = 17
-      x = 68645
-      y = 45899
+      x = 68_645
+      y = 45_899
       tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end
@@ -152,8 +152,8 @@ defmodule GeoSQL.TilesTest do
         "\x1Am\n\tuser_pois\x12\x13\x12\b\0\0\x01\x01\x02\x02\x03\x03\x18\x01\"\x05\t\xC2\x02\xD2\x0F\x1A\x04name\x1A\x02id\x1A\x06access\x1A\aamenity\"\v\n\tuser_pois\"\x02(\x03\"\t\n\aprivate\"\x0F\n\rswimming_pool(\x80 x\x02"
 
       z = 17
-      x = 68645
-      y = 45899
+      x = 68_645
+      y = 45_899
       tile = PostGIS.VectorTiles.generate(unquote(repo), z, x, y, layers)
       assert(tile == expected_tile)
     end

@@ -38,7 +38,7 @@ defmodule GeoSQL.SpatiaLiteFunctions.Test do
         |> GeopackageRepo.one()
         |> QueryUtils.decode_geometry(GeopackageRepo)
 
-      assert match?(%Geometry.MultiPolygon{srid: 26915}, result)
+      assert match?(%Geometry.MultiPolygon{srid: 26_915}, result)
     end
   end
 

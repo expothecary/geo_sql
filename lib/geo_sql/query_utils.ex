@@ -104,7 +104,7 @@ defmodule GeoSQL.QueryUtils do
     Keyword.validate!(options, allowed_keys)
 
     {
-      Enum.map(options, fn {key, _value} -> "#{key} => ?" end) |> Enum.join(", "),
+      Enum.map_join(options, ", ", fn {key, _value} -> "#{key} => ?" end),
       Enum.map(options, fn {_key, value} -> value end)
     }
   end

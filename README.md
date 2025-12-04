@@ -84,7 +84,7 @@ allowing Ecto schemas to contain geometry fields that are stored as Geopackage d
 Example:
 
   ```elixir
-  defmodule GeoSQL.Test.Schema.Geopackage do
+  defmodule MyApp.Geopackage do
     use Ecto.Schema
 
     @primary_key false
@@ -106,9 +106,6 @@ Due to being tied to SQLite3, only SQLite3 databases are supported and the Spati
 module must be available as it is (currently) used to do the serialization in memory.
 The Spatialite module does not need to be initialized on a Geopackage database, but
 it does need to be available on the system for GeoSQL to use.
-
-NOTE: If the `Geometry` library gains support for the Geopackage binary format, similar to
-its suport for the WKB format, then the Spatialite requirement may be dropped.
 
 ### Readying the Repo with `GeoSQL.init/1`
 

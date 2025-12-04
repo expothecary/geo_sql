@@ -22,6 +22,9 @@ ex_gis_store-*.tar
 # Temporary files, for example, from tests.
 /tmp/
 
+# LS files
+.expert
+
 functions_status.md
 test/support/*-shm
 test/support/*-wal

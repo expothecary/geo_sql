@@ -37,6 +37,7 @@ defmodule GeoSQL.Mixfile do
       {:jason, "~> 1.0"},
 
       # dev
+      {:credo, "~> 1.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
 
       # testing

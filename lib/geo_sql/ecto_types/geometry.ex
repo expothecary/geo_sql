@@ -255,7 +255,31 @@ defmodule GeoSQL.Geometry.Geopackage do
   # This is just GeoSQL.Geometry in a Geopackage costume
   # It allows type systems to differentiate beteween standard
   # geometry encodings and Geopackage encoding.
-  @moduledoc false
+  @moduledoc """
+  A Geopackage data type for use with geopackage-encoded fields
+
+  Example:
+
+    ```elixir
+    defmodule MyApp.Geopackage do
+      use Ecto.Schema
+
+      @primary_key false
+      schema "some_table_in_geopackage" do
+        field(:id, :integer, source: :OBJECTID)
+        field(:name, :string)
+        field(:shape, GeoSQL.Geometry.Geopackage, source: :Shape)
+      end
+    end
+    ```
+
+  The schema can now be used in queries like any other:
+
+    ```elixir
+    from(g in MyApp.Geopackage) |> MyApp.GeopackageRepo.all()
+    ```
+  """
+
   @type t :: Geometry.t()
   use Ecto.Type
 

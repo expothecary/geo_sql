@@ -99,7 +99,7 @@ Example:
 This schema can now be used in queries like any other:
 
   ```elixir
-  from(g in Geopackage) |> GeopackageRepo.all()
+  from(g in MyApp.Geopackage) |> MyApp.GeopackageRepo.all()
   ```
 
 Due to being tied to SQLite3, only SQLite3 databases are supported and the Spatialite

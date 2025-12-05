@@ -275,9 +275,9 @@ defmodule GeoSQL.Common do
         quote do
           fragment(
             "ST_EstimatedExtent(?, ?, ?)::geometry",
+            unquote(schema),
             unquote(table),
-            unquote(column),
-            unquote(schema)
+            unquote(column)
           )
         end
 

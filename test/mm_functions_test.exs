@@ -435,8 +435,28 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: gml_to_sql (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "converts GML into a geometry" do
+        query = from(location in Location, select: MM.gml_to_sql(^Fixtures.gml(), unquote(repo)))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(result, Fixtures.gml_geometry())
+      end
+
+      test "converts GML into a geometry with a defined SRID" do
+        srid = 2056
+
+        query =
+          from(location in Location, select: MM.gml_to_sql(^Fixtures.gml(), ^srid, unquote(repo)))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert result.srid == srid
+        assert Helper.fuzzy_match_geometry(result, Fixtures.gml_geometry())
       end
     end
 

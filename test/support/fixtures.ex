@@ -1,6 +1,25 @@
 defmodule GeoSQL.Test.Fixtures do
   @moduledoc false
 
+  def gml(which \\ :default)
+
+  def gml(:default) do
+    "<gml:LineString srsName=\"EPSG:4269\"> <gml:coordinates> -71.16028,42.258729 -71.160837,42.259112 -71.161143,42.25932 </gml:coordinates> </gml:LineString>"
+  end
+
+  def gml_geometry(which \\ :default)
+
+  def gml_geometry(:default) do
+    %Geometry.LineString{
+      path: [
+        [-71.16028, 42.258729],
+        [-71.160837, 42.259112],
+        [-71.161143, 42.25932]
+      ],
+      srid: 4269
+    }
+  end
+
   def multipolygon_ewkb(which \\ :default)
 
   def multipolygon_ewkb(:default) do

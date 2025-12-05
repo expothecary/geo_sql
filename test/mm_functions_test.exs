@@ -229,8 +229,21 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: curve_to_line (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Turns a curve into a line" do
+        # SpatiaLite does not support curve_to_line (yet?)
+        skip_repos = [GeoSQL.Test.SpatiaLite.Repo]
+
+        if not Enum.member?(skip_repos, unquote(repo)) do
+          circle = "CIRCULARSTRING(220268 150415,220227 150505,220227 150406)"
+
+          query = from(location in Location, select: MM.curve_to_line(MM.geom_from_text(^circle)))
+
+          result =
+            unquote(repo).one(query)
+            |> QueryUtils.decode_geometry(unquote(repo))
+
+          assert %Geometry.LineString{} = result
+        end
       end
     end
 
@@ -801,8 +814,21 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: num_curves (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Counts the components on a compound curve" do
+        # SpatiaLite does not support num_curves (yet?)
+        skip_repos = [GeoSQL.Test.SpatiaLite.Repo]
+
+        if not Enum.member?(skip_repos, unquote(repo)) do
+          curve = "COMPOUNDCURVE EMPTY"
+
+          query = from(location in Location, select: MM.num_curves(MM.geom_from_text(^curve)))
+
+          result =
+            unquote(repo).one(query)
+            |> QueryUtils.decode_geometry(unquote(repo))
+
+          assert 0 == result
+        end
       end
     end
 

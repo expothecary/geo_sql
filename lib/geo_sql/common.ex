@@ -818,7 +818,7 @@ defmodule GeoSQL.Common do
 
   @doc group: "Geometry Accessors"
   defmacro number_of_geometries(geometry_collection) do
-    quote do: fragment("ST_NumGeometeries(?)", unquote(geometry_collection))
+    quote do: fragment("ST_NumGeometries(?)", unquote(geometry_collection))
   end
 
   @doc group: "Geometry Processing"

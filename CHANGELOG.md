@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] 05-12-2025
+
+* Improvements
+  * Expanded unit test coverage
+* Fixes
+  * `MM.gml_to_sql` works with SpatialLite
+  * `MM.num_patches` works with SpatialLite
+
 ## [1.4.1] 05-12-2025
 
 * Improvements

@@ -449,8 +449,28 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: estimated_extent (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Finds the estiamated extend of a table" do
+        geom = Fixtures.polygon()
+
+        if unquote(repo) == GeoSQL.Test.PostGIS.Repo do
+          # this is necessary to have statistics on the table
+          # which estimated extent relies on
+          unquote(repo).query("CREATE INDEX foo ON locations USING gist(geom)")
+        end
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        table = %GeoSQL.Test.Schema.Location{}.__meta__.source
+
+        query =
+          from(location in Location,
+            select: Common.estimated_extent(^table, "geom", unquote(repo))
+          )
+
+        assert [%Geometry.Polygon{rings: [ring]}] =
+                 unquote(repo).all(query)
+                 |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert length(ring) == 5
       end
     end
 

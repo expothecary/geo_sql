@@ -734,8 +734,8 @@ defmodule GeoSQL.Common do
 
   defmacro min_coord(geometry, :x, repo) do
     case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres -> quote do: fragment("ST_MinX(?)", unquote(geometry))
-      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_XMin(?)", unquote(geometry))
+      Ecto.Adapters.Postgres -> quote do: fragment("ST_XMin(?)", unquote(geometry))
+      Ecto.Adapters.SQLite3 -> quote do: fragment("ST_MinX(?)", unquote(geometry))
     end
   end
 

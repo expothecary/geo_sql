@@ -830,8 +830,28 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: num_patches (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "return correct number of faces" do
+        {query, faces} =
+          case unquote(repo) do
+            GeoSQL.Test.SpatiaLite.Repo ->
+              {from(location in Location,
+                 select: MM.num_patches(^Fixtures.geometry_collection(), unquote(repo))
+               ), 2}
+
+            _ ->
+              surface = "POLYHEDRALSURFACE( ((0 0 0, 0 0 1, 0 1 1, 0 1 0, 0 0 0)),
+		((0 0 0, 0 1 0, 1 1 0, 1 0 0, 0 0 0)), ((0 0 0, 1 0 0, 1 0 1, 0 0 1, 0 0 0)),
+		((1 1 0, 1 1 1, 1 0 1, 1 0 0, 1 1 0)),
+		((0 1 0, 0 1 1, 1 1 1, 1 1 0, 0 1 0)), ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1)) )"
+
+              {from(
+                 location in Location,
+                 select: MM.num_patches(MM.geom_from_text(^surface), unquote(repo))
+               ), 6}
+          end
+
+        result = unquote(repo).one(query)
+        assert result == faces
       end
     end
 

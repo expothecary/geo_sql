@@ -376,8 +376,14 @@ defmodule GeoSQL.MM do
   end
 
   @doc group: "Geometry Accessors"
-  defmacro num_patches(geometry) do
-    quote do: fragment("ST_NumPatches(?)", unquote(geometry))
+  defmacro num_patches(geometry, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("NumGeometries(?)", unquote(geometry))
+
+      _ ->
+        quote do: fragment("ST_NumPatches(?)", unquote(geometry))
+    end
   end
 
   @spec num_points(GeoSQL.geometry_input()) :: GeoSQL.fragment()

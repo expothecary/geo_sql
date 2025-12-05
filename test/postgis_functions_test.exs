@@ -239,8 +239,49 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: expand" do
-    test "untested" do
-      # FIXME
+    test "expands geomtry with dx/dy" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.expand(location.geom, 10, 100)
+        )
+
+      assert [%Geometry.Polygon{rings: [ring]}] = PostGISRepo.all(query)
+
+      assert length(ring) == 5
+    end
+
+    test "expands geomtry with dx/dy/dz" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.expand(location.geom, 10, 50, 100)
+        )
+
+      assert [%Geometry.Polygon{rings: [ring]}] = PostGISRepo.all(query)
+
+      assert length(ring) == 5
+    end
+
+    test "expands geomtry with dx/dy/dz/dm" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "hello", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.expand(location.geom, 10, 100, 0, 1000)
+        )
+
+      assert [%Geometry.Polygon{rings: [ring]}] = PostGISRepo.all(query)
+
+      assert length(ring) == 5
     end
   end
 

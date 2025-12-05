@@ -499,8 +499,21 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: expand (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "expands geomtry by a set amount" do
+        geom = Fixtures.polygon()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.expand(location.geom, 2.0)
+          )
+
+        assert [%Geometry.Polygon{rings: [ring]}] =
+                 unquote(repo).all(query)
+                 |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert length(ring) == 5
       end
     end
 

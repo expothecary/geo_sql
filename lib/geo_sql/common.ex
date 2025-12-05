@@ -298,7 +298,7 @@ defmodule GeoSQL.Common do
 
   @spec expand(
           geometry :: GeoSQL.geometry_input(),
-          units_to_expand :: number
+          units_to_expand :: GeoSQL.fragment() | number
         ) :: GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, units_to_expand) do

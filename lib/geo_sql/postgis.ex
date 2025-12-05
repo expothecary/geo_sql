@@ -203,8 +203,8 @@ defmodule GeoSQL.PostGIS do
 
   @spec expand(
           geometry :: GeoSQL.geometry_input(),
-          dx :: number,
-          dy :: number
+          dx :: GeoSQL.fragment() | number,
+          dy :: GeoSQL.fragment() | number
         ) :: GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, dx, dy) do
@@ -213,29 +213,29 @@ defmodule GeoSQL.PostGIS do
 
   @spec expand(
           geometry :: GeoSQL.geometry_input(),
-          dx :: number,
-          dy :: number,
-          dz :: number
+          dx :: GeoSQL.fragment() | number,
+          dy :: GeoSQL.fragment() | number,
+          dz :: GeoSQL.fragment() | number
         ) :: GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, dx, dy, dz) do
     quote do
-      fragment("ST_Expand(?,?,?)", unquote(geometry), unquote(dx), unquote(dy), unquote(dz))
+      fragment("ST_Expand(?,?,?, ?)", unquote(geometry), unquote(dx), unquote(dy), unquote(dz))
     end
   end
 
   @spec expand(
           geometry :: GeoSQL.geometry_input(),
-          dx :: number,
-          dy :: number,
-          dz :: number,
-          dm :: number
+          dx :: GeoSQL.fragment() | number,
+          dy :: GeoSQL.fragment() | number,
+          dz :: GeoSQL.fragment() | number,
+          dm :: GeoSQL.fragment() | number
         ) :: GeoSQL.fragment()
   @doc group: "Bounding Boxes"
   defmacro expand(geometry, dx, dy, dz, dm) do
     quote do
       fragment(
-        "ST_Expand(?,?,?)",
+        "ST_Expand(?,?,?,?,?)",
         unquote(geometry),
         unquote(dx),
         unquote(dy),

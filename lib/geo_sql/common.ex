@@ -768,13 +768,7 @@ defmodule GeoSQL.Common do
   @spec minimum_bounding_radius(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
   defmacro minimum_bounding_radius(geometry, repo \\ nil) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_MinimumBoundingRadius(?)", unquote(geometry))
-
-      Ecto.Adapters.SQLite3 ->
-        quote do: fragment("GEOSMinimumBoundingRadius(?)", unquote(geometry))
-    end
+    quote do: fragment("ST_MinimumBoundingRadius(?)", unquote(geometry))
   end
 
   @doc group: "Measurement"

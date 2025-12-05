@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 * Improvements
   * Expanded unit test coverage
+  * More documentation
+  * Style fixes suggested by `credo`
 * Fixes
   * `GeoSQL.PostGIS.expand` can be called with more than two dimensions
   * `GeoSQL.Common.ST_EstimatedExtent` supports `{schema, table}` and just `table_name`

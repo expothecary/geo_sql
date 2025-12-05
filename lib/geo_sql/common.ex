@@ -274,7 +274,7 @@ defmodule GeoSQL.Common do
       Ecto.Adapters.Postgres ->
         quote do
           fragment(
-            "ST_ExtimatedEtent(?, ?, ?)::geometry",
+            "ST_EstimatedExtent(?, ?, ?)::geometry",
             unquote(table),
             unquote(column),
             unquote(schema)
@@ -289,7 +289,7 @@ defmodule GeoSQL.Common do
   defmacro estimated_extent(table, column, repo) do
     case RepoUtils.adapter(repo) do
       Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_ExtimatedEtent(?, ?)::geometry", unquote(table), unquote(column))
+        quote do: fragment("ST_EstimatedExtent(?, ?)::geometry", unquote(table), unquote(column))
 
       Ecto.Adapters.SQLite3 ->
         quote do: fragment("GetLayerExtent(?, ?)", unquote(table), unquote(column))

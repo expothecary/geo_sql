@@ -916,8 +916,32 @@ defmodule GeoSQL.MMFunctions.Test do
     end
 
     describe "SQL/MM: patch_n (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns a given face" do
+        {query, type} =
+          case unquote(repo) do
+            GeoSQL.Test.SpatiaLite.Repo ->
+              {from(location in Location,
+                 select: MM.patch_n(^Fixtures.geometry_collection(), 2, unquote(repo))
+               ), Geometry.LineString}
+
+            _ ->
+              surface = "POLYHEDRALSURFACE( ((0 0 0, 0 0 1, 0 1 1, 0 1 0, 0 0 0)),
+		((0 0 0, 0 1 0, 1 1 0, 1 0 0, 0 0 0)), ((0 0 0, 1 0 0, 1 0 1, 0 0 1, 0 0 0)),
+		((1 1 0, 1 1 1, 1 0 1, 1 0 0, 1 1 0)),
+		((0 1 0, 0 1 1, 1 1 1, 1 1 0, 0 1 0)), ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1)) )"
+
+              {from(
+                 location in Location,
+                 select: MM.patch_n(MM.geom_from_text(^surface), 1, unquote(repo))
+               ), Geometry.PolygonZ}
+          end
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        %actual_type{} = result
+        assert type == actual_type
       end
     end
 

@@ -404,11 +404,21 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_Overlaps(?,?)", unquote(geometryA), unquote(geometryB))
   end
 
-  @spec patch_n(GeoSQL.geometry_input(), face_index :: number | GeoSQL.geometry_input()) ::
+  @spec patch_n(
+          GeoSQL.geometry_input(),
+          face_index :: number | GeoSQL.geometry_input(),
+          Ecto.Repo.t() | nil
+        ) ::
           GeoSQL.fragment()
   @doc group: "Geometry Accessors"
-  defmacro patch_n(geometry, face_index) do
-    quote do: fragment("ST_PatchN(?,?)", unquote(geometry), unquote(face_index))
+  defmacro patch_n(geometry, face_index, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("ST_GeometryN(?,?)", unquote(geometry), unquote(face_index))
+
+      _ ->
+        quote do: fragment("ST_PatchN(?,?)", unquote(geometry), unquote(face_index))
+    end
   end
 
   @spec perimeter(GeoSQL.geometry_input()) :: GeoSQL.fragment()

@@ -843,20 +843,66 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: make_valid (#{repo})" do
-      test "untested" do
-        # FIXME
+      # NOTE: Spatialite does have ST_MakeValid, but it seems rather flaky
+      supports_make_valid = [GeoSQL.Test.PostGIS.Repo]
+
+      if Enum.member?(supports_make_valid, repo) do
+        test "creates valid geometries" do
+          unquote(repo).insert(%LocationMulti{
+            name: "collection",
+            geom: Fixtures.geometry_collection(:courtyard)
+          })
+
+          query =
+            from(
+              location in LocationMulti,
+              select: Common.make_valid(location.geom)
+            )
+
+          result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+
+          assert %Geometry.GeometryCollection{} = result
+        end
       end
     end
 
     describe "Common: max_coord (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns max coordinate" do
+        point = Fixtures.point()
+        pointz = Fixtures.point(:z)
+
+        unquote(repo).insert(%GeoType{t: "hello", point: point, pointz: pointz})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              x: Common.max_coord(location.point, :x, unquote(repo)),
+              y: Common.max_coord(location.point, :y, unquote(repo)),
+              z: Common.max_coord(location.pointz, :z, unquote(repo))
+            }
+          )
+
+        result = unquote(repo).one(query)
+
+        assert %{x: 30.0, y: -90.0, z: 10.0} = result
       end
     end
 
     describe "Common: max_distance (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns max distance" do
+        line = Fixtures.linestring()
+        pointz = Fixtures.point(:z)
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line})
+
+        query =
+          from(location in GeoType,
+            select: Common.max_distance(location.linestring, ^pointz)
+          )
+
+        result = unquote(repo).one(query)
+
+        assert 1.0 == result
       end
     end
 
@@ -867,32 +913,99 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: min_coord (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns min coordinate" do
+        point = Fixtures.point()
+        pointz = Fixtures.point(:z)
+
+        unquote(repo).insert(%GeoType{t: "hello", point: point, pointz: pointz})
+
+        query =
+          from(location in GeoType,
+            select: %{
+              x: Common.min_coord(location.point, :x, unquote(repo)),
+              y: Common.min_coord(location.point, :y, unquote(repo)),
+              z: Common.min_coord(location.pointz, :z, unquote(repo))
+            }
+          )
+
+        result = unquote(repo).one(query)
+
+        assert %{x: 30.0, y: -90.0, z: 10.0} = result
       end
     end
 
     describe "Common: minimum_bounding_circle (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "calculate the min bounding circle around a line" do
+        unquote(repo).insert(%Location{name: "line", geom: Fixtures.linestring()})
+
+        query =
+          from(
+            location in Location,
+            select: Common.minimum_bounding_circle(location.geom, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
       end
     end
 
     describe "Common: minimum_bounding_radius (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "calculate the radius of the min bounding circle around a line" do
+        unquote(repo).insert(%Location{name: "line", geom: Fixtures.linestring()})
+
+        query =
+          from(
+            location in Location,
+            select: Common.minimum_bounding_radius(location.geom)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        case unquote(repo) do
+          GeoSQL.Test.SpatiaLite.Repo -> assert 0.5 == result
+          _ -> assert {%Geometry.Point{}, 0.5} = result
+        end
       end
     end
 
     describe "Common: minimum_clearance (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "calculates the correct clearance" do
+        unquote(repo).insert(%Location{name: "line", geom: Fixtures.linestring()})
+
+        query =
+          from(
+            location in Location,
+            select: Common.minimum_clearance(location.geom, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert 1.0 == result
       end
     end
 
     describe "Common:  multi(#{repo})" do
-      test "untested" do
-        # FIXME
+      test "turns a linestring into a multi linestring" do
+        unquote(repo).insert(%Location{name: "intersecting lines", geom: Fixtures.linestring()})
+
+        query =
+          from(
+            location in Location,
+            select: Common.multi(location.geom)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineString{} = result
       end
     end
 
@@ -991,51 +1104,86 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "Common: number_of_dimension (#{repo})" do
-      test "untested" do
-        # FIXME
+    describe "Common: number_of_dimensions (#{repo})" do
+      test "Returns correct number of dimensions" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.number_of_dimensions(location.geom))
+        result = unquote(repo).one(query)
+        assert 2 == result
       end
     end
 
     describe "Common: number_of_points (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of points" do
+        geom = Fixtures.multipoint()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.number_of_points(location.geom))
+        result = unquote(repo).one(query)
+        assert 3 == result
       end
     end
 
     describe "Common: number_of_rings (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of rings" do
+        geom = Fixtures.polygon()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.number_of_rings(location.geom))
+        result = unquote(repo).one(query)
+        assert 1 == result
       end
     end
 
     describe "Common: number_of_geometries (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of rings" do
+        geom = Fixtures.geometry_collection()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.number_of_geometries(location.geom))
+        result = unquote(repo).one(query)
+        assert 2 == result
       end
     end
 
     describe "Common: oriented_envelope (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of rings" do
+        geom = Fixtures.geometry_collection()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.oriented_envelope(location.geom))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+        assert %Geometry.Polygon{} = result
       end
     end
 
     describe "Common: offset_curve (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of rings" do
+        geom = Fixtures.linestring()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.offset_curve(location.geom, 10))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
       end
     end
 
     describe "Common: polygonize (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Returns correct number of rings" do
+        geom = Fixtures.multilinestring()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.polygonize(location.geom))
+        result = unquote(repo).one(query)
+
+        assert is_nil(result) or
+                 %Geometry.GeometryCollection{geometries: [], srid: 4326} == result
       end
     end
 
     describe "Common: project (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "Moves a point" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.project(location.geom, 10, 1))
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+        assert %Geometry.Point{} = result
       end
     end
 

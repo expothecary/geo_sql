@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
     * `MM.num_patches`
     * `MM.patch_n`
 * Fixes
+  * `Common.min_coord(geometry, :x, repo)` works correctly now (`:y` and `:z` variants were unaffected)
+  * SpatiaLite documentation for the function behind `minimum_bounding_radius` was wrong; adapted to the real names used in the SaptiaLite library rather than what their docs say
+  * Fix typo in `Common.number_of_geometries`
 
 ## [1.4.1] 05-12-2025
 

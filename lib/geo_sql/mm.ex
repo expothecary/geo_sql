@@ -222,14 +222,32 @@ defmodule GeoSQL.MM do
     quote do: fragment("ST_GeometryType(?)", unquote(geometry))
   end
 
+  @spec gml_to_sql(geomgml :: GeoSQL.fragment() | String.t(), Ecto.Repo.t()) :: GeoSQL.fragment()
   @doc group: "Data Formats"
-  defmacro gml_to_sql(geomgml) do
-    quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
+  defmacro gml_to_sql(geomgml, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("GeomFromGML(?)", unquote(geomgml))
+
+      _ ->
+        quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
+    end
   end
 
+  @spec gml_to_sql(
+          geomgml :: GeoSQL.fragment() | String.t(),
+          srid :: GeoSQL.fragment() | non_neg_integer,
+          Ecto.Repo.t()
+        ) :: GeoSQL.fragment()
   @doc group: "Data Formats"
-  defmacro gml_to_sql(geomgml, srid) do
-    quote do: fragment("ST_GMLToSQL(?, ?)", unquote(geomgml), unquote(srid))
+  defmacro gml_to_sql(geomgml, srid, repo) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.SQLite3 ->
+        quote do: fragment("SetSRID(GeomFromGML(?), ?)", unquote(geomgml), unquote(srid))
+
+      _ ->
+        quote do: fragment("ST_GMLToSQL(?,?)", unquote(geomgml), unquote(srid))
+    end
   end
 
   @spec interior_ring_n(GeoSQL.geometry_input(), index :: pos_integer) :: GeoSQL.fragment()

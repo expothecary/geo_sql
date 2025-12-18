@@ -767,7 +767,7 @@ defmodule GeoSQL.Common do
 
   @spec minimum_bounding_radius(GeoSQL.geometry_input(), Ecto.Repo.t() | nil) :: GeoSQL.fragment()
   @doc group: "Geometry Processing"
-  defmacro minimum_bounding_radius(geometry, repo \\ nil) do
+  defmacro minimum_bounding_radius(geometry, _repo \\ nil) do
     quote do: fragment("ST_MinimumBoundingRadius(?)", unquote(geometry))
   end
 

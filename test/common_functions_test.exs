@@ -376,8 +376,54 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: concave_hull (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a hull from a geometry" do
+        geom = Fixtures.multipoint()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(
+            location in Location,
+            select: Common.concave_hull(Common.collect(location.geom))
+          )
+
+        result = unquote(repo).one(query)
+
+        # the nil is because spatialite may not have an avail impl that
+        # returns a meaningful result
+        assert nil == result or is_struct(result, Geometry.Polygon)
+      end
+
+      test "returns a hull with custom precision" do
+        geom = Fixtures.multipoint()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(
+            location in Location,
+            select: Common.concave_hull(location.geom, 0.5)
+          )
+
+        result = unquote(repo).one(query)
+        # the nil is because spatialite may not have an avail impl that
+        # returns a meaningful result
+        assert nil == result or is_struct(result, Geometry.Polygon)
+      end
+
+      test "returns a hull with custom precision and allowing holes" do
+        geom = Fixtures.multipoint()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(
+            location in Location,
+            select: Common.concave_hull(location.geom, 0.5, true)
+          )
+
+        result = unquote(repo).one(query)
+        # the nil is because spatialite may not have an avail impl that
+        # returns a meaningful result
+        assert nil == result or is_struct(result, Geometry.Polygon)
       end
     end
 

@@ -428,14 +428,32 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: covers (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "detects coverage" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+        unquote(repo).insert(%GeoType{t: "interpolate_point", linestring: line, polygon: polygon})
+
+        query =
+          from(g in GeoType, select: Common.covers(g.linestring, g.polygon))
+
+        result = unquote(repo).one(query)
+
+        refute unquote(repo).to_boolean(result)
       end
     end
 
     describe "Common: covered_by (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "detects coverage" do
+        line = Fixtures.linestring()
+        polygon = Fixtures.polygon()
+        unquote(repo).insert(%GeoType{t: "interpolate_point", linestring: line, polygon: polygon})
+
+        query =
+          from(g in GeoType, select: Common.covered_by(g.linestring, g.polygon))
+
+        result = unquote(repo).one(query)
+
+        refute unquote(repo).to_boolean(result)
       end
     end
 

@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] 20-12-2025
+
+* Improvements
+  * Expanded unit test coverage
+* Fixes
+  * `Common.line_interpolate_points` supports the `repeat?` parameter
+  * Fix `Common.maximum_inscribed_circle` with SpatiaLite
+
 ## [1.4.2] 05-12-2025
 
 * Improvements

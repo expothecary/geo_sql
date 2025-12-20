@@ -895,8 +895,8 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Topology Relationships"
-  defmacro relate_match(matrix, pattern) when is_binary(matrix) and is_binary(pattern) do
-    quote do: fragment("ST_Relatematch(?, ?)", unquote(matrix), unquote(pattern))
+  defmacro relate_match(matrix, pattern) do
+    quote do: fragment("ST_RelateMatch(?, ?)", unquote(matrix), unquote(pattern))
   end
 
   @spec reverse(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()

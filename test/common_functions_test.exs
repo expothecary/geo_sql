@@ -7,6 +7,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.PostGIS
   use GeoSQL.Common
   use GeoSQL.QueryUtils
+  use GeoSQL.RepoUtils
   use GeoSQL.Test.Helper
   alias GeoSQL.Test.Helper
 
@@ -730,9 +731,7 @@ defmodule GeoSQL.CommonFunctions.Test do
       test "returns details on validity" do
         invalid_polygon = Fixtures.polygon(:invalid)
         unquote(repo).insert(%GeoType{t: "hello", polygon: invalid_polygon})
-
         query = from(g in GeoType, select: Common.is_valid_detail(g.polygon))
-
         result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
 
         assert match?(%Geometry.Point{}, result) or
@@ -744,42 +743,144 @@ defmodule GeoSQL.CommonFunctions.Test do
       test "returns reason for validity" do
         invalid_polygon = Fixtures.polygon(:invalid)
         unquote(repo).insert(%GeoType{t: "hello", polygon: invalid_polygon})
-
         query = from(g in GeoType, select: Common.is_valid_reason(g.polygon))
-
         result = unquote(repo).one(query)
-
         assert is_binary(result)
       end
     end
 
     describe "Common: largest_empty_circle (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a geometry that indicates a circle" do
+        geometry = Fixtures.geometry_collection()
+        unquote(repo).insert(%Location{geom: geometry})
+
+        query =
+          from(l in Location,
+            select: Common.largest_empty_circle(l.geom, 0.0, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        # TODO: it would be nice to able to abstract away the select as well as the query?
+        case RepoUtils.adapter_for(unquote(repo)) do
+          Ecto.Adapters.Postgres ->
+            assert {%Geometry.Point{}, %Geometry.Point{}, radius} = result
+            assert is_float(radius)
+
+          Ecto.Adapters.SQLite3 ->
+            assert %Geometry.LineString{} = result
+        end
       end
     end
 
     describe "Common: line_interpolate_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "adds a point" do
+        line = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_interpolate_point(g.linestring, 0.8, false, unquote(repo))
+          )
+
+        [result] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
+      end
+
+      test "adds a point with the spheroid" do
+        line = Fixtures.linestring()
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_interpolate_point(g.linestring, 0.8, true, unquote(repo))
+          )
+
+        [result] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 
     describe "Common: line_interpolate_points (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "adds points" do
+        line = Fixtures.linestring()
+
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_interpolate_points(g.linestring, 0.4, true, false, unquote(repo))
+          )
+
+        [result] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        %x{} = result
+        assert Enum.member?([Geometry.MultiPoint, Geometry.MultiPointM, Geometry.Point], x)
+      end
+
+      test "adds points with the spheroid" do
+        line = Fixtures.linestring()
+
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_interpolate_points(g.linestring, 0.4, true, false, unquote(repo))
+          )
+
+        [result] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %x{} = result
+        assert Enum.member?([Geometry.MultiPoint, Geometry.MultiPointM, Geometry.Point], x)
       end
     end
 
     describe "Common: line_locate_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "find a point" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+
+        unquote(repo).insert(%GeoType{t: "make_point", linestring: line, point: point})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_locate_point(g.linestring, g.point, false, unquote(repo))
+          )
+
+        [result] = unquote(repo).all(query)
+
+        assert is_float(result)
       end
     end
 
     describe "Common: line_substring (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a sub-line" do
+        line = Fixtures.linestring(:m)
+
+        unquote(repo).insert(%GeoType{t: "make_point", linestringm: line})
+
+        query =
+          from(g in GeoType,
+            select: Common.line_substring(g.linestringm, 0.1, 0.8, unquote(repo))
+          )
+
+        [result] =
+          unquote(repo).all(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineStringM{} = result
       end
     end
 
@@ -1024,7 +1125,28 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "Common: maximum_inscribed_circle (#{repo})" do
       test "untested" do
-        # FIXME
+        geometry = Fixtures.polygon()
+        unquote(repo).insert(%Location{geom: geometry})
+
+        query =
+          from(l in Location,
+            select: Common.maximum_inscribed_circle(l.geom, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        # TODO: it would be nice to able to abstract away the select as well as the query?
+        case RepoUtils.adapter_for(unquote(repo)) do
+          Ecto.Adapters.Postgres ->
+            assert {%Geometry.Point{}, %Geometry.Point{}, radius} = result
+            assert is_float(radius)
+
+          Ecto.Adapters.SQLite3 ->
+            # TODO: not sure why it returns nil in this case?
+            assert %Geometry.LineString{} = result
+        end
       end
     end
 

@@ -212,11 +212,11 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "Common: bd_m_poly_from_text (#{repo})" do
       test "produces a MultiPolygon" do
-        multilinestering = Fixtures.multilinestring(:polygonizable)
+        multilinestring = Fixtures.multilinestring(:polygonizable)
 
         unquote(repo).insert(%GeoType{
           t: "bd_m_poly_from_text",
-          multilinestring: multilinestering
+          multilinestring: multilinestring
         })
 
         query =
@@ -224,7 +224,7 @@ defmodule GeoSQL.CommonFunctions.Test do
             select:
               Common.bd_m_poly_from_text(
                 MM.as_text(g.multilinestring),
-                ^multilinestering.srid
+                ^multilinestring.srid
               )
           )
 
@@ -238,11 +238,11 @@ defmodule GeoSQL.CommonFunctions.Test do
 
     describe "Common: bd_poly_from_text (#{repo})" do
       test "produces a Polygon" do
-        multilinestering = Fixtures.multilinestring(:polygonizable)
+        multilinestring = Fixtures.multilinestring(:polygonizable)
 
         unquote(repo).insert(%GeoType{
           t: "bd_poly_from_text",
-          multilinestring: multilinestering
+          multilinestring: multilinestring
         })
 
         query =
@@ -250,7 +250,7 @@ defmodule GeoSQL.CommonFunctions.Test do
             select:
               Common.bd_poly_from_text(
                 MM.as_text(g.multilinestring),
-                ^multilinestering.srid
+                ^multilinestring.srid
               )
           )
 
@@ -1436,62 +1436,183 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: reduce_precision (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a geometry" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.reduce_precision(location.geom, 5.0))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 
     describe "Common: remove_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "removes a point from a line" do
+        geom = Fixtures.linestring(:ring)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.remove_point(location.geom, 1))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
       end
     end
 
     describe "Common: remove_repeated_points (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "removes duplicate points" do
+        geom = Fixtures.linestring(:ring)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.remove_repeated_points(location.geom, 1, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
       end
     end
 
     describe "Common: relate_match (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "works with a couple of matrices" do
+        geom = Fixtures.linestring(:ring)
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.relate_match("101202FFF", "TTTTTTFFF"))
+        result = unquote(repo).one(query)
+        assert unquote(repo).to_boolean(result) === true
       end
     end
 
     describe "Common: reverse (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "reverses a string" do
+        geom = Fixtures.linestring()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.reverse(location.geom))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %{geom | path: Enum.reverse(geom.path)} == result
       end
     end
 
     describe "Common: rotate (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "rotate a line by some radians" do
+        geom = Fixtures.linestring()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.rotate(location.geom, Common.radians(90), unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
       end
     end
 
     describe "Common: segmentize (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "segments a polygon" do
+        geom = Fixtures.polygon()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.segmentize(location.geom, 5)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
       end
     end
 
     describe "Common: set_point (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "sets a point in a linestring" do
+        line = Fixtures.linestring()
+        point = Fixtures.point()
+        index = 1
+
+        expected = %Geometry.LineString{
+          line
+          | path: List.replace_at(line.path, index, point.coordinates)
+        }
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType,
+            select: Common.set_point(location.linestring, ^index, location.point)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert expected == result
       end
     end
 
     describe "Common: set_srid (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "sets the srid" do
+        point = Fixtures.point()
+        dest_srid = point.srid + 1
+
+        expected = %Geometry.Point{point | srid: dest_srid}
+
+        unquote(repo).insert(%GeoType{t: "hello", point: point})
+
+        query =
+          from(location in GeoType,
+            select: Common.set_srid(location.point, ^dest_srid, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert expected == result
       end
     end
 
     describe "Common: shared_paths (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "identifies shared paths" do
+        line = Fixtures.linestring()
+        multiline = Fixtures.multilinestring()
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, multilinestring: multiline})
+
+        # TODO: once the Geometry library has fixed its GeometryCollection wkb parsing, remove the "as_ewkt"
+        expected = [
+          "SRID=4326;GEOMETRYCOLLECTION(MULTILINESTRING((30 -90,30 -90.5),(30 -90.5,30 -91)),MULTILINESTRING EMPTY)",
+          "SRID=4326;MULTILINESTRING((30 -90,30 -90.5,30 -91))"
+        ]
+
+        query =
+          from(location in GeoType,
+            select:
+              Common.as_ewkt(
+                Common.shared_paths(location.multilinestring, location.linestring),
+                unquote(repo)
+              )
+          )
+
+        result = unquote(repo).one(query)
+        assert Enum.member?(expected, result)
       end
     end
 

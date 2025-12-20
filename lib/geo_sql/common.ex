@@ -873,11 +873,7 @@ defmodule GeoSQL.Common do
   @doc group: "Geometry Editors"
   defmacro remove_point(line, offset) do
     quote do
-      fragment(
-        "ST_RemovePoint(?, ?, ?)",
-        unquote(line),
-        unquote(offset)
-      )
+      fragment("ST_RemovePoint(?, ?)", unquote(line), unquote(offset))
     end
   end
 

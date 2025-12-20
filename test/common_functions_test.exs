@@ -1523,6 +1523,24 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
+    describe "Common: scale (#{repo})" do
+      test "scales a polygon" do
+        geom = Fixtures.polygon()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.scale(location.geom, 5, 10, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
+      end
+    end
+
     describe "Common: segmentize (#{repo})" do
       test "segments a polygon" do
         geom = Fixtures.polygon()
@@ -1617,26 +1635,74 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: shift_longitude (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "moves a point" do
+        point = Fixtures.point()
+        unquote(repo).insert(%GeoType{t: "hello", point: point})
+
+        query =
+          from(location in GeoType,
+            select: Common.shift_longitude(location.point, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 
     describe "Common: shortest_line (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a linestring" do
+        line = Fixtures.linestring()
+        point = Fixtures.point(:comparison)
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType,
+            select:
+              Common.shortest_line(location.linestring, location.point, false, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineString{} = result
       end
     end
 
     describe "Common: simplify (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "works" do
+        geom = Fixtures.multilinestring()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query = from(location in Location, select: Common.simplify(location.geom, 10))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineString{} = result
       end
     end
 
     describe "Common: simplify_preserve_topology (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "works" do
+        geom = Fixtures.multilinestring()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.simplify_preserve_topology(location.geom, 10))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.MultiLineString{} = result
       end
     end
 

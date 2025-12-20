@@ -923,18 +923,10 @@ defmodule GeoSQL.Common do
     end
   end
 
-  @spec segmentize(geometry :: GeoSQL.geometry_input(), max_segement_length :: number) ::
-          GeoSQL.fragment()
-  @doc group: "Geometry Editors"
-  defmacro segmentize(geometry, max_segement_length) do
-    quote do: fragment("ST_Segmentize(?, ?)", unquote(geometry), unquote(max_segement_length))
-  end
-
   @spec scale(GeoSQL.geometry_input(), scale_x :: number, scale_y :: number, Ecto.Repo.t() | nil) ::
           GeoSQL.fragment()
   @doc group: "Affine Transformations"
-  defmacro scale(geometry, scale_x, scale_y, repo \\ nil)
-           when is_number(scale_x) and is_number(scale_y) do
+  defmacro scale(geometry, scale_x, scale_y, repo \\ nil) do
     if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
       quote do
         fragment(
@@ -947,6 +939,13 @@ defmodule GeoSQL.Common do
     else
       quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_x), unquote(scale_y))
     end
+  end
+
+  @spec segmentize(geometry :: GeoSQL.geometry_input(), max_segement_length :: number) ::
+          GeoSQL.fragment()
+  @doc group: "Geometry Editors"
+  defmacro segmentize(geometry, max_segement_length) do
+    quote do: fragment("ST_Segmentize(?, ?)", unquote(geometry), unquote(max_segement_length))
   end
 
   @spec set_point(

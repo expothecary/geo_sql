@@ -595,15 +595,14 @@ defmodule GeoSQL.Common do
 
   @spec locate_along(GeoSQL.geometry_input(), measure :: number) :: GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro locate_along(geometry, measure) when is_number(measure) do
+  defmacro locate_along(geometry, measure) do
     quote do: fragment("ST_LocateAlong(?,?)", unquote(geometry), unquote(measure))
   end
 
   @spec locate_between(GeoSQL.geometry_input(), measure_start :: number, measure_end :: number) ::
           GeoSQL.fragment()
   @doc group: "Linear Referencing"
-  defmacro locate_between(geometry, measure_start, measure_end)
-           when is_number(measure_start) and is_number(measure_end) do
+  defmacro locate_between(geometry, measure_start, measure_end) do
     quote do
       fragment(
         "ST_LocateBetween(?,?,?)",
@@ -835,7 +834,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Geometry Processing"
-  defmacro offset_curve(line, distance) when is_number(distance) do
+  defmacro offset_curve(line, distance) do
     quote do: fragment("ST_OffsetCurve(?,?)", unquote(line), unquote(distance))
   end
 
@@ -864,7 +863,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Geometry Processing"
-  defmacro reduce_precision(geometry, grid_size) when is_number(grid_size) do
+  defmacro reduce_precision(geometry, grid_size) do
     quote do: fragment("ST_ReducePrecision(?, ?)", unquote(geometry), unquote(grid_size))
   end
 
@@ -1007,12 +1006,12 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Geometry Processing"
-  defmacro simplify(geometry, tolerance) when is_number(tolerance) do
+  defmacro simplify(geometry, tolerance)  do
     quote do: fragment("ST_Simplify(?, ?)", unquote(geometry), unquote(tolerance))
   end
 
   @doc group: "Geometry Processing"
-  defmacro simplify_preserve_topology(geometry, tolerance) when is_number(tolerance) do
+  defmacro simplify_preserve_topology(geometry, tolerance) do
     quote do: fragment("ST_SimplifyPreserveTopology(?, ?)", unquote(geometry), unquote(tolerance))
   end
 

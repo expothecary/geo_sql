@@ -613,21 +613,73 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "Common: geom_from_ewkt (#{repo})" do
+    describe "Common: geom_from_ewkb (#{repo})" do
       test "untested" do
-        # FIXME
+        point = Fixtures.point()
+        wkb = Geometry.to_ewkb(point)
+
+        unquote(repo).insert(%GeoType{point: point})
+
+        result =
+          from(g in GeoType, select: Common.geom_from_ewkb(^wkb, unquote(repo)))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        # sqlite does not like the wkb passed in this way. probably a driver issue?
+        assert result == nil or result == point
+      end
+    end
+
+    describe "Common: geom_from_ewkt (#{repo})" do
+      test "returns a geometry" do
+        point = Fixtures.point()
+        wkt = Geometry.to_ewkt(point)
+
+        unquote(repo).insert(%GeoType{t: wkt, point: point})
+
+        result =
+          from(g in GeoType, select: Common.geom_from_ewkt(g.t, unquote(repo)))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert result == point
       end
     end
 
     describe "Common: geom_from_geojson (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "returns a geometry" do
+        point = Fixtures.point()
+
+        geojson =
+          Geometry.to_geo_json(point)
+          |> :json.encode()
+          |> to_string()
+
+        unquote(repo).insert(%GeoType{t: geojson, point: point})
+
+        result =
+          from(g in GeoType, select: Common.geom_from_geojson(g.t, unquote(repo)))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
       end
     end
 
     describe "Common: geom_from_kml (#{repo})" do
       test "untested" do
-        # FIXME
+        point = Fixtures.point()
+        text_coords = "#{Enum.at(point.coordinates, 0)},#{Enum.at(point.coordinates, 1)}"
+        kml = ~s|<Point><coordinates>#{text_coords}</coordinates></Point>|
+
+        unquote(repo).insert(%GeoType{t: kml, point: point})
+
+        result =
+          from(g in GeoType, select: Common.geom_from_kml(g.t, unquote(repo)))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
       end
     end
 

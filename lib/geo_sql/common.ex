@@ -731,7 +731,7 @@ defmodule GeoSQL.Common do
         quote do: fragment("ST_MaximumInscribedCircle(?)", unquote(geometry))
 
       Ecto.Adapters.SQLite3 ->
-        quote do: fragment("GEOSMaximumInscribedCircle(?)", unquote(geometry))
+        quote do: fragment("GEOSMaximumInscribedCircle(?, 0.0)", unquote(geometry))
     end
   end
 

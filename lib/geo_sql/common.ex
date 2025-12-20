@@ -906,13 +906,20 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Affine Transformations"
-  defmacro rotate(geometry, rotate_radians, repo \\ nil) when is_number(rotate_radians) do
-    if RepoUtils.adapter(repo) == Ecto.Adapters.SQLite3 do
-      degrees_per_radian = 57.2958
-      degrees = rotate_radians * degrees_per_radian
-      quote do: fragment("RotateCoordinates(?, ?)", unquote(geometry), unquote(degrees))
-    else
-      quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
+  defmacro rotate(geometry, rotate_radians, repo \\ nil) do
+    case RepoUtils.adapter(repo) do
+      Ecto.Adapters.Postgres ->
+        quote do: fragment("ST_Rotate(?, ?)", unquote(geometry), unquote(rotate_radians))
+
+      Ecto.Adapters.SQLite3 ->
+        # SpatiaLite uses degrees :/
+        quote do
+          fragment(
+            "RotateCoordinates(?, ?)",
+            unquote(geometry),
+            fragment("Degrees(?)", unquote(rotate_radians))
+          )
+        end
     end
   end
 

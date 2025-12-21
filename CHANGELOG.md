@@ -2,6 +2,16 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] 21-12-2025
+
+* Improvements
+  * Test coverage of GeoSQL.Common functions is complete
+* Fixes
+  * Fix `GeoSQL.Common.unary_union`
+  * Fix `GeoSQL.Common.remove_point`
+  * Fix a possible math exception in `GeoSQL.Common.rotate`
+  * Allow fragments to be used for any parameter in the `GeoSQL.Common` macros
+
 ## [1.5.0] 20-12-2025
 
 * Improvements

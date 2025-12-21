@@ -1006,7 +1006,7 @@ defmodule GeoSQL.Common do
   end
 
   @doc group: "Geometry Processing"
-  defmacro simplify(geometry, tolerance)  do
+  defmacro simplify(geometry, tolerance) do
     quote do: fragment("ST_Simplify(?, ?)", unquote(geometry), unquote(tolerance))
   end
 

@@ -1707,44 +1707,190 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
 
     describe "Common: snap_to_grid (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "works with a polygon wand a single size" do
+        geom = Fixtures.polygon(:donut)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.snap_to_grid(location.geom, 5))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
+      end
+
+      test "works with a polygon with x/y sizes" do
+        geom = Fixtures.polygon(:donut)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.snap_to_grid(location.geom, 5, 8))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
+      end
+
+      test "works with a polygon with x/y sizes and origins" do
+        geom = Fixtures.polygon(:donut)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.snap_to_grid(location.geom, 5, 8, 0, 0))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
+      end
+
+      test "works with a polygon with a point x/y sizes and origins" do
+        geom = Fixtures.linestring(:zm)
+        point = Geometry.PointZM.new(Enum.at(geom.path, 2), geom.srid)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.snap_to_grid(location.geom, ^point, 5, 8, 0, 0)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.LineStringZM{} = result
       end
     end
 
     describe "Common: split (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "divides a polygon" do
+        line = Fixtures.linestring(:ring)
+        point = Geometry.Point.new(Enum.at(line.path, 2), line.srid)
+
+        unquote(repo).insert(%GeoType{t: "hello", linestring: line, point: point})
+
+        query =
+          from(location in GeoType,
+            select: Common.split(location.linestring, location.point)
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        %x{} = result
+        assert Enum.member?([Geometry.GeometryCollection, Geometry.MultiLineString], x)
       end
     end
 
     describe "Common: subdivide (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "cuts a donut" do
+        geom = Fixtures.polygon(:donut)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.subdivide(location.geom))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Polygon{} = result
       end
     end
 
     describe "Common: translate (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "shifts a 2d point" do
+        geom = Fixtures.point()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.translate(location.geom, 10, 100))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
+      end
+
+      test "shifts a 3d point" do
+        geom = Fixtures.point(:z)
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.translate(location.geom, 10, 100, 50))
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.PointZ{} = result
       end
     end
 
     describe "Common: transform_pipeline (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "transforms a point" do
+        geom = Fixtures.point()
+        pipeline = "urn:ogc:def:coordinateOperation:EPSG::16031"
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.transform_pipeline(location.geom, ^pipeline, 4326, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.Point{} = result
       end
     end
 
     describe "Common: triangulate_polygon (#{repo})" do
       test "untested" do
-        # FIXME
+        geom = Fixtures.polygon()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location,
+            select: Common.triangulate_polygon(location.geom, unquote(repo))
+          )
+
+        result =
+          unquote(repo).one(query)
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert %Geometry.GeometryCollection{} = result
       end
     end
 
     describe "Common: unary_union (#{repo})" do
-      test "untested" do
-        # FIXME
+      test "combines multigeometries" do
+        geom = Fixtures.multilinestring()
+
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.unary_union(location.geom))
+
+        result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
+        assert %Geometry.MultiLineString{} = result
       end
     end
   end

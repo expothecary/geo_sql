@@ -1164,6 +1164,6 @@ defmodule GeoSQL.Common do
 
   @doc group: "Overlays"
   defmacro unary_union(geometry) do
-    quote do: fragment("ST_UnaryUnion(?, ?)", unquote(geometry))
+    quote do: fragment("ST_UnaryUnion(?)", unquote(geometry))
   end
 end

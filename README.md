@@ -309,8 +309,9 @@ pulls in their suite of features and introduces helpful aliases with one line in
 ### Mapbox Vector Tiles
 
 `GeoSQL` can generate vector tiles using the Mapbox encoding directly from PostGIS databases.
-It works with any table that has an id column, a column with geometry information, and a set of
-tagged information such as names. The tag information is usually fetch as (or from) a `jsonb` data.
+It works with any table that has an id column, a column with geometry information, and a map of
+data such as a location's name and address info. These are often refered to as "tags" in map APIs.
+These tags are usually retrieved from the database as `jsonb` data.
 
 The `PostGIS.VectorTiles.generate/5` function takes a layer definition in the form of a list of
 `PostGIS.VectorTiles.Layer` structs along with the tile coordinates and an `Ecto.Repo`:

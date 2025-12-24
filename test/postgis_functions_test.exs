@@ -124,14 +124,53 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: collection_homogenize" do
-    test "untested" do
-      # FIXME
+    test "works on a collection" do
+      collection = Fixtures.geometry_collection()
+
+      PostGISRepo.insert(%LocationMulti{name: "collection", geom: collection})
+
+      query =
+        from(l in LocationMulti,
+          where: l.name == "collection",
+          select: PostGIS.collection_homogenize(Common.make_valid(l.geom))
+        )
+
+      result = PostGISRepo.one(query)
+      assert %Geometry.GeometryCollection{} = result
     end
   end
 
   describe "PostGIS: contains_properly" do
-    test "untested" do
-      # FIXME
+    test "works with two geometries" do
+      line = Fixtures.polygon()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{t: "hello", polygon: line, point: point})
+
+      query =
+        from(location in GeoType,
+          select: PostGIS.contains_properly(location.polygon, location.point)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result === false
+    end
+
+    test "works with two geometries without indixes" do
+      line = Fixtures.polygon()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{t: "hello", polygon: line, point: point})
+
+      query =
+        from(location in GeoType,
+          select: PostGIS.contains_properly(location.polygon, location.point, :without_indexes)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result === false
     end
   end
 

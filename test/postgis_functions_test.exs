@@ -175,8 +175,36 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: d_within" do
-    test "untested" do
-      # FIXME
+    test "using the geometry srid" do
+      line = Fixtures.polygon()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{t: "hello", polygon: line, point: point})
+
+      query =
+        from(location in GeoType,
+          select: PostGIS.d_within(location.polygon, location.point, 10)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result === false
+    end
+
+    test "on the spheroid" do
+      line = Fixtures.polygon()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{t: "hello", polygon: line, point: point})
+
+      query =
+        from(location in GeoType,
+          select: PostGIS.d_within(location.polygon, location.point, 10, true)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result === false
     end
   end
 

@@ -139,19 +139,17 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Distance Relationships"
-  defmacro d_within(geometryA, geometryB, float, return_value \\ :by_srid)
-
-  defmacro d_within(geometryA, geometryB, float, :by_srid) do
+  defmacro d_within(geometryA, geometryB, precision) do
     quote do
-      fragment("ST_DWithin(?,?,?)", unquote(geometryA), unquote(geometryB), unquote(float))
+      fragment("ST_DWithin(?,?,?)", unquote(geometryA), unquote(geometryB), unquote(precision))
     end
   end
 
   @doc group: "Distance Relationships"
-  defmacro d_within(geometryA, geometryB, float, use_spheroid) when is_boolean(use_spheroid) do
+  defmacro d_within(geometryA, geometryB, float, use_spheroid) do
     quote do
       fragment(
-        "ST_DWithin(?::geography, ?::geography, ?)",
+        "ST_DWithin(?::geography, ?::geography, ?, ?)",
         unquote(geometryA),
         unquote(geometryB),
         unquote(float),

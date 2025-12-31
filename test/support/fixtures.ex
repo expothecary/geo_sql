@@ -348,6 +348,10 @@ defmodule GeoSQL.Test.Fixtures do
     %Geometry.PointZ{coordinates: [30, -90, 10], srid: 4326}
   end
 
+  def point(:zm) do
+    %Geometry.PointZM{coordinates: [30, -90, 10, 15], srid: 4326}
+  end
+
   def point(:comparison) do
     %Geometry.Point{coordinates: [30.5, -86.2], srid: 4326}
   end

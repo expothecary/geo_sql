@@ -633,4 +633,16 @@ defmodule GeoSQL.PostGIS do
   defmacro zm_flag(geometry) do
     quote do: fragment("ST_Zmflag(?)", unquote(geometry))
   end
+
+  @doc group: "Geometry Accessors"
+  @doc """
+  A helper function to translate dimension flags as returned by e.g. `zm_flag`,
+  into developer-friendly atoms.
+  """
+  @type dimensionality :: :dim_2 | :dim_3z | :dim_3m | :dim_4
+  @spec dimensionality(integer) :: dimensionality
+  def dimensionality(0), do: :dim_2
+  def dimensionality(1), do: :dim_3m
+  def dimensionality(2), do: :dim_3z
+  def dimensionality(3), do: :dim_4
 end

@@ -313,6 +313,25 @@ defmodule GeoSQL.PostGIS do
     end
   end
 
+  @type crossing_direction ::
+          :none
+          | :left
+          | :multicross_left
+          | :multicross_left_same_end
+          | :right
+          | :multicross_right
+          | :multicross_right_same_end
+  @spec crossing_direction(integer) :: crossing_direction
+  @doc group: "Topology Relationships"
+  @doc "Transforms the numeric return value of line-crossing functions to an atom denoting the direction"
+  def crossing_direction(0), do: :none
+  def crossing_direction(-3), do: :multicross_left_same_end
+  def crossing_direction(-2), do: :multicross_left
+  def crossing_direction(-1), do: :left
+  def crossing_direction(1), do: :right
+  def crossing_direction(2), do: :multicross_right
+  def crossing_direction(3), do: :multicross_right_same_end
+
   @spec line_to_curve(geometry :: GeoSQL.geometry_input()) :: GeoSQL.fragment()
   @doc group: "Geometry Editors"
   defmacro line_to_curve(geometry) do

@@ -869,68 +869,179 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: rotate" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.rotate(l.geom, Common.radians(90))
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: rotate_x" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.rotate_x(l.geom, Common.radians(90))
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: rotate_y" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.rotate_y(l.geom, Common.radians(90))
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: rotate_z" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring(:zm)
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.rotate_z(l.geom, Common.radians(90))
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineStringZM{} = result
     end
   end
 
   describe "PostGIS: scale" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring(:zm)
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.scale(l.geom, 1, 2, 3)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineStringZM{} = result
     end
   end
 
   describe "PostGIS: scroll" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring(:ring)
+      point = Geometry.Point.new(Enum.at(line.path, 1), line.srid)
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.scroll(l.geom, ^point)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: summary" do
-    test "untested" do
-      # FIXME
+    test "describes a collection" do
+      geom = Fixtures.geometry_collection(:courtyard)
+      PostGISRepo.insert(%LocationMulti{name: "collection", geom: geom})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.summary(l.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert is_binary(result)
     end
   end
 
   describe "PostGIS: swap_ordinates" do
-    test "untested" do
-      # FIXME
+    test "swaps a point around" do
+      geom = Fixtures.point()
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: geom})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.swap_ordinates(l.geom, "xy")
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.Point{} = result
     end
   end
 
   describe "PostGIS: trans_scale" do
-    test "untested" do
-      # FIXME
+    test "swaps a point around" do
+      geom = Fixtures.point()
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: geom})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.trans_scale(l.geom, 1, 2, 3, 4)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.Point{} = result
     end
   end
 
   describe "PostGIS: wrap_x" do
-    test "untested" do
-      # FIXME
+    test "works on a point" do
+      geom = Fixtures.point()
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: geom})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.wrap_x(l.geom, 1, 2)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.Point{} = result
     end
   end
 
   describe "PostGIS: zm_flag" do
-    test "untested" do
-      # FIXME
+    test "works on a point" do
+      geom = Fixtures.point(:zm)
+      PostGISRepo.insert(%LocationMulti{name: "point", geom: geom})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.zm_flag(l.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert :dim_4 = PostGIS.dimensionality(result)
     end
   end
 end

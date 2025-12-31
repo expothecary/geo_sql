@@ -540,14 +540,14 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   describe "PostGIS: line_crossing_direction" do
     test "detects crossing directions" do
-      lineA = Fixtures.linestring()
-      lineB = Fixtures.linestring(:intersects)
+      line_a = Fixtures.linestring()
+      line_b = Fixtures.linestring(:intersects)
 
-      PostGISRepo.insert(%LocationMulti{name: "line", geom: lineA})
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line_a})
 
       query =
         from(l in LocationMulti,
-          select: PostGIS.line_crossing_direction(l.geom, ^lineB)
+          select: PostGIS.line_crossing_direction(l.geom, ^line_b)
         )
 
       result = PostGISRepo.one(query)
@@ -641,14 +641,14 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   describe "PostGIS: make_box_2d" do
     test "returns a polygon" do
-      pointA = Fixtures.point()
-      pointB = Fixtures.point(:comparison)
+      point_a = Fixtures.point()
+      point_b = Fixtures.point(:comparison)
 
-      PostGISRepo.insert(%GeoType{point: pointA})
+      PostGISRepo.insert(%GeoType{point: point_a})
 
       result =
         from(g in GeoType,
-          select: PostGIS.make_box_2d(g.point, ^pointB)
+          select: PostGIS.make_box_2d(g.point, ^point_b)
         )
         |> PostGISRepo.one()
 

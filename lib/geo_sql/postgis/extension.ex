@@ -1,4 +1,5 @@
 defmodule GeoSQL.PostGIS.Extension.Box2D do
+  @moduledoc false
   @doc false
   def init(_opts), do: nil
 

@@ -2,6 +2,18 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] 21-12-2025
+
+* Improvements
+  * Added `PostGIS.crossing_direction` which translates the arcane integer return values PostGIS uses for crossing directions to a developer-friendly atom (e.g. `:left`)
+  * Added `PostGIS.dimensionality` which translates the arcane integer return values PostGIS uses for dimension flags to a developer-friendly atom (e.g. `:dim_3m`)
+  * Added support for encoding and decoding the Box2D PostGIS type via the %GeoSQL.PostGIS.Box2D{} struct
+  * Parameters are now optional on `PostGIS.make_valid`
+  * `PostGIS.scale` accepts Ecto fragments as parameters (not only literal numbers)
+  * Test coverage of GeoSQL.PostGIS functions is complete
+* Fixes
+  * Correct the number of parameters passed to PostGIS in `PostGIS.swap_ordinates`
+
 ## [1.5.1] 21-12-2025
 
 * Improvements

@@ -539,7 +539,7 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: line_crossing_direction" do
-    test "untested" do
+    test "detects crossing directions" do
       lineA = Fixtures.linestring()
       lineB = Fixtures.linestring(:intersects)
 
@@ -556,8 +556,18 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: line_to_curve" do
-    test "untested" do
-      # FIXME
+    test "operates on a line" do
+      line = Fixtures.linestring()
+
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.line_to_curve(l.geom)
+        )
+
+      result = PostGISRepo.one(query)
+      assert %Geometry.LineString{} = result
     end
   end
 
@@ -596,14 +606,36 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: locate_between_elevations" do
-    test "untested" do
-      # FIXME
+    test "returns matching points from a PolygonZM between to elevations" do
+      linestringzm = Fixtures.linestring(:zm)
+
+      PostGISRepo.insert(%GeoType{linestringzm: linestringzm})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.locate_between_elevations(g.linestringzm, 3, 7)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.MultiLineStringZM{} = result
+      assert Enum.count(result.line_strings) == 1
     end
   end
 
   describe "PostGIS: longest_line" do
-    test "untested" do
-      # FIXME
+    test "returns a line" do
+      linestring = Fixtures.linestring()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{linestring: linestring, point: point})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.longest_line(g.linestring, g.point)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.LineString{} = result
     end
   end
 
@@ -625,32 +657,106 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: make_envelope" do
-    test "untested" do
-      # FIXME
+    test "Turns coordiantes into a polygon" do
+      PostGISRepo.insert(%GeoType{})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.make_envelope(1, 2, 3, 4)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.Polygon{} = result
+    end
+
+    test "Turns coordiantes into a polygon with an srid" do
+      PostGISRepo.insert(%GeoType{})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.make_envelope(1, 2, 3, 4, 5)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.Polygon{srid: 5} = result
     end
   end
 
   describe "PostGIS: make_valid" do
-    test "untested" do
-      # FIXME
+    test "makes a polygon valid" do
+      polygon = Fixtures.polygon()
+      PostGISRepo.insert(%GeoType{polygon: polygon})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.make_valid(g.polygon)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.Polygon{} = result
+    end
+
+    test "makes a polygon valid with params" do
+      polygon = Fixtures.polygon()
+      params = "method=structure keepcollapsed=true"
+      PostGISRepo.insert(%GeoType{polygon: polygon})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.make_valid(g.polygon, ^params)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.Polygon{} = result
     end
   end
 
   describe "PostGIS: mem_union" do
-    test "untested" do
-      # FIXME
+    test "unions lines into a multiline" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "a", geom: line})
+      ring = Fixtures.linestring(:ring)
+      PostGISRepo.insert(%LocationMulti{name: "a", geom: ring})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.mem_union(l.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.MultiLineString{} = result
     end
   end
 
   describe "PostGIS: mem_size" do
-    test "untested" do
-      # FIXME
+    test "returns the memory size of a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.mem_size(l.geom)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert is_integer(result) and result > 0
     end
   end
 
   describe "PostGIS: normalize" do
-    test "untested" do
-      # FIXME
+    test "works on a polygon" do
+      polygon = Fixtures.polygon()
+      PostGISRepo.insert(%GeoType{polygon: polygon})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.normalize(g.polygon)
+        )
+        |> PostGISRepo.one()
+
+      assert %Geometry.Polygon{} = result
     end
   end
 
@@ -706,20 +812,59 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: quantize_coordinates" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.quantize_coordinates(l.geom, x: 1, y: 0, z: 0, m: 0)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: remove_irrelevant_points_for_view" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select:
+            PostGIS.remove_irrelevant_points_for_view(
+              l.geom,
+              ^%PostGIS.Box2D{
+                xmin: 10,
+                ymin: 50,
+                xmax: 60,
+                ymax: 60
+              }
+            )
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 
   describe "PostGIS: remove_small_parts" do
-    test "untested" do
-      # FIXME
+    test "works on a line" do
+      line = Fixtures.linestring()
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: line})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.remove_small_parts(l.geom, 5, 5)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert %Geometry.LineString{} = result
     end
   end
 

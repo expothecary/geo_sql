@@ -210,7 +210,19 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   describe "PostGIS: d_fully_within" do
     test "untested" do
-      # FIXME
+      line = Fixtures.polygon()
+      point = Fixtures.point()
+
+      PostGISRepo.insert(%GeoType{t: "hello", polygon: line, point: point})
+
+      query =
+        from(location in GeoType,
+          select: PostGIS.d_fully_within(location.polygon, location.point, 10)
+        )
+
+      result = PostGISRepo.one(query)
+
+      assert result === false
     end
   end
 
@@ -288,20 +300,56 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: dump_points" do
-    test "untested" do
-      # FIXME
+    test "Unrolls the points out of a multipolygon" do
+      geom = Fixtures.multipolygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.dump_points(location.geom)
+        )
+
+      results = PostGISRepo.all(query)
+
+      assert {[1, 1, 1], %Geometry.Point{}} = Enum.at(results, 0)
+      assert 15 == Enum.count(results)
     end
   end
 
   describe "PostGIS: dump_segments" do
-    test "untested" do
-      # FIXME
+    test "Unrolls the segments out of a multipolygon" do
+      geom = Fixtures.multipolygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.dump_segments(location.geom)
+        )
+
+      results = PostGISRepo.all(query)
+
+      assert {[1, 1, 1], %Geometry.LineString{}} = Enum.at(results, 0)
+      assert 14 == Enum.count(results)
     end
   end
 
   describe "PostGIS: dump_rings" do
     test "untested" do
-      # FIXME
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.dump_rings(location.geom)
+        )
+
+      results = PostGISRepo.all(query)
+
+      assert {[0], %Geometry.Polygon{}} = Enum.at(results, 0)
+      assert 1 == Enum.count(results)
     end
   end
 
@@ -353,26 +401,85 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: generate_points" do
-    test "untested" do
-      # FIXME
+    test "generates points with a polygon" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.generate_points(location.geom, 5)
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert %Geometry.MultiPoint{} = results
+    end
+
+    test "generates points with a polygon and a seed" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.generate_points(location.geom, 5, 1337)
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert %Geometry.MultiPoint{} = results
     end
   end
 
   describe "PostGIS: has_arc" do
-    test "untested" do
-      # FIXME
+    test "detects if a geometry has an arc" do
+      geom = Fixtures.polygon()
+
+      PostGISRepo.insert(%Location{name: "polygon", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.has_arc(location.geom)
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert results === false
     end
   end
 
   describe "PostGIS: has_m" do
-    test "untested" do
-      # FIXME
+    test "detects geometry with measures" do
+      geom = Fixtures.point(:m)
+
+      PostGISRepo.insert(%Location{name: "pointm", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.has_m(location.geom)
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert results === true
     end
   end
 
   describe "PostGIS: has_z" do
-    test "untested" do
-      # FIXME
+    test "detects 3D geometry" do
+      geom = Fixtures.point(:z)
+
+      PostGISRepo.insert(%Location{name: "pointz", geom: geom})
+
+      query =
+        from(location in Location,
+          select: PostGIS.has_z(location.geom)
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert results === true
     end
   end
 
@@ -433,7 +540,18 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
   describe "PostGIS: line_crossing_direction" do
     test "untested" do
-      # FIXME
+      lineA = Fixtures.linestring()
+      lineB = Fixtures.linestring(:intersects)
+
+      PostGISRepo.insert(%LocationMulti{name: "line", geom: lineA})
+
+      query =
+        from(l in LocationMulti,
+          select: PostGIS.line_crossing_direction(l.geom, ^lineB)
+        )
+
+      result = PostGISRepo.one(query)
+      assert PostGIS.crossing_direction(result) == :left
     end
   end
 

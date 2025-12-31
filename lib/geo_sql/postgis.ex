@@ -559,11 +559,15 @@ defmodule GeoSQL.PostGIS do
     quote do: fragment("ST_Scale(?,?,?)", unquote(geometry), unquote(scale_by), unquote(origin))
   end
 
-  @spec scale(GeoSQL.geometry_input(), scale_x :: number, scale_y :: number, scale_z :: number) ::
+  @spec scale(
+          GeoSQL.geometry_input(),
+          scale_x :: GeoSQL.fragment() | number,
+          scale_y :: GeoSQL.fragment() | number,
+          scale_z :: GeoSQL.fragment() | number
+        ) ::
           GeoSQL.fragment()
   @doc group: "Affine Transformations"
-  defmacro scale(geometry, scale_x, scale_y, scale_z)
-           when is_number(scale_x) and is_number(scale_y) and is_number(scale_z) do
+  defmacro scale(geometry, scale_x, scale_y, scale_z) do
     quote do
       fragment(
         "ST_Scale(?,?,?,?)",
@@ -589,7 +593,7 @@ defmodule GeoSQL.PostGIS do
 
   @doc group: "Geometry Editors"
   defmacro swap_ordinates(geometry, ordinates) do
-    quote do: fragment("ST_SwapOrdinates(?)", unquote(geometry), unquote(ordinates))
+    quote do: fragment("ST_SwapOrdinates(?, ?)", unquote(geometry), unquote(ordinates))
   end
 
   @spec trans_scale(

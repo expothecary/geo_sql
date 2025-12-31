@@ -417,6 +417,12 @@ defmodule GeoSQL.PostGIS do
   end
 
   @doc group: "Geometry Validation"
+  defmacro make_valid(geometry, params \\ nil)
+
+  defmacro make_valid(geometry, nil) do
+    quote do: fragment("ST_MakeValid(?)", unquote(geometry))
+  end
+
   defmacro make_valid(geometry, params) do
     quote do: fragment("ST_MakeValid(?, ?)", unquote(geometry), unquote(params))
   end

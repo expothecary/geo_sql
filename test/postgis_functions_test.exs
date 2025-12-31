@@ -608,8 +608,19 @@ defmodule GeoSQL.PostGISFunctions.Test do
   end
 
   describe "PostGIS: make_box_2d" do
-    test "untested" do
-      # FIXME
+    test "returns a polygon" do
+      pointA = Fixtures.point()
+      pointB = Fixtures.point(:comparison)
+
+      PostGISRepo.insert(%GeoType{point: pointA})
+
+      result =
+        from(g in GeoType,
+          select: PostGIS.make_box_2d(g.point, ^pointB)
+        )
+        |> PostGISRepo.one()
+
+      assert %GeoSQL.PostGIS.Box2D{} = result
     end
   end
 

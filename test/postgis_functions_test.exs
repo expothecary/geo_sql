@@ -662,11 +662,11 @@ defmodule GeoSQL.PostGISFunctions.Test do
 
       result =
         from(g in GeoType,
-          select: PostGIS.make_envelope(1, 2, 3, 4)
+          select: PostGIS.make_envelope(10, 10, 11, 11, "4326")
         )
         |> PostGISRepo.one()
 
-      assert %Geometry.Polygon{} = result
+      assert %Geometry.Polygon{srid: 4326} = result
     end
 
     test "Turns coordiantes into a polygon with an srid" do

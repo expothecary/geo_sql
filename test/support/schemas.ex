@@ -8,6 +8,16 @@ defmodule GeoSQL.Test.Schema.Location do
   end
 end
 
+defmodule GeoSQL.Test.Schema.GeoCompatLocation do
+  @moduledoc false
+  use Ecto.Schema
+
+  schema "locations" do
+    field(:name, :string)
+    field(:geom, Geo.PostGIS.Geometry)
+  end
+end
+
 defmodule GeoSQL.Test.Schema.Geographies do
   @moduledoc false
   use Ecto.Schema

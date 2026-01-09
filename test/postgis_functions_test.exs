@@ -8,7 +8,29 @@ defmodule GeoSQL.PostGISFunctions.Test do
   use GeoSQL.MM
   use GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{GeoType, Location, LocationMulti}
+  alias GeoSQL.Test.Schema.{GeoType, GeoCompatLocation, Location, LocationMulti}
+
+  describe "PostGIS: Geo compatibility" do
+    test "Inserts Geo structs, gets out Geometry structs" do
+      expected = Fixtures.point()
+
+      geom = %Geo.Point{
+        coordinates: List.to_tuple(expected.coordinates),
+        srid: expected.srid
+      }
+
+      PostGISRepo.insert(%GeoCompatLocation{name: "pointm", geom: geom})
+
+      query =
+        from(location in Location,
+          select: location.geom
+        )
+
+      results = PostGISRepo.one(query)
+
+      assert Helper.fuzzy_match_geometry(results, expected)
+    end
+  end
 
   describe "PostGIS: affine" do
     test "performs an affine transformation with 3D matrix" do

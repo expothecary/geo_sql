@@ -42,6 +42,7 @@ defmodule GeoSQL.Mixfile do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
 
       # testing
+      {:geo, "~> 4.0", only: [:test]},
       {:mix_test_watch, "~> 1.3", only: [:dev, :test], runtime: false}
     ]
   end

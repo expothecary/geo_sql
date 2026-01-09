@@ -46,6 +46,7 @@ defmodule GeoSQL.PostGIS.Extension do
   """
   @behaviour Postgrex.Extension
 
+  # import __MODULE__.Macros
   @doc "Convenience function to get the extension modules for PostGIS support."
   def extensions do
     [__MODULE__, __MODULE__.Box2D]
@@ -60,15 +61,51 @@ defmodule GeoSQL.PostGIS.Extension do
   @doc false
   def format(_opts), do: :binary
 
+  if Code.ensure_loaded?(Geo) do
+    def encode_geo(geom) do
+      data = Geo.WKB.encode_to_iodata(geom)
+      [<<IO.iodata_length(data)::integer-size(32)>> | data]
+    end
+  else
+    def encode_geo(%x{}) do
+      raise "GeoSQL PostGIS Extension can not encode #{x} without the geo library."
+    end
+  end
+
   @doc false
   def encode(_opts) do
-    all_types =
-      unquote(GeoSQL.Geometry.all_types())
+    all_geometry_types = unquote(GeoSQL.Geometry.all_types())
+
+    all_geo_types = [
+      Geo.GeometryCollection,
+      Geo.LineString,
+      Geo.LineStringM,
+      Geo.LineStringZ,
+      Geo.LineStringZM,
+      Geo.MultiLineString,
+      Geo.MultiLineStringM,
+      Geo.MultiLineStringZ,
+      Geo.MultiLineStringZM,
+      Geo.MultiPoint,
+      Geo.MultiPointZ,
+      Geo.MultiPolygon,
+      Geo.MultiPolygonZ,
+      Geo.Point,
+      Geo.PointZ,
+      Geo.PointM,
+      Geo.PointZM,
+      Geo.Polygon,
+      Geo.PolygonZ
+    ]
 
     quote do
-      %x{} = geom when x in unquote(all_types) ->
+      %x{} = geom when x in unquote(all_geometry_types) ->
         data = Geometry.to_ewkb(geom)
         [<<IO.iodata_length(data)::integer-size(32)>> | data]
+
+      %x{} = geom when x in unquote(all_geo_types) ->
+        IO.inspect(x, label: "GOT A GEO TYPE!")
+        GeoSQL.PostGIS.Extension.encode_geo(geom)
     end
   end
 

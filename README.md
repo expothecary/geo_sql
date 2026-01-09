@@ -77,12 +77,9 @@ Example:
 
 #### Geo
 
-Structs from the `geo` library are supported for writes to the database. This allows
-using libraries and Ecto schemas which still use `%Geo.{}` structs while using `GeoSQL` which
-uses the `Geometry` library (due to performance and correctness issues).
-
-To enable this compatibility, add the `geo` library to your application's dependencies and
-recompile the `geo_sql` dependency with `mix deps.compile geo_sql --force`.
+If the `geo` library is included in the build, `%Geo.{}` stucts are supported for writes to
+the database. Libraries and Ecto schemas which still use `%Geo.{}` structs can therefore be
+used with `GeoSQL`'s database extentions.
 
 #### Geopackage
 

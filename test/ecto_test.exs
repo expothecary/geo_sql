@@ -7,6 +7,7 @@ defmodule GeoSQL.Ecto.Test do
 
   alias GeoSQL.Test.Schema.{
     Location,
+    GeoCompatLocation,
     Geographies,
     LocationMulti,
     GeoType,
@@ -14,7 +15,29 @@ defmodule GeoSQL.Ecto.Test do
   }
 
   for repo <- Helper.repos() do
-    describe "Basic geometry queries #{repo}" do
+    describe "Geo compatibility (#{repo})" do
+      test "Inserts Geo structs, gets out Geometry structs" do
+        expected = Fixtures.point()
+
+        geom = %Geo.Point{
+          coordinates: List.to_tuple(expected.coordinates),
+          srid: expected.srid
+        }
+
+        PostGISRepo.insert(%GeoCompatLocation{name: "pointm", geom: geom})
+
+        query =
+          from(location in Location,
+            select: location.geom
+          )
+
+        results = PostGISRepo.one(query)
+
+        assert Helper.fuzzy_match_geometry(results, expected)
+      end
+    end
+
+    describe "Basic geometry queries (#{repo})" do
       test "geometry equality" do
         geom = Fixtures.multipolygon()
 

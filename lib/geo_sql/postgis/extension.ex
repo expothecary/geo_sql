@@ -104,7 +104,6 @@ defmodule GeoSQL.PostGIS.Extension do
         [<<IO.iodata_length(data)::integer-size(32)>> | data]
 
       %x{} = geom when x in unquote(all_geo_types) ->
-        IO.inspect(x, label: "GOT A GEO TYPE!")
         GeoSQL.PostGIS.Extension.encode_geo(geom)
     end
   end

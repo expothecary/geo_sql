@@ -16,7 +16,7 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
   """
   @behaviour Ecto.Adapters.SQLite3.TypeExtension
   @behaviour Exqlite.TypeExtension
-  @geo_types [
+  @geometry_types [
     Geometry.GeometryCollection,
     Geometry.LineString,
     Geometry.LineStringZ,
@@ -43,6 +43,30 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
     Geometry.PolygonM,
     Geometry.PolygonZM
   ]
+
+  if Code.ensure_loaded?(Geo) do
+    @geo_types [
+      Geo.GeometryCollection,
+      Geo.LineString,
+      Geo.LineStringM,
+      Geo.LineStringZ,
+      Geo.LineStringZM,
+      Geo.MultiLineString,
+      Geo.MultiLineStringM,
+      Geo.MultiLineStringZ,
+      Geo.MultiLineStringZM,
+      Geo.MultiPoint,
+      Geo.MultiPointZ,
+      Geo.MultiPolygon,
+      Geo.MultiPolygonZ,
+      Geo.Point,
+      Geo.PointZ,
+      Geo.PointM,
+      Geo.PointZM,
+      Geo.Polygon,
+      Geo.PolygonZ
+    ]
+  end
 
   defmodule InMemorySqlite do
     @moduledoc false
@@ -103,8 +127,14 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
   def dumpers(_ecto_type, _primitive_type), do: nil
 
   @impl true
-  def convert(%x{} = geometry) when x in @geo_types do
-    {:ok, convert_geometry(geometry)}
+  def convert(%x{} = geometry) when x in @geometry_types do
+    {:ok, convert_geometry(Geometry.to_ewkt(geometry))}
+  end
+
+  if Code.ensure_loaded?(Geo) do
+    def convert(%x{} = geometry) when x in @geo_types do
+      {:ok, convert_geometry(Geo.WKT.encode!(geometry))}
+    end
   end
 
   def convert(%GeoSQL.QueryUtils.WKB{data: data}) do
@@ -113,18 +143,36 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
 
   def convert(_), do: nil
 
-  def encode_geometry(%x{} = geometry) when x in @geo_types do
-    {:ok, convert_geometry(geometry)}
+  def encode_geometry(%x{} = geometry) when x in @geometry_types do
+    {:ok, convert_geometry(Geometry.to_ewkt(geometry))}
   rescue
     exception ->
       {:error, exception}
   end
 
-  def encode_geopackage_geometry(%x{} = geometry) when x in @geo_types do
-    {:ok, convert_geopackage_geometry(geometry)}
+  if Code.ensure_loaded?(Geo) do
+    def encode_geometry(%x{} = geometry) when x in @geo_types do
+      {:ok, convert_geometry(Geo.WKT.encode!(geometry))}
+    rescue
+      exception ->
+        {:error, exception}
+    end
+  end
+
+  def encode_geopackage_geometry(%x{} = geometry) when x in @geometry_types do
+    {:ok, convert_geopackage_geometry(Geometry.to_ewkb(geometry))}
   rescue
     exception ->
       {:error, exception}
+  end
+
+  if Code.ensure_loaded?(Geo) do
+    def encode_geopackage_geometry(%x{} = geometry) when x in @geo_types do
+      {:ok, convert_geopackage_geometry(Geo.WKB.encode!(geometry))}
+    rescue
+      exception ->
+        {:error, exception}
+    end
   end
 
   def decode_geometry(nil), do: {:ok, nil}
@@ -153,9 +201,7 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
   end
 
   defp convert_geometry(geometry) do
-    data =
-      Geometry.to_ewkt(geometry)
-      |> sanitize_zm_labels()
+    data = sanitize_zm_labels(geometry)
 
     # translate it to SpatiaLite's format
     conn = InMemorySqlite.conn()
@@ -196,9 +242,7 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
   end
 
   defp convert_geopackage_geometry(geometry) do
-    data =
-      Geometry.to_ewkb(geometry)
-      |> sanitize_zm_labels()
+    data = sanitize_zm_labels(geometry)
 
     # translate it to SpatiaLite's format
     conn = InMemorySqlite.conn()

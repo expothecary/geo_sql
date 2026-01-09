@@ -235,7 +235,7 @@ defmodule GeoSQL.Geometry do
   defp do_cast(geom) when is_binary(geom) do
     try do
       geom
-      |> :json.decode()
+      |> JSON.decode!()
       |> do_cast()
     rescue
       error in ErlangError ->
@@ -446,14 +446,14 @@ if Code.ensure_loaded?(Geo) and not Code.ensure_loaded?(Geo.PostGIS.Geometry) do
     def string_keys(other), do: other
 
     defp do_cast(geom) when is_binary(geom) do
-      case Geo.PostGIS.Config.json_library().decode(geom) do
+      case JSON.decode!(geom) do
         {:ok, geom} when is_map(geom) -> do_cast(geom)
         {:error, reason} -> {:error, [message: "failed to decode JSON", reason: reason]}
       end
     end
 
     defp do_cast(geom) do
-      case Geo.JSON.decode(geom) do
+      case JSON.decode!(geom) do
         {:ok, result} -> {:ok, result}
         {:error, reason} -> {:error, [message: "failed to decode GeoJSON", reason: reason]}
       end

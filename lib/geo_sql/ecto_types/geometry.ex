@@ -322,9 +322,7 @@ end
 
 if Code.ensure_loaded?(Geo) and not Code.ensure_loaded?(Geo.PostGIS.Geometry) do
   defmodule Geo.PostGIS.Geometry do
-    @moduledoc """
-    Implements the Ecto.Type behaviour for all geometry types.
-    """
+    @moduledoc false
 
     alias Geo.{
       Point,

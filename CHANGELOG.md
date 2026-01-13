@@ -7,8 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 * Dependencies
   * Bumped minimum Elixir dependency to 1.18 to be able to use the JSON module, as the `geometry` library is not fully compatible with `:json`
 * Improvements
-  * The PostGIS and SpatiaLite extensions now support using structs from the `geo` library in mutations. This allows compatibility with libraries
-    and Ecto schemas using `%Geo.*{}` structs. All queries still return `%Geometry.*{}` structs.
+  * MySQL/MariaDB databases are now supported if the `myxql` library is available as a
+    dependency.
+  * The PostGIS and SpatiaLite extensions now support using structs from the `geo`
+    library in mutations. This allows compatibility with libraries and Ecto schemas 
+    using `%Geo.*{}` structs. All queries still return `%Geometry.*{}` structs.
 
 ## [1.6.0] 21-12-2025
 

@@ -28,7 +28,7 @@ Not-goals include:
 Add `GeoSQL` to your project by adding the following to the `deps` section in `mix.exs` (or equivalent):
 
   ```elixir
-  {:geo_sql, "~> 0.1"}
+  {:geo_sql, "~> 1.0"}
   ```
 
 and then run the usual `mix deps.get`.

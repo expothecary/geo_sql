@@ -11,7 +11,7 @@ level functions for features such as generating Mapbox vector tiles.
 The goals of this library are:
 
  * Ease: fast to get started, hide complexity where possible
- * Portability: currently supports PostGIS and SpatiaLite.
+ * Portability: currently supports PostGIS, SpatiaLite, MariaDB/MySQL, and GeoPackage.
  * Completeness: extensive support for GIS SQL functions, not just the most common ones.
  * Clarity: Functions organized by their availability and standards compliance
  * Utility: Provide out-of-the-box support for complete worfklows. Mapbox vector tile
@@ -21,19 +21,19 @@ The goals of this library are:
 Not-goals include:
 
  * Having the fewest possible dependencies. Ecto adapters are pulled in as necessary,
-   along with other dependencies such as `Jason` in order to ease use.
+   and other quality-of-life libraries may also be used internally.
 
 ## Usage
 
 Add `GeoSQL` to your project by adding the following to the `deps` section in `mix.exs` (or equivalent):
 
-  ```
+  ```elixir
   {:geo_sql, "~> 0.1"}
   ```
 
-Run the usual `mix deps.get`!
+and then run the usual `mix deps.get`.
 
-Full documentation can be generated locally with `mix docs`.
+Full documentation is available [online](https://hexdocs.pm/geo_sql).
 
 ### Ecto Schemas
 
@@ -75,45 +75,7 @@ Example:
   end
   ```
 
-#### Geo
-
-If the `geo` library is included in the build, `%Geo.{}` stucts are supported for writes to
-the database. Libraries and Ecto schemas which still use `%Geo.{}` structs can therefore be
-used with `GeoSQL`'s database extentions.
-
-#### Geopackage
-
-The Geopackage standard defines its own binary format for serializing geometries in SQLite3
-databases. GeoSQL provides access to these types via the `GeoSQL.Geometry.Geopackage` type
-allowing Ecto schemas to contain geometry fields that are stored as Geopackage data.
-
-Example:
-
-  ```elixir
-  defmodule MyApp.Geopackage do
-    use Ecto.Schema
-
-    @primary_key false
-    schema "some_table_in_geopackage" do
-      field(:id, :integer, source: :OBJECTID)
-      field(:name, :string)
-      field(:shape, GeoSQL.Geometry.Geopackage, source: :Shape)
-    end
-  end
-  ```
-
-This schema can now be used in queries like any other:
-
-  ```elixir
-  from(g in MyApp.Geopackage) |> MyApp.GeopackageRepo.all()
-  ```
-
-Due to being tied to SQLite3, only SQLite3 databases are supported and the Spatialite
-module must be available as it is (currently) used to do the serialization in memory.
-The Spatialite module does not need to be initialized on a Geopackage database, but
-it does need to be available on the system for GeoSQL to use.
-
-### Readying the Repo with `GeoSQL.init/1`
+### Readying an Ecto Repo with `GeoSQL.init/1`
 
 Once added to your project, an `Ecto.Repo` can be readied for use by calling
 `GeoSQL.init/2`. This can be done once the repo has been started by implementing
@@ -154,7 +116,7 @@ will still need to be called after the repo has been started.
 Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` can be
 called after the call to `Repo.put_dynamic_repo/1` has completed.
 
-### Macro usage
+### Ecto Queries
 
 Once initialized, the wide array of macros can be used with `Ecto` queries:
 
@@ -348,7 +310,50 @@ with the `MVT` vector tile layer format.
 Database prefixes ("schemas" in PostgreSQL) are also supported both on the whole tile query
 as well as per-layer.
 
-## Building
+#### Geopackage
+
+The Geopackage standard defines its own binary format for serializing geometries in SQLite3
+databases. GeoSQL provides access to these types via the `GeoSQL.Geometry.Geopackage` type
+allowing Ecto schemas to contain geometry fields that are stored as Geopackage data.
+
+Example:
+
+  ```elixir
+  defmodule MyApp.Geopackage do
+    use Ecto.Schema
+
+    @primary_key false
+    schema "some_table_in_geopackage" do
+      field(:id, :integer, source: :OBJECTID)
+      field(:name, :string)
+      field(:shape, GeoSQL.Geometry.Geopackage, source: :Shape)
+    end
+  end
+  ```
+
+This schema can now be used in queries like any other:
+
+  ```elixir
+  from(g in MyApp.Geopackage) |> MyApp.GeopackageRepo.all()
+  ```
+
+Due to being tied to SQLite3, only SQLite3 databases are supported and the Spatialite
+module must be available as it is (currently) used to do the serialization in memory.
+The Spatialite module does not need to be initialized on a Geopackage database, but
+it does need to be available on the system for GeoSQL to use.
+
+#### Support for the Geo library
+
+If the application includes the `geo` library as a dependency, `%Geo.{}` stucts are supported for writes to
+the database. Libraries and Ecto schemas which still use `%Geo.{}` structs can therefore be
+used with `GeoSQL`'s database extentions.
+
+## Contributing
+
+If you would like to contribute support for more functions (PostGIS and
+SpatiaLite both provide a frighteningly impressive amount of them!) or
+support for other databases, do not hesitate to make a PR and it will be 
+reviewed in a timely fashion.
 
 To build and interact with the library locally:
 
@@ -358,14 +363,16 @@ To build and interact with the library locally:
     mix compile
     iex -S mix
 
+Documentation can be generated locally with `mix docs`.
+    
+### Unit Tests
 
-## Unit Tests
+Unit tests currently assume that working installations of PostGIS, SpatiaLite, and MariaDB/Mysql are running on the local machine.
 
-Unit tests currently assume a working PostGIS installation is available locally.
+The locations of the test databases are defined in `config/test.exs` and may be
+changed to suit your own dev environment.
 
-The URL for the test database is defined in `config/test.exs`.
-
-**Note** that this database will be created and **dropped** on every run of the tests.
+**Note** that databases will be created and **dropped** on every run of the tests.
 Do NOT point it to an existing database!
 
 The migrations in `priv/repo/migrations` are run on each test run.
@@ -390,13 +397,7 @@ Current the following backends are recognized:
 
   * `pgsql`
   * `sqlite3`
-
-## Contributing
-
-If you would like to contribute support for more functions (PostGIS and
-SpatiaLite both provide a frighteningly impressive amount of them!) or
-support for other databases, do not hesitate to make a PR and the author
-will review and merge in a timely fashion.
+  * `mysql`
 
 ## Acknowledgements
 

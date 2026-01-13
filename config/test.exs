@@ -1,11 +1,12 @@
 import Config
 
 test_repos =
-  (System.get_env("GEOSQL_TEST_BACKENDS") || "pgsql,sqlite3")
+  (System.get_env("GEOSQL_TEST_BACKENDS") || "pgsql,sqlite3,mysql")
   |> String.split(",")
   |> Enum.reduce([], fn backend, acc ->
     case backend do
       "pgsql" -> [GeoSQL.Test.PostGIS.Repo | acc]
+      "mysql" -> [GeoSQL.Test.MySQL.Repo | acc]
       "sqlite3" -> [GeoSQL.Test.SpatiaLite.Repo, GeoSQL.Test.Geopackage.Repo | acc]
     end
   end)
@@ -18,6 +19,18 @@ config :geo_sql, GeoSQL.Test.PostGIS.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   priv: "priv/repo/postgis",
   testing_primary: true
+
+config :geo_sql, GeoSQL.Test.MySQL.Repo,
+  host: "localhost",
+  username: "testing",
+  password: "testing",
+  protocol: :tcp,
+  database: "geosql_tests",
+  types: GeoSQL.PostgrexTypes,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  priv: "priv/repo/mysql",
+  testing_primary: true,
+  show_sensitive_data_on_connection_error: true
 
 config :geo_sql, GeoSQL.Test.SpatiaLite.Repo,
   database: "geo_sql_test.sqlite3",

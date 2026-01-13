@@ -28,12 +28,17 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      {:geometry, "~> 1.1"},
-      {:postgrex, ">= 0.0.0"},
       {:ecto, "~> 3.13.0"},
       {:ecto_sql, "~> 3.0"},
+      {:geometry, "~> 1.1"},
+      {:postgrex, ">= 0.0.0"},
       {:exqlite, "~> 0.32"},
       {:ecto_sqlite3, "~> 0.21"},
+      {:myxql,
+       git: "https://github.com/aseigo/myxql.git",
+       branch: "feature/add-support-for-gepmetry-lib",
+       override: true,
+       optional: true},
       {:jason, "~> 1.0"},
 
       # dev
@@ -78,7 +83,8 @@ defmodule GeoSQL.Mixfile do
 
   # TODO: would be nice to find a way to get this from the test config.
   defp dynamic_test_repos(command),
-    do: "#{command} --quiet -r GeoSQL.Test.PostGIS.Repo -r GeoSQL.Test.SpatiaLite.Repo"
+    do:
+      "#{command} --quiet -r GeoSQL.Test.PostGIS.Repo -r GeoSQL.Test.SpatiaLite.Repo -r GeoSQL.Test.MySQL.Repo"
 
   defp aliases do
     [

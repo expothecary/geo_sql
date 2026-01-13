@@ -130,6 +130,7 @@ defmodule GeoSQL.QueryUtils do
     case repo.__adapter__() do
       Ecto.Adapters.Postgres -> query_result
       Ecto.Adapters.SQLite3 -> decode_one(GeoSQL.SpatiaLite.TypeExtension, query_result)
+      Ecto.Adapters.MyXQL -> query_result
     end
   end
 
@@ -143,6 +144,9 @@ defmodule GeoSQL.QueryUtils do
           query_results,
           fn query_result -> decode_one(GeoSQL.SpatiaLite.TypeExtension, query_result) end
         )
+
+      Ecto.Adapters.MyXQL ->
+        query_results
     end
   end
 
@@ -191,6 +195,9 @@ defmodule GeoSQL.QueryUtils do
 
       Ecto.Adapters.SQLite3 ->
         decode_all(query_results, GeoSQL.SpatiaLite.TypeExtension, fields_to_decode)
+
+      Ecto.Adapters.MyXQL ->
+        query_results
     end
   end
 

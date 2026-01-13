@@ -5,6 +5,15 @@ defmodule GeoSQL.Test.PostGIS.Repo do
   def to_boolean(value), do: value
 end
 
+defmodule GeoSQL.Test.MySQL.Repo do
+  use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.MyXQL
+
+  def has_array_literals?, do: true
+  def to_boolean(1), do: true
+  def to_boolean(0), do: false
+  def to_boolean(value), do: value
+end
+
 defmodule GeoSQL.Test.SpatiaLite.Repo do
   use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.SQLite3
 

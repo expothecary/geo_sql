@@ -97,6 +97,7 @@ defmodule GeoSQL.Test.Helper do
     setup_funs = Keyword.get(options, :setup_funs, [])
 
     quote do
+      alias GeoSQL.Test.MySQL.Repo, as: MySQLRepo
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
       alias GeoSQL.Test.SpatiaLite.Repo, as: SpatialiteRepo
       alias GeoSQL.Test.Geopackage.Repo, as: GeopackageRepo
@@ -133,6 +134,7 @@ defmodule GeoSQL.Test.Helper do
   # A globally shared repo is problematic due to not wanting to polute the main library
   # or have a global ExUnit-wide global PID. So instead a repo is started per test suite.
   def repo_name_suffix(GeoSQL.Test.PostGIS.Repo), do: "PostGISRepo"
+  def repo_name_suffix(GeoSQL.Test.MySQL.Repo), do: "MySQL"
   def repo_name_suffix(GeoSQL.Test.SpatiaLite.Repo), do: "SpatiaLiteRepo"
   def repo_name_suffix(GeoSQL.Test.Geopackage.Repo), do: "GeopackageRepo"
 
@@ -143,7 +145,10 @@ defmodule GeoSQL.Test.Helper do
 
     # horrible hack here, but we need to start repo supervised for setup_all functions
     # that need access to a global db object they can modify for all tests aftewards.
-    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
+    pid =
+      ExUnit.Callbacks.start_link_supervised!(repo_spec)
+      |> IO.inspect(label: repo)
+
     Ecto.Adapters.SQL.Sandbox.mode(pid, :manual)
 
     GeoSQL.init(repo, json: Jason, decode_binary: :reference)

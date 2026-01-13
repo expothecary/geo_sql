@@ -55,4 +55,14 @@ defmodule GeoSQL.RepoUtils do
       end
     end
   end
+
+  @doc false
+  def unsupported(fn_name, adapter) do
+    raise "#{fn_name} is unspported in #{adpter_to_name(adapter)}"
+  end
+
+  defp adpter_to_name(Ecto.Adapters.Postgres), do: "PostGIS"
+  defp adpter_to_name(Ecto.Adapters.MyXQL), do: "MySQL/MariaDB"
+  defp adpter_to_name(Ecto.Adapters.SQLite3), do: "SpatiaLite"
+  defp adpter_to_name(adapter), do: adapter
 end

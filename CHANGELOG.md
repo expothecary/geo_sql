@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html
 
 ## [1.7.0] xx-01-2026
 * Dependencies
-  * Bumped minimum Elixir dependency to 1.18 to be able to use the JSON module, as the `geometry` library is not fully compatible with `:json`
+  * Bumped minimum Elixir dependency to 1.18 to be able to use the `JSON` module, as the `geometry` library is not fully compatible with `:json`
 * Improvements
   * MySQL/MariaDB databases are now supported if the `myxql` library is available as a
     dependency.

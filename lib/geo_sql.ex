@@ -71,6 +71,12 @@ defmodule GeoSQL do
     adapter
   end
 
+  if Code.ensure_loaded?(MyXQL) do
+    defp register_types(Ecto.Adapters.MyXQL = adapter, repo, opts) do
+      Application.put_env(:myxql, :geometry_codec, GeoSQL.MySQL.GeometryCodec)
+    end
+  end
+
   defp register_types(adapter, _repo, _opts), do: adapter
 
   defp run_query(repo, sql) do

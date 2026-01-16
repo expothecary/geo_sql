@@ -98,14 +98,9 @@ defmodule GeoSQL.MM do
   Note: this function takes an optional Ecto.Repo parameter due to
   some backends implementing the non-standard ST_NDims rather than ST_CoordDim
   """
-  defmacro coord_dim(geometry, repo \\ nil) do
-    case RepoUtils.adapter(repo) do
-      Ecto.Adapters.MyXQL ->
-        RepoUtils.raise("coord_dim", Ecto.Adapters.MyXQL)
-
-      _ ->
-        quote do: fragment("ST_NDims(?)", unquote(geometry))
-    end
+  # FIXME GeoSQL2 remove unused repo param
+  defmacro coord_dim(geometry, _repo \\ nil) do
+    quote do: fragment("ST_NDims(?)", unquote(geometry))
   end
 
   @spec crosses(GeoSQL.geometry_input(), GeoSQL.geometry_input()) :: GeoSQL.fragment()
@@ -226,14 +221,11 @@ defmodule GeoSQL.MM do
   @doc group: "Data Formats"
   defmacro gml_to_sql(geomgml, repo \\ nil) do
     case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
-
       Ecto.Adapters.SQLite3 ->
         quote do: fragment("GeomFromGML(?)", unquote(geomgml))
 
-      adapter ->
-        RepoUtils.unsupported("gml_to_sql", adapter)
+      _adapter ->
+        quote do: fragment("ST_GMLToSQL(?)", unquote(geomgml))
     end
   end
 
@@ -245,14 +237,11 @@ defmodule GeoSQL.MM do
   @doc group: "Data Formats"
   defmacro gml_to_sql(geomgml, srid, repo) do
     case RepoUtils.adapter(repo) do
-      Ecto.Adapters.Postgres ->
-        quote do: fragment("ST_GMLToSQL(?,?)", unquote(geomgml), unquote(srid))
-
       Ecto.Adapters.SQLite3 ->
         quote do: fragment("SetSRID(GeomFromGML(?), ?)", unquote(geomgml), unquote(srid))
 
-      adapter ->
-        RepoUtils.unsupported("gml_to_sql", adapter)
+      _adapter ->
+        quote do: fragment("ST_GMLToSQL(?,?)", unquote(geomgml), unquote(srid))
     end
   end
 

@@ -2,7 +2,7 @@ defmodule GeoSQL.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/expothecary/geo_sql"
-  @version "1.7.0"
+  @version "1.8.0"
 
   def project do
     [
@@ -34,11 +34,7 @@ defmodule GeoSQL.Mixfile do
       {:postgrex, ">= 0.0.0"},
       {:exqlite, "~> 0.32"},
       {:ecto_sqlite3, "~> 0.21"},
-      {:myxql,
-       git: "https://github.com/aseigo/myxql.git",
-       branch: "feature/add-support-for-gepmetry-lib",
-       override: true,
-       optional: true},
+      {:myxql, "~> 0.8.1", optional: true},
       {:jason, "~> 1.0"},
 
       # dev
@@ -55,7 +51,7 @@ defmodule GeoSQL.Mixfile do
   defp package do
     [
       description:
-        "Spatial databases and GIS SQL functions. Currently supports PostGIS, Spatialite, and Geopackage.",
+        "Spatial databases and GIS SQL functions. Currently supports PostGIS, Spatialite, MySQL, MariaDB, and Geopackage.",
       files: ["lib", "mix.exs", "README.md", "CHANGELOG.md"],
       maintainers: ["Aaron Seigo"],
       licenses: ["MIT"],

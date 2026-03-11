@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] 11-03-2026
+
+* Improvements
+  * MySQL / MariaDB is now supported via a MyXQL extension.
 
 ## [1.7.0] 14-02-2026
 * Dependencies

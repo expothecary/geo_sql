@@ -14,7 +14,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, point) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, point) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [
             42,
             geo
@@ -38,7 +38,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, t, point) VALUES ($1, $2, $3)",
+          "INSERT INTO specified_columns (id, t, point) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)}, #{unquote(repo).arg(3)})",
           [
             42,
             "test",
@@ -57,34 +57,13 @@ defmodule GeoSQL.Test do
       assert(result == [[42, "test", geo]])
     end
 
-    test "insert pointz (#{repo})" do
-      geo = %Geometry.PointZ{coordinates: [30, -90, 70], srid: 4326}
-
-      {:ok, _} =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, pointz) VALUES ($1, $2)",
-          [42, geo]
-        )
-
-      result =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "SELECT id, pointz FROM specified_columns",
-          []
-        )
-        |> decode(unquote(repo), [1])
-
-      assert(result == [[42, geo]])
-    end
-
     test "insert linestring (#{repo})" do
       geo = %Geometry.LineString{path: [[30, 10], [10, 30], [40, 40]], srid: 4326}
 
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, linestring) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, linestring) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [42, geo]
         )
 
@@ -99,54 +78,6 @@ defmodule GeoSQL.Test do
       assert(result == [[42, geo]])
     end
 
-    test "insert LineStringZ (#{repo})" do
-      geo = %Geometry.LineStringZ{
-        path: [[30, 10, 20], [10, 30, 2], [40, 40, 50]],
-        srid: 4326
-      }
-
-      {:ok, _} =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, linestringz) VALUES ($1, $2)",
-          [42, geo]
-        )
-
-      result =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "SELECT id, linestringz FROM specified_columns",
-          []
-        )
-        |> decode(unquote(repo), [1])
-
-      assert result == [[42, geo]]
-    end
-
-    test "insert LineStringZM (#{repo})" do
-      geo = %Geometry.LineStringZM{
-        path: [[30, 10, 20, 40], [10, 30, 2, -10], [40, 40, 50, 100]],
-        srid: 4326
-      }
-
-      {:ok, _} =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, linestringzm) VALUES ($1, $2)",
-          [42, geo]
-        )
-
-      result =
-        Ecto.Adapters.SQL.query(
-          unquote(repo).get_dynamic_repo(),
-          "SELECT id, linestringzm FROM specified_columns",
-          []
-        )
-        |> decode(unquote(repo), [1])
-
-      assert result == [[42, geo]]
-    end
-
     test "insert polygon (#{repo})" do
       geo = %Geometry.Polygon{
         rings: [
@@ -159,7 +90,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, polygon) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, polygon) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [42, geo]
         )
 
@@ -180,7 +111,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, multipoint) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, multipoint) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [42, geo]
         )
 
@@ -204,7 +135,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, multilinestring) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, multilinestring) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [42, geo]
         )
 
@@ -234,7 +165,7 @@ defmodule GeoSQL.Test do
       {:ok, _} =
         Ecto.Adapters.SQL.query(
           unquote(repo).get_dynamic_repo(),
-          "INSERT INTO specified_columns (id, multipolygon) VALUES ($1, $2)",
+          "INSERT INTO specified_columns (id, multipolygon) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
           [42, geo]
         )
 
@@ -247,6 +178,78 @@ defmodule GeoSQL.Test do
         |> decode(unquote(repo), [1])
 
       assert(result == [[42, geo]])
+    end
+
+
+    if repo.has_zm?() do
+      test "insert pointz (#{repo})" do
+        geo = %Geometry.PointZ{coordinates: [30, -90, 70], srid: 4326}
+
+        {:ok, _} =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "INSERT INTO specified_columns (id, pointz) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
+            [42, geo]
+          )
+
+        result =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "SELECT id, pointz FROM specified_columns",
+            []
+          )
+          |> decode(unquote(repo), [1])
+
+        assert(result == [[42, geo]])
+      end
+
+      test "insert LineStringZ (#{repo})" do
+        geo = %Geometry.LineStringZ{
+          path: [[30, 10, 20], [10, 30, 2], [40, 40, 50]],
+          srid: 4326
+        }
+
+        {:ok, _} =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "INSERT INTO specified_columns (id, linestringz) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
+            [42, geo]
+          )
+
+        result =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "SELECT id, linestringz FROM specified_columns",
+            []
+          )
+          |> decode(unquote(repo), [1])
+
+        assert result == [[42, geo]]
+      end
+
+      test "insert LineStringZM (#{repo})" do
+        geo = %Geometry.LineStringZM{
+          path: [[30, 10, 20, 40], [10, 30, 2, -10], [40, 40, 50, 100]],
+          srid: 4326
+        }
+
+        {:ok, _} =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "INSERT INTO specified_columns (id, linestringzm) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)})",
+            [42, geo]
+          )
+
+        result =
+          Ecto.Adapters.SQL.query(
+            unquote(repo).get_dynamic_repo(),
+            "SELECT id, linestringzm FROM specified_columns",
+            []
+          )
+          |> decode(unquote(repo), [1])
+
+        assert result == [[42, geo]]
+      end
     end
   end
 end

@@ -39,6 +39,9 @@ defmodule GeoSQL.QueryUtils.Test do
           Ecto.Adapters.Postgres ->
             assert(Regex.match?(pattern, query_string))
 
+          Ecto.Adapters.MyXQL ->
+            refute(Regex.match?(pattern, query_string))
+
           Ecto.Adapters.SQLite3 ->
             refute(Regex.match?(pattern, query_string))
         end

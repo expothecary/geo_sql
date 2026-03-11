@@ -1,6 +1,6 @@
 if Code.ensure_loaded?(MyXQL) do
   defmodule GeoSQL.MySQL.GeometryCodec do
-    @behaviour MyXQL.Protocol.GeometryCodec
+    @behaviour MyXQL.GeometryCodec
 
     supported_structs = [
       Geometry.Point,

@@ -184,7 +184,7 @@ defmodule GeoSQL.Test.Helper do
   end
 end
 
-excludable_tags = [:pgsql, :sqlite3]
+excludable_tags = [:pgsql, :sqlite3, :myqsl]
 
 exclude_tags =
   GeoSQL.Test.Helper.repos()
@@ -195,6 +195,7 @@ exclude_tags =
         case repo.__adapter__() do
           Ecto.Adapters.Postgres -> Enum.reject(exclude_tags, fn tag -> tag == :pgsql end)
           Ecto.Adapters.SQLite3 -> Enum.reject(exclude_tags, fn tag -> tag == :sqlite3 end)
+          Ecto.Adapters.MyXQL -> Enum.reject(exclude_tags, fn tag -> tag == :mysql end)
           _ -> exclude_tags
         end
     end

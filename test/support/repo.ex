@@ -3,6 +3,7 @@ defmodule GeoSQL.Test.PostGIS.Repo do
 
   def has_array_literals?, do: true
   def to_boolean(value), do: value
+  def has_zm?, do: true
 end
 
 defmodule GeoSQL.Test.MySQL.Repo do
@@ -12,6 +13,7 @@ defmodule GeoSQL.Test.MySQL.Repo do
   def to_boolean(1), do: true
   def to_boolean(0), do: false
   def to_boolean(value), do: value
+  def has_zm?, do: false
 end
 
 defmodule GeoSQL.Test.SpatiaLite.Repo do
@@ -20,6 +22,7 @@ defmodule GeoSQL.Test.SpatiaLite.Repo do
   def has_array_literals?, do: false
   def to_boolean(1), do: true
   def to_boolean(0), do: false
+  def has_zm?, do: true
 end
 
 defmodule GeoSQL.Test.Geopackage.Repo do
@@ -28,6 +31,7 @@ defmodule GeoSQL.Test.Geopackage.Repo do
   def has_array_literals?, do: false
   def to_boolean(1), do: true
   def to_boolean(0), do: false
+  def has_zm?, do: true
 end
 
 # For the migrations.

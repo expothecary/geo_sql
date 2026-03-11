@@ -14,6 +14,78 @@ defmodule GeoSQL.CommonFunctions.Test do
   alias GeoSQL.Test.Schema.{Location, LocationMulti, GeoType}
 
   for repo <- Helper.repos() do
+    describe "Common: as_geojson (#{repo})" do
+      test "returns correct binary data" do
+        geom = Fixtures.multipolygon()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+
+        query =
+          from(location in Location, select: Common.as_geojson(location.geom, unquote(repo)))
+
+        [geojson] = unquote(repo).all(query)
+
+        hydrated =
+          geojson
+          |> Jason.decode!()
+          |> Geometry.from_geo_json!()
+
+        assert 4326 = hydrated.srid
+        assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
+      end
+    end
+
+    describe "Common: degrees (#{repo})" do
+      test "Converts radians to degrees" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.degrees(0.5))
+        result = unquote(repo).one(query)
+        assert is_number(result)
+      end
+    end
+
+    describe "Common: geom_from_geojson (#{repo})" do
+      test "returns a geometry" do
+        point = Fixtures.point()
+
+        geojson =
+          Geometry.to_geo_json(point)
+          |> :json.encode()
+          |> to_string()
+
+        unquote(repo).insert(%GeoType{t: geojson, point: point})
+
+        result =
+          from(g in GeoType, select: Common.geom_from_geojson(g.t, unquote(repo)))
+          |> unquote(repo).one()
+          |> QueryUtils.decode_geometry(unquote(repo))
+
+        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
+      end
+    end
+
+    describe "Common: number_of_geometries (#{repo})" do
+      test "Returns correct number of rings" do
+        geom = Fixtures.geometry_collection()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.number_of_geometries(location.geom))
+        result = unquote(repo).one(query)
+        assert 2 == result
+      end
+    end
+
+    describe "Common: radians (#{repo})" do
+      test "Converts degrees to radians" do
+        geom = Fixtures.point()
+        unquote(repo).insert(%Location{name: "hello", geom: geom})
+        query = from(location in Location, select: Common.radians(45))
+        result = unquote(repo).one(query)
+        assert is_number(result)
+      end
+    end
+  end
+
+  for repo <- (Helper.repos() |> List.delete(GeoSQL.Test.MySQL.Repo)) do
     describe "Common: add_measure (#{repo})" do
       test "adds measure values to a line" do
         line = Fixtures.linestring()
@@ -106,26 +178,6 @@ defmodule GeoSQL.CommonFunctions.Test do
         [ewkt] = unquote(repo).all(query)
         hydrated = Geometry.from_ewkt!(ewkt)
         assert geom.srid == hydrated.srid
-        assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
-      end
-    end
-
-    describe "Common: as_geojson (#{repo})" do
-      test "returns correct binary data" do
-        geom = Fixtures.multipolygon()
-        unquote(repo).insert(%Location{name: "hello", geom: geom})
-
-        query =
-          from(location in Location, select: Common.as_geojson(location.geom, unquote(repo)))
-
-        [geojson] = unquote(repo).all(query)
-
-        hydrated =
-          geojson
-          |> Jason.decode!()
-          |> Geometry.from_geo_json!()
-
-        assert 4326 = hydrated.srid
         assert Helper.fuzzy_match_geometry(geom.polygons, hydrated.polygons)
       end
     end
@@ -503,16 +555,6 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "Common: degrees (#{repo})" do
-      test "Converts radians to degrees" do
-        geom = Fixtures.point()
-        unquote(repo).insert(%Location{name: "hello", geom: geom})
-        query = from(location in Location, select: Common.degrees(0.5))
-        result = unquote(repo).one(query)
-        assert is_number(result)
-      end
-    end
-
     describe "Common: estimated_extent (#{repo})" do
       test "Finds the estimated extent of a table" do
         geom = Fixtures.polygon()
@@ -644,26 +686,6 @@ defmodule GeoSQL.CommonFunctions.Test do
           |> QueryUtils.decode_geometry(unquote(repo))
 
         assert result == point
-      end
-    end
-
-    describe "Common: geom_from_geojson (#{repo})" do
-      test "returns a geometry" do
-        point = Fixtures.point()
-
-        geojson =
-          Geometry.to_geo_json(point)
-          |> :json.encode()
-          |> to_string()
-
-        unquote(repo).insert(%GeoType{t: geojson, point: point})
-
-        result =
-          from(g in GeoType, select: Common.geom_from_geojson(g.t, unquote(repo)))
-          |> unquote(repo).one()
-          |> QueryUtils.decode_geometry(unquote(repo))
-
-        assert Helper.fuzzy_match_geometry(result.coordinates, point.coordinates)
       end
     end
 
@@ -1372,16 +1394,6 @@ defmodule GeoSQL.CommonFunctions.Test do
       end
     end
 
-    describe "Common: number_of_geometries (#{repo})" do
-      test "Returns correct number of rings" do
-        geom = Fixtures.geometry_collection()
-        unquote(repo).insert(%Location{name: "hello", geom: geom})
-        query = from(location in Location, select: Common.number_of_geometries(location.geom))
-        result = unquote(repo).one(query)
-        assert 2 == result
-      end
-    end
-
     describe "Common: oriented_envelope (#{repo})" do
       test "Returns correct number of rings" do
         geom = Fixtures.geometry_collection()
@@ -1422,16 +1434,6 @@ defmodule GeoSQL.CommonFunctions.Test do
         query = from(location in Location, select: Common.project(location.geom, 10, 1))
         result = unquote(repo).one(query) |> QueryUtils.decode_geometry(unquote(repo))
         assert %Geometry.Point{} = result
-      end
-    end
-
-    describe "Common: radians (#{repo})" do
-      test "Converts degrees to radians" do
-        geom = Fixtures.point()
-        unquote(repo).insert(%Location{name: "hello", geom: geom})
-        query = from(location in Location, select: Common.radians(45))
-        result = unquote(repo).one(query)
-        assert is_number(result)
       end
     end
 

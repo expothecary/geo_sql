@@ -62,8 +62,8 @@ jobs:
             -${{ steps.setup-beam.outputs.setup-beam-version }}"
       - name: Get dependencies
         run: mix deps.get
-      - name: Compile dependencies
-        run: MIX_ENV=test mix deps.compile
+      # - name: Compile dependencies
+      #  run: MIX_ENV=test mix deps.compile
       - name: Compile project
         run: MIX_ENV=test mix compile --warnings-as-errors
       - name: Check unused dependencies

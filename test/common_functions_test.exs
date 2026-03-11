@@ -11,7 +11,7 @@ defmodule GeoSQL.CommonFunctions.Test do
   use GeoSQL.Test.Helper
   alias GeoSQL.Test.Helper
 
-  alias GeoSQL.Test.Schema.{Location, LocationMulti, GeoType}
+  alias GeoSQL.Test.Schema.{GeoType, Location, LocationMulti}
 
   for repo <- Helper.repos() do
     describe "Common: as_geojson (#{repo})" do
@@ -85,7 +85,7 @@ defmodule GeoSQL.CommonFunctions.Test do
     end
   end
 
-  for repo <- (Helper.repos() |> List.delete(GeoSQL.Test.MySQL.Repo)) do
+  for repo <- Helper.repos() |> List.delete(GeoSQL.Test.MySQL.Repo) do
     describe "Common: add_measure (#{repo})" do
       test "adds measure values to a line" do
         line = Fixtures.linestring()

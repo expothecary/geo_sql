@@ -7,7 +7,7 @@ defmodule GeoSQL.QueryUtils.Test do
   use GeoSQL.RepoUtils
   use GeoSQL.Common
   use GeoSQL.Test.Helper
-  alias GeoSQL.Test.Schema.{GeoType}
+  alias GeoSQL.Test.Schema.GeoType
 
   encoding_repos = [Ecto.Adapters.SQLite3]
 

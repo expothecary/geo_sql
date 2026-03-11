@@ -180,7 +180,6 @@ defmodule GeoSQL.Test do
       assert(result == [[42, geo]])
     end
 
-
     if repo.has_zm?() do
       test "insert pointz (#{repo})" do
         geo = %Geometry.PointZ{coordinates: [30, -90, 70], srid: 4326}

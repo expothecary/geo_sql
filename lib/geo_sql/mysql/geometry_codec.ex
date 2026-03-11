@@ -1,5 +1,6 @@
 if Code.ensure_loaded?(MyXQL) do
   defmodule GeoSQL.MySQL.GeometryCodec do
+    @moduledoc false
     @behaviour MyXQL.GeometryCodec
 
     supported_structs = [

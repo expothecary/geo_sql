@@ -255,17 +255,15 @@ defmodule GeoSQL.QueryUtils do
   defp decode_all(query_result, _, _), do: query_result
 
   defp decode_one(type_extension, encoded_field) do
-    try do
       case type_extension.decode_geometry(encoded_field) do
         {:ok, successfully_decoded_field} -> successfully_decoded_field
         :error -> encoded_field
         {:error, _} -> encoded_field
       end
-    rescue
+  rescue
       _ ->
         # error, usually because the field was not a geometry.
         # swallow that error
         encoded_field
-    end
   end
 end

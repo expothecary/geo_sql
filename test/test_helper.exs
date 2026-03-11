@@ -97,12 +97,12 @@ defmodule GeoSQL.Test.Helper do
     setup_funs = Keyword.get(options, :setup_funs, [])
 
     quote do
+      alias GeoSQL.Test.Fixtures
+      alias GeoSQL.Test.Geopackage.Repo, as: GeopackageRepo
+      alias GeoSQL.Test.Helper
       alias GeoSQL.Test.MySQL.Repo, as: MySQLRepo
       alias GeoSQL.Test.PostGIS.Repo, as: PostGISRepo
       alias GeoSQL.Test.SpatiaLite.Repo, as: SpatialiteRepo
-      alias GeoSQL.Test.Geopackage.Repo, as: GeopackageRepo
-      alias GeoSQL.Test.Fixtures
-      alias GeoSQL.Test.Helper
 
       setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++ unquote(setup_funs)
 

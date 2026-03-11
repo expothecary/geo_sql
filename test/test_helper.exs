@@ -184,7 +184,7 @@ defmodule GeoSQL.Test.Helper do
   end
 end
 
-excludable_tags = [:pgsql, :sqlite3, :myqsl]
+excludable_tags = [:pgsql, :sqlite3, :mysql]
 
 exclude_tags =
   GeoSQL.Test.Helper.repos()

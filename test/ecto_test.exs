@@ -66,7 +66,7 @@ defmodule GeoSQL.Ecto.Test do
         {:ok, _} =
           Ecto.Adapters.SQL.query(
             unquote(repo).get_dynamic_repo(),
-            "INSERT INTO specified_columns (id, t, point, linestring) VALUES ($1, $2, $3, $4)",
+            "INSERT INTO specified_columns (id, t, point, linestring) VALUES (#{unquote(repo).arg(1)}, #{unquote(repo).arg(2)}, #{unquote(repo).arg(3)}, #{unquote(repo).arg(4)})",
             [
               42,
               "test",

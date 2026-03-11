@@ -145,9 +145,7 @@ defmodule GeoSQL.Test.Helper do
 
     # horrible hack here, but we need to start repo supervised for setup_all functions
     # that need access to a global db object they can modify for all tests aftewards.
-    pid =
-      ExUnit.Callbacks.start_link_supervised!(repo_spec)
-      |> IO.inspect(label: repo)
+    pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
 
     Ecto.Adapters.SQL.Sandbox.mode(pid, :manual)
 

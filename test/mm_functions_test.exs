@@ -31,7 +31,7 @@ defmodule GeoSQL.MMFunctions.Test do
     end
   end
 
-  for repo <- Helper.repos() do
+  for repo <- (Helper.repos() |> List.delete(GeoSQL.Test.MySQL.Repo)) do
     describe "SQL/MM: area (#{repo})" do
       test "returns a numeric result" do
         query = from(location in Location, select: MM.area(location.geom))

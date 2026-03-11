@@ -37,34 +37,34 @@ defmodule GeoSQL.Geometry do
   """
 
   alias Geometry.{
-    Point,
-    PointZ,
-    PointM,
-    PointZM,
-    LineString,
-    LineStringZ,
-    LineStringM,
-    LineStringZM,
-    Polygon,
-    PolygonZ,
-    PolygonM,
-    PolygonZM,
-    MultiPoint,
-    MultiPointZ,
-    MultiPointM,
-    MultiPointZM,
-    MultiLineString,
-    MultiLineStringZ,
-    MultiLineStringM,
-    MultiLineStringZM,
-    MultiPolygon,
-    MultiPolygonZ,
-    MultiPolygonM,
-    MultiPolygonZM,
     GeometryCollection,
-    GeometryCollectionZ,
     GeometryCollectionM,
-    GeometryCollectionZM
+    GeometryCollectionZ,
+    GeometryCollectionZM,
+    LineString,
+    LineStringM,
+    LineStringZ,
+    LineStringZM,
+    MultiLineString,
+    MultiLineStringM,
+    MultiLineStringZ,
+    MultiLineStringZM,
+    MultiPoint,
+    MultiPointM,
+    MultiPointZ,
+    MultiPointZM,
+    MultiPolygon,
+    MultiPolygonM,
+    MultiPolygonZ,
+    MultiPolygonZM,
+    Point,
+    PointM,
+    PointZ,
+    PointZM,
+    Polygon,
+    PolygonM,
+    PolygonZ,
+    PolygonZM
   }
 
   @types [
@@ -233,14 +233,12 @@ defmodule GeoSQL.Geometry do
   end
 
   defp do_cast(geom) when is_binary(geom) do
-    try do
-      geom
-      |> JSON.decode!()
-      |> do_cast()
-    rescue
-      error in ErlangError ->
-        {:error, [message: "Failed to decode JSON", reason: error.original]}
-    end
+    geom
+    |> JSON.decode!()
+    |> do_cast()
+  rescue
+    error in ErlangError ->
+      {:error, [message: "Failed to decode JSON", reason: error.original]}
   end
 
   defp do_cast(geom) do
@@ -325,24 +323,24 @@ if Code.ensure_loaded?(Geo) and not Code.ensure_loaded?(Geo.PostGIS.Geometry) do
     @moduledoc false
 
     alias Geo.{
-      Point,
-      PointZ,
-      PointM,
-      PointZM,
+      GeometryCollection,
       LineString,
       LineStringM,
       LineStringZ,
       LineStringZM,
-      Polygon,
-      PolygonZ,
-      MultiPoint,
-      MultiPointZ,
       MultiLineString,
       MultiLineStringZ,
       MultiLineStringZM,
+      MultiPoint,
+      MultiPointZ,
       MultiPolygon,
       MultiPolygonZ,
-      GeometryCollection
+      Point,
+      PointM,
+      PointZ,
+      PointZM,
+      Polygon,
+      PolygonZ
     }
 
     @types [

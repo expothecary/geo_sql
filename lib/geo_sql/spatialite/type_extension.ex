@@ -72,15 +72,15 @@ defmodule GeoSQL.SpatiaLite.TypeExtension do
     @moduledoc false
     use Agent
 
-    def start_link() do
+    def start_link do
       Agent.start_link(&start_conn/0, name: __MODULE__)
     end
 
-    def start() do
+    def start do
       Agent.start(&start_conn/0, name: __MODULE__)
     end
 
-    def start_conn() do
+    def start_conn do
       {:ok, conn} = Exqlite.Sqlite3.open(":memory:")
       Exqlite.Sqlite3.enable_load_extension(conn, true)
       Exqlite.Sqlite3.execute(conn, "select load_extension('mod_spatialite')")

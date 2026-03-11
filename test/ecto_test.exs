@@ -6,11 +6,11 @@ defmodule GeoSQL.Ecto.Test do
   use GeoSQL.Test.Helper
 
   alias GeoSQL.Test.Schema.{
-    Location,
     GeoCompatLocation,
     Geographies,
-    LocationMulti,
     GeoType,
+    Location,
+    LocationMulti,
     WrongGeoType
   }
 

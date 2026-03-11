@@ -80,11 +80,9 @@ defmodule GeoSQL do
   defp register_types(adapter, _repo, _opts), do: adapter
 
   defp run_query(repo, sql) do
-    try do
-      Ecto.Adapters.SQL.query!(repo.get_dynamic_repo(), sql)
-      :ok
-    rescue
-      _ -> :error
-    end
+    Ecto.Adapters.SQL.query!(repo.get_dynamic_repo(), sql)
+    :ok
+  rescue
+    _ -> :error
   end
 end

@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] 28-06-2026
+
+* Improvements
+  * Do not over-specify the version of ecto_sql
+
 ## [1.8.0] 11-03-2026
 
 * Improvements

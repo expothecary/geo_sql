@@ -30,13 +30,13 @@ defmodule GeoSQL.Mixfile do
 
   defp deps do
     [
-      {:ecto, "~> 3.13.0"},
+      {:ecto, "~> 3.13"},
       {:ecto_sql, "~> 3.0"},
       {:geometry, "~> 1.1"},
       {:postgrex, ">= 0.0.0"},
       {:exqlite, "~> 0.32"},
       {:ecto_sqlite3, "~> 0.21"},
-      {:myxql, "~> 0.8.1", optional: true},
+      {:myxql, "~> 0.9.0", optional: true},
       {:jason, "~> 1.0"},
 
       # dev

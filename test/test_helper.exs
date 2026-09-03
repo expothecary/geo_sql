@@ -149,7 +149,7 @@ defmodule GeoSQL.Test.Helper do
 
     Ecto.Adapters.SQL.Sandbox.mode(pid, :manual)
 
-    GeoSQL.init(repo, json: Jason, decode_binary: :reference)
+    GeoSQL.init(repo, decode_binary: :reference)
 
     #     pid = ExUnit.Callbacks.start_link_supervised!(repo_spec)
     # Add the repo pid and name into the context so that tests can access it

@@ -26,7 +26,7 @@ defmodule GeoSQL.CommonFunctions.Test do
 
         hydrated =
           geojson
-          |> Jason.decode!()
+          |> JSON.decode!()
           |> Geometry.from_geo_json!()
 
         assert 4326 = hydrated.srid

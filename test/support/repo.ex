@@ -39,4 +39,4 @@ defmodule GeoSQL.Test.Geopackage.Repo do
 end
 
 # For the migrations.
-GeoSQL.init(GeoSQL.Test.PostGIS.Repo, json: Jason, decode_binary: :reference)
+GeoSQL.init(GeoSQL.Test.PostGIS.Repo, decode_binary: :reference)

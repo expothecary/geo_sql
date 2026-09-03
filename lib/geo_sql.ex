@@ -34,7 +34,7 @@ defmodule GeoSQL do
   If using additional type extensions, pass those modules in via the `type_extensions` option.
   """
   @spec init(Ecto.Repo.t(), init_options) :: :ok
-  def init(repo, opts \\ [json: Jason, decode_binary: :copy]) when is_atom(repo) do
+  def init(repo, opts \\ [decode_binary: :copy]) when is_atom(repo) do
     repo.__adapter__()
     |> register_types(repo, opts)
     |> init_spatial_capabilities(repo, opts)

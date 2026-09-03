@@ -107,7 +107,7 @@ defmodule GeoSQL.Test.Helper do
       setup_all [{GeoSQL.Test.Helper, :ecto_setup_all}] ++ unquote(setup_funs)
 
       setup context do
-        for repo <- GeoSQL.Test.Helper.repos(:all) do
+        for repo <- GeoSQL.Test.Helper.repos() do
           GeoSQL.Test.Helper.ecto_setup(repo, context)
         end
 
@@ -117,7 +117,7 @@ defmodule GeoSQL.Test.Helper do
   end
 
   def ecto_setup_all(context) do
-    Enum.reduce(repos(:all), [repo_info: %{}], fn repo, acc ->
+    Enum.reduce(repos(), [repo_info: %{}], fn repo, acc ->
       repo_name = String.to_atom(to_string(context.module) <> repo_name_suffix(repo))
       ecto_setup_repo(repo, repo_name, acc)
     end)

@@ -1617,22 +1617,24 @@ defmodule GeoSQL.CommonFunctions.Test do
         unquote(repo).insert(%GeoType{t: "hello", linestring: line, multilinestring: multiline})
 
         # TODO: once the Geometry library has fixed its GeometryCollection wkb parsing, remove the "as_ewkt"
-        expected = [
-          "SRID=4326;GEOMETRYCOLLECTION(MULTILINESTRING((30 -90,30 -90.5),(30 -90.5,30 -91)),MULTILINESTRING EMPTY)",
-          "SRID=4326;MULTILINESTRING((30 -90,30 -90.5,30 -91))"
-        ]
+        expected = %Geometry.GeometryCollection{
+          geometries: [
+            %Geometry.MultiLineString{
+              line_strings: [[[30.0, -90.0], [30.0, -90.5], [30.0, -91.0]]],
+              srid: 4326
+            },
+            %Geometry.MultiLineString{line_strings: [], srid: 4326}
+          ],
+          srid: 4326
+        }
 
         query =
           from(location in GeoType,
-            select:
-              Common.as_ewkt(
-                Common.shared_paths(location.multilinestring, location.linestring),
-                unquote(repo)
-              )
+            select: Common.shared_paths(location.multilinestring, location.linestring)
           )
 
         result = unquote(repo).one(query)
-        assert Enum.member?(expected, result)
+        assert expected == result
       end
     end
 

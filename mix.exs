@@ -32,7 +32,7 @@ defmodule GeoSQL.Mixfile do
     [
       {:ecto, "~> 3.13"},
       {:ecto_sql, "~> 3.0"},
-      {:geometry, "~> 1.1"},
+      {:geometry, "~> 1.2"},
       {:postgrex, ">= 0.0.0"},
       {:exqlite, "~> 0.32"},
       {:ecto_sqlite3, "~> 0.21"},

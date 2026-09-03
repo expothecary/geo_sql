@@ -865,15 +865,13 @@ defmodule GeoSQL.MMFunctions.Test do
                ), 2}
 
             _ ->
-              surface = "POLYHEDRALSURFACE( ((0 0 0, 0 0 1, 0 1 1, 0 1 0, 0 0 0)),
-    ((0 0 0, 0 1 0, 1 1 0, 1 0 0, 0 0 0)), ((0 0 0, 1 0 0, 1 0 1, 0 0 1, 0 0 0)),
-    ((1 1 0, 1 1 1, 1 0 1, 1 0 0, 1 1 0)),
-    ((0 1 0, 0 1 1, 1 1 1, 1 1 0, 0 1 0)), ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1)) )"
+              surface =
+                "GEOMETRYCOLLECTION(MULTIPOINT((-2 3),(-2 2)), LINESTRING(5 5 ,10 10), POLYGON((-7 4.2,-7.1 5,-7.1 4.3,-7 4.2)))"
 
               {from(
                  location in Location,
                  select: MM.num_patches(MM.geom_from_text(^surface), unquote(repo))
-               ), 6}
+               ), 3}
           end
 
         result = unquote(repo).one(query)
@@ -951,15 +949,18 @@ defmodule GeoSQL.MMFunctions.Test do
                ), Geometry.LineString}
 
             _ ->
-              surface = "POLYHEDRALSURFACE( ((0 0 0, 0 0 1, 0 1 1, 0 1 0, 0 0 0)),
-    ((0 0 0, 0 1 0, 1 1 0, 1 0 0, 0 0 0)), ((0 0 0, 1 0 0, 1 0 1, 0 0 1, 0 0 0)),
-    ((1 1 0, 1 1 1, 1 0 1, 1 0 0, 1 1 0)),
-    ((0 1 0, 0 1 1, 1 1 1, 1 1 0, 0 1 0)), ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1)) )"
+              #             Geometry library does not support decoding POLYHEDRALSURFACE objects (yet?)
+              #               surface = "POLYHEDRALSURFACE( ((0 0 0, 0 0 1, 0 1 1, 0 1 0, 0 0 0)),
+              #     ((0 0 0, 0 1 0, 1 1 0, 1 0 0, 0 0 0)), ((0 0 0, 1 0 0, 1 0 1, 0 0 1, 0 0 0)),
+              #     ((1 1 0, 1 1 1, 1 0 1, 1 0 0, 1 1 0)),
+              #     ((0 1 0, 0 1 1, 1 1 1, 1 1 0, 0 1 0)), ((0 0 1, 1 0 1, 1 1 1, 0 1 1, 0 0 1)) )"
+
+              surface = "MULTIPOINT((1 2 7), (3 4 7), (5 6 7), (8 9 10))"
 
               {from(
                  location in Location,
                  select: MM.patch_n(MM.geom_from_text(^surface), 1, unquote(repo))
-               ), Geometry.PolygonZ}
+               ), Geometry.PointZ}
           end
 
         result =

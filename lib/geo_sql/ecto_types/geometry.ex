@@ -449,10 +449,7 @@ if Code.ensure_loaded?(Geo) and not Code.ensure_loaded?(Geo.PostGIS.Geometry) do
     end
 
     defp do_cast(geom) do
-      case JSON.decode!(geom) do
-        {:ok, result} -> {:ok, result}
-        {:error, reason} -> {:error, [message: "failed to decode GeoJSON", reason: reason]}
-      end
+      geom
     end
 
     def embed_as(_), do: :self

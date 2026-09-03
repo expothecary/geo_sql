@@ -34,8 +34,6 @@ defmodule GeoSQL.Common do
     end
   end
 
-  require Ecto.Query
-
   use GeoSQL.RepoUtils
 
   @spec add_measure(

@@ -1,7 +1,6 @@
 defmodule GeoSQL.PostGIS.VectorTiles do
   import Ecto.Query
   use GeoSQL.MM
-  require GeoSQL.PostGIS
   require GeoSQL.PostGIS.Operators
   alias GeoSQL.PostGIS
   alias GeoSQL.QueryUtils

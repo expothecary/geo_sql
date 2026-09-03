@@ -94,9 +94,21 @@ defmodule GeoSQL.Mixfile do
   end
 
   # TODO: would be nice to find a way to get this from the test config.
-  defp dynamic_test_repos(command),
-    do:
-      "#{command} --quiet -r GeoSQL.Test.PostGIS.Repo -r GeoSQL.Test.SpatiaLite.Repo -r GeoSQL.Test.MySQL.Repo"
+  defp dynamic_test_repos(command) do
+    command_args =
+      (System.get_env("GEOSQL_TEST_BACKENDS") || "pgsql,sqlite3,mysql")
+      |> String.split(",")
+      |> Enum.reduce(["--quiet"], fn backend, acc ->
+        case backend do
+          "pgsql" -> ["GeoSQL.Test.PostGIS.Repo" | acc]
+          "mysql" -> ["GeoSQL.Test.MySQL.Repo" | acc]
+          "sqlite3" -> ["GeoSQL.Test.SpatiaLite.Repo" | acc]
+        end
+      end)
+      |> Enum.reverse()
+
+    "#{command} #{Enum.join(command_args, " -r ")}"
+  end
 
   defp aliases do
     [

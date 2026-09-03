@@ -35,6 +35,55 @@ and then run the usual `mix deps.get`.
 
 Full documentation is available [online](https://hexdocs.pm/geo_sql).
 
+
+### Prepare the Ecto Repo with `GeoSQL.init/1`
+
+Once added to your project, an `Ecto.Repo` can be readied for use by calling
+`GeoSQL.init/2`. This can be done once the repo has been started by implementing
+the `init/2` callback in your repo module like this:
+
+  ```elixir
+  defmodule MyApp.Repo do
+    use Ecto.Repo, otp_app: :my_app, adapter: Ecto.Adapters.Postgres
+
+    @impl true
+    def init(:supervisor, config) do
+      GeoSQL.init(__MODULE__)
+      {:ok, config}
+    end
+
+    def init(:runtime, config), do: {:ok, config}
+  end
+  ```
+
+Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` can be
+called after the call to `Repo.put_dynamic_repo/1` has completed.
+
+If Ecto migrations are failing, place a `GeoSQL.init/1` call in the top-level of
+the file the Repo is defined in:
+
+  ```
+  defmodule MyApp.Repo do
+    use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.Postgres
+  end
+
+  GeoSQL.init(MyApp.Repo)
+  ```
+
+This will ensure that any special types are defined before the repo even starts.
+
+#### Postgres Configuration
+
+For PostGIS, types are automatically added by `GeoSQL.init/2`. For this reason, call
+`GeoSQL.init/2` *after* any other custom types are registered.
+
+A types entry will also need to be added to the repo config in e.g. `config/config.exs`:
+
+  ```elixir
+  config :my_app, MyApp.Repo,
+    types: MyApp.PostgresTypes
+  ```
+
 ### Ecto Schemas
 
 Ecto Schemas can have fields with the following values:
@@ -74,47 +123,6 @@ Example:
     end
   end
   ```
-
-### Readying an Ecto Repo with `GeoSQL.init/1`
-
-Once added to your project, an `Ecto.Repo` can be readied for use by calling
-`GeoSQL.init/2`. This can be done once the repo has been started by implementing
-the `init/2` callback in your repo module like this:
-
-  ```elixir
-  defmodule MyApp.Repo do
-    use Ecto.Repo, otp_app: :my_app, adapter: Ecto.Adapters.Postgres
-
-    @impl true
-    def init(:supervisor, config) do
-      GeoSQL.init(__MODULE__, json: Jason)
-      {:ok, config}
-    end
-
-    def init(:runtime, config), do: {:ok, config}
-  end
-  ```
-
-For PostGIS, types are automatically added by `GeoSQL.init/2`. For this reason, call
-`GeoSQL.init/2` *after* any other custom types are registered. The type extensions included
-in `GeoSQL` are available via the `GeoSQL.PostGIS.Extension.extensions/0` function.
-
-If migrations are failing, place a `GeoSQL.init/1` call in the top-level of the file the Repo is defined in:
-
-  ```
-  defmodule MyApp.Repo do
-    use Ecto.Repo, otp_app: :geo_sql, adapter: Ecto.Adapters.Postgres
-  end
-
-  # For the migrations.
-  GeoSQL.init(MyApp.Repo)
-  ```
-
-This will ensure that any special types are defined and registered, though it
-will still need to be called after the repo has been started.
-
-Dynamic Ecto repositories are also supported, and `GeoSQL.init/1` can be
-called after the call to `Repo.put_dynamic_repo/1` has completed.
 
 ### Ecto Queries
 
@@ -352,7 +360,7 @@ used with `GeoSQL`'s database extentions.
 
 If you would like to contribute support for more functions (PostGIS and
 SpatiaLite both provide a frighteningly impressive amount of them!) or
-support for other databases, do not hesitate to make a PR and it will be 
+support for other databases, do not hesitate to make a PR and it will be
 reviewed in a timely fashion.
 
 To build and interact with the library locally:
@@ -364,7 +372,7 @@ To build and interact with the library locally:
     iex -S mix
 
 Documentation can be generated locally with `mix docs`.
-    
+
 ### Unit Tests
 
 Unit tests currently assume that working installations of PostGIS, SpatiaLite, and MariaDB/Mysql are running on the local machine.

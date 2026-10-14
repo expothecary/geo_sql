@@ -2,7 +2,7 @@ defmodule GeoSQL.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/expothecary/geo_sql"
-  @version "1.8.1"
+  @version "1.8.2"
 
   def project do
     [

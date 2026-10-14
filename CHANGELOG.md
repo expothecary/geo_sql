@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] 28-06-2026
+
+* Improvements
+  * Support curve geometries, thanks to support in the Geometry library
+* Fixes
+  * Tests now run correctly when some storage targets are excluded
+
 ## [1.8.1] 28-06-2026
 
 * Improvements
